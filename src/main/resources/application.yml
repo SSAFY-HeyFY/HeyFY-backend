@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: heyfy
+
+springdoc:
+  api-docs:
+    version: OPENAPI_3_1  # OpenAPI 3.1 문법 사용
+    path: /api-docs       # 기본 json 엔드포인트 경로
+  swagger-ui:
+    path: /swagger-ui.html
