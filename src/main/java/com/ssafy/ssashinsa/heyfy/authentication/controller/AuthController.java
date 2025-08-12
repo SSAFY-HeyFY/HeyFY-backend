@@ -17,13 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth") // 요청 경로를 /auth로 설정
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-
 
     @PostMapping("/signin")
     public ResponseEntity<SignInSuccessDto> signIn(@RequestBody SignInDto signInDto) {

@@ -22,14 +22,11 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        // ErrorResponse에서 제공하는 정적 팩토리 메서드를 사용하여 응답 생성
         ResponseEntity<ErrorResponse> responseEntity = ErrorResponse.responseEntity(ErrorCode.UNAUTHORIZED);
 
-        // 응답 상태와 컨텐츠 타입 설정
         response.setStatus(responseEntity.getStatusCode().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        // ObjectMapper를 사용해 응답 본문을 JSON으로 변환하여 작성
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writeValue(response.getOutputStream(), responseEntity.getBody());
     }
