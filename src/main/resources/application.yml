@@ -1,10 +1,16 @@
 spring:
   application:
     name: heyfy
+  profiles:
+    active: default
+
+  jwt:
+    secret: c6f1a8e2b7d4c90e5f3b2a8d7e6c1a5b9d3f8e0c4b6a7d8e9f2a4c1b5d3a7e9c
+    access-expiration: 3600000
 
 springdoc:
   api-docs:
-    version: OPENAPI_3_1  # OpenAPI 3.1 문법 사용
-    path: /api-docs       # 기본 json 엔드포인트 경로
+    version: OPENAPI_3_1
+    path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
