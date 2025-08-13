@@ -6,7 +6,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.ssafy.ssashinsa.heyfy.common.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
-import lombok.RequiredArgsConstructor; // 추가
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -52,13 +51,13 @@ public class JwtTokenProvider {
     }
 
 
-    public boolean validateToken(String token) {
+    public void validateToken(String token) {
         try {
             JWT.require(Algorithm.HMAC256(secretKey)).build().verify(token);
-            return true;
-        } catch (JWTVerificationException e) {
-            // 토큰 검증 실패 시 false 반환
-            return false;
+        } catch (com.auth0.jwt.exceptions.TokenExpiredException e) { //만료된 토큰
+            throw new CustomException(ErrorCode.EXPIRED_TOKEN);
+        } catch (JWTVerificationException e) { //유효하지 않은 토큰
+            throw new CustomException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
     }
 }

@@ -22,7 +22,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            JwtTokenProvider jwtTokenProvider,
+            UserDetailsService userDetailsService,
+            CustomAuthenticationEntryPoint customAuthenticationEntryPoint // 이 부분을 추가
+    ) throws Exception {
 
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
 
@@ -42,7 +47,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(authenticationManager -> authenticationManager
-                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                        .authenticationEntryPoint(customAuthenticationEntryPoint) // 이 부분을 수정
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

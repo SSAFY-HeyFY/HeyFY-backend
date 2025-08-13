@@ -1,14 +1,16 @@
 package com.ssafy.ssashinsa.heyfy.authentication.jwt;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.common.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.common.ErrorResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,11 +39,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (CustomException e) {
-                throw e;
+                handleException(response, e.getErrorCode());
+                return;
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    // ExceptionController는 MVC에서 발생하는 예외만 처리하기 때문에 예외적으로 직접 처리
+    private void handleException(HttpServletResponse response, ErrorCode errorCode) throws IOException {
+        ResponseEntity<ErrorResponse> responseEntity = ErrorResponse.responseEntity(errorCode);
+
+        response.setStatus(responseEntity.getStatusCode().value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.writeValue(response.getOutputStream(), responseEntity.getBody());
     }
 
     private String resolveToken(HttpServletRequest request) {
