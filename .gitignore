@@ -233,4 +233,12 @@ gradle-app.setting
 # Java heap dump
 *.hprof
 
+### Python ###
+# AI model artifacts (ai_model/)
+ai_model/__pycache__/
+ai_model/env/
+ai_model/data/
+ai_model/models/
+ai_model/outputs/
+
 # End of https://www.toptal.com/developers/gitignore/api/intellij,eclipse,java,gradle
