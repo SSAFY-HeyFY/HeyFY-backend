@@ -1,0 +1,42 @@
+spring:
+  jwt:
+    secret: c6f1a8e2b7d4c90e5f3b2a8d7e6c1a5b9d3f8e0c4b6a7d8e9f2a4c1b5d3a7e9c  # 테스트용. 운영은 외부 주입
+    access-expiration: 3600000   # 1시간
+    refresh-expiration: 604800000 # 7일
+
+  redis:
+    host: localhost
+    port: 6379
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # dev에서는 호스트의 3307 -> 컨테이너 3306 매핑을 쓴다고 가정
+    url: jdbc:mysql://localhost:3306/heyfy?
+      useSSL=false&
+      allowPublicKeyRetrieval=true&
+      serverTimezone=UTC&
+      characterEncoding=UTF-8
+    username: root
+    password: root
+    hikari:
+      # HikariCP 설정 (필요 시)
+      initialization-fail-timeout: 0
+      maximum-pool-size: 10
+      minimum-idle: 5
+
+  jpa:
+    # Hibernate 6(스프링부트 3)에서는 dialect 자동 감지가 되므로 보통 생략 권장
+    # database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create   # 개발용. 운영은 validate 또는 none 권장
+
+springdoc:
+  api-docs:
+    version: OPENAPI_3_1
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
