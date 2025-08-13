@@ -23,6 +23,10 @@ public class JwtTokenProvider {
     @Value("${spring.jwt.access-expiration}")
     private long accessExpiration;
 
+    @Value("${spring.jwt.refresh-expiration}")
+    private long refreshExpiration;
+
+
     public String createAccessToken(Authentication authentication) {
         String username = authentication.getName();
         String roles = authentication.getAuthorities().stream()
@@ -35,6 +39,19 @@ public class JwtTokenProvider {
         return JWT.create()
                 .withSubject(username)
                 .withClaim("roles", roles)
+                .withIssuedAt(now)
+                .withExpiresAt(validity)
+                .sign(Algorithm.HMAC256(secretKey));
+    }
+
+    public String createRefreshToken(Authentication authentication) {
+        String username = authentication.getName();
+
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + refreshExpiration);
+
+        return JWT.create()
+                .withSubject(username)
                 .withIssuedAt(now)
                 .withExpiresAt(validity)
                 .sign(Algorithm.HMAC256(secretKey));
@@ -60,4 +77,6 @@ public class JwtTokenProvider {
             throw new CustomException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
     }
+
+
 }

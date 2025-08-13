@@ -20,13 +20,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
     @Bean
     public SecurityFilterChain filterChain(
             HttpSecurity http,
             JwtTokenProvider jwtTokenProvider,
             UserDetailsService userDetailsService,
-            CustomAuthenticationEntryPoint customAuthenticationEntryPoint // 이 부분을 추가
+            CustomAuthenticationEntryPoint customAuthenticationEntryPoint
     ) throws Exception {
 
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
@@ -38,16 +37,11 @@ public class SecurityConfig {
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/auth/signup/**").permitAll()
-                        .requestMatchers("/auth/signin/**").permitAll()
-                        .requestMatchers("/auth/token/access").permitAll()
-                        .requestMatchers("/api/test/public").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                        .requestMatchers(PermitAllPaths.PATHS.toArray(new String[0])).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(authenticationManager -> authenticationManager
-                        .authenticationEntryPoint(customAuthenticationEntryPoint) // 이 부분을 수정
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

@@ -1,6 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.authentication.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.ssashinsa.heyfy.authentication.config.PermitAllPaths;
 import com.ssafy.ssashinsa.heyfy.common.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.ErrorResponse;
@@ -16,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -26,6 +28,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String requestURI = request.getRequestURI();
+        AntPathMatcher pathMatcher = new AntPathMatcher();
+
+        return PermitAllPaths.PATHS.stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, requestURI));
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
