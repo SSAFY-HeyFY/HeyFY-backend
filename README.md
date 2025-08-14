@@ -1,6 +1,21 @@
 # HeyFY-backend
 신한은행 해커톤 3기 백엔드 레포입니다.
 
+# 🤫 application.yml 관리
+- `application.yml` 파일 수정 금지
+- `application-local.yml` 수정 시 리뷰 후 반영
+  - ❗️appKey는 공백❗️(각자 관리)
+- `application-secret.yml`은 @EomYoosang 만 관리
+
+# 🐋 Docke-Compose를 사용한 로컬 환경 설정
+1. Docker 설치
+   - [도커 사이트](https://www.docker.com/) 접속하여 OS에 맞는 도커 설치
+2. Docker hub 로그인
+3. 프로젝트 루트 디렉토리에서 명령어 실행
+```
+docker-compose -f docker-compose-local.yml up -d
+```
+
 # 🌿 Git Branch 전략 및 커밋 컨벤션
 
 ## 📌 브랜치 종류 및 규칙
