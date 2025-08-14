@@ -236,4 +236,5 @@ gradle-app.setting
 ### yml
 application-secret.yml
 
+
 # End of https://www.toptal.com/developers/gitignore/api/intellij,eclipse,java,gradle

@@ -3,6 +3,3 @@ spring:
     name: heyfy
   profiles:
     active: local
-
-
-

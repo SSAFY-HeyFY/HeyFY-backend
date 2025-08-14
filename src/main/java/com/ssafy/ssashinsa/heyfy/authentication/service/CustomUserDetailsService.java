@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // 현재 db가 없어 하드코딩으로 user : user, password : ssafy로 설정. 후에 변경할 예정
         if (!"user".equals(username)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.LOGIN_FAILED);
         }
 
         String encodedPassword = passwordEncoder.encode("ssafy");

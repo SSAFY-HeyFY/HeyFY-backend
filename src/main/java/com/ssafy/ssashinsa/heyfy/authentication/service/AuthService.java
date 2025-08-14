@@ -2,7 +2,9 @@ package com.ssafy.ssashinsa.heyfy.authentication.service;
 
 import com.ssafy.ssashinsa.heyfy.authentication.dto.SignInDto;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.SignInSuccessDto;
+import com.ssafy.ssashinsa.heyfy.authentication.dto.TokenDto;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
+import com.ssafy.ssashinsa.heyfy.authentication.util.RedisUtil;
 import com.ssafy.ssashinsa.heyfy.common.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +14,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RedisUtil redisUtil;
 
     public SignInSuccessDto signIn(SignInDto signInDto) {
         try {
@@ -24,11 +29,94 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(signInDto.getUsername(), signInDto.getPassword());
 
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
-            String accessToken = jwtTokenProvider.createAccessToken(authentication);
-            return new SignInSuccessDto(accessToken);
+
+            // jti를 통해서 액세스 토큰-리프레쉬 토큰 쌍이 올바른지 체크
+            String jti = UUID.randomUUID().toString();
+            String accessToken = jwtTokenProvider.createAccessToken(authentication, jti);
+            String refreshToken = jwtTokenProvider.createRefreshToken(authentication, jti);
+
+            redisUtil.deleteRefreshToken(signInDto.getUsername());
+            redisUtil.setRefreshToken(signInDto.getUsername(), refreshToken);
+
+            return new SignInSuccessDto(accessToken, refreshToken);
         } catch (BadCredentialsException e) {
             throw new CustomException(ErrorCode.LOGIN_FAILED);
         }
     }
+
+    // 리프레쉬 토큰 재발급
+    public TokenDto refreshAccessToken(String authorizationHeader, String refreshToken) {
+
+        validateRefreshToken(refreshToken);
+
+        String refreshTokenUsername = jwtTokenProvider.getUsernameFromToken(refreshToken);
+        validateRefreshTokenInRedis(refreshTokenUsername, refreshToken);
+
+        validateAccessTokenAndUserMatch(authorizationHeader, refreshToken);
+
+
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(refreshTokenUsername, null, null);
+
+        String newJti = UUID.randomUUID().toString();
+
+        String newAccessToken = jwtTokenProvider.createAccessToken(authentication, newJti);
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(authentication, newJti);
+
+        redisUtil.deleteRefreshToken(refreshTokenUsername);
+        redisUtil.setRefreshToken(refreshTokenUsername, newRefreshToken);
+
+        return new TokenDto(newAccessToken, newRefreshToken);
+    }
+    // RefreshToken 유효성 검증
+    private void validateRefreshToken(String refreshToken) {
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            throw new CustomException(ErrorCode.MISSING_REFRESH_TOKEN);
+        }
+        try {
+            jwtTokenProvider.validateToken(refreshToken);
+        } catch (CustomException e) {
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN); // 안드로이드 상에서는 INVALID_REFRESH_TOKEN 받았을때 재 로그인 하도록 로직 구분
+        }
+    }
+
+    // RefreshToken이 redis에 저장되어 있는지 검증
+    private void validateRefreshTokenInRedis(String refreshTokenUsername, String refreshToken) {
+        String redisRefreshToken = redisUtil.getRefreshToken(refreshTokenUsername);
+        if (redisRefreshToken == null || !redisRefreshToken.equals(refreshToken)) {
+            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+    }
+
+    // AccessToken 유효성 검증, AccessToken 만료여부 확인, AccessToken과 refreshToken 비교
+    private void validateAccessTokenAndUserMatch(String authorizationHeader, String refreshToken) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            throw new CustomException(ErrorCode.MISSING_ACCESS_TOKEN);
+        }
+        String accessToken = authorizationHeader.substring(7);
+        try {
+            jwtTokenProvider.validateToken(accessToken);
+            // 보안 강화: 유효한 Access Token으로 갱신 요청 시 Refresh Token 무효화(악의적인 사용자에게 정보를 주지 않기 위함)
+            redisUtil.deleteRefreshToken(jwtTokenProvider.getUsernameFromToken(refreshToken));
+            throw new CustomException(ErrorCode.NOT_EXPIRED_TOKEN);
+        } catch (CustomException e) {
+            if (!e.getErrorCode().equals(ErrorCode.EXPIRED_TOKEN)) {
+                throw e;
+            }
+            String accessTokenJti = jwtTokenProvider.getJtiFromToken(accessToken);
+            String refreshTokenJti = jwtTokenProvider.getJtiFromToken(refreshToken);
+
+            if (!accessTokenJti.equals(refreshTokenJti)) {
+                throw new CustomException(ErrorCode.TOKEN_PAIR_MISMATCH);
+            }
+        }
+    }
+
+
+
+
+
+
+
 
 }
