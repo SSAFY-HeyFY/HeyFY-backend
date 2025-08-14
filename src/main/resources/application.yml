@@ -2,20 +2,4 @@ spring:
   application:
     name: heyfy
   profiles:
-    active: default
-  data:
-    redis:
-      host: localhost
-      port: 6379 # 도커 등 사용시 변경 필요할 수 있음
-
-  jwt:
-    secret: c6f1a8e2b7d4c90e5f3b2a8d7e6c1a5b9d3f8e0c4b6a7d8e9f2a4c1b5d3a7e9c # 이 파일은 테스트 용이므로, 일단 임의의 비밀 키를 사용
-    access-expiration: 3600000 # 1시간 - 테스트 용으로 길게 잡은 것이므로, 후에 30분가량으로 줄여도 된다
-    refresh-expiration: 604800000 # 7일
-
-springdoc:
-  api-docs:
-    version: OPENAPI_3_1
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
+    active: local
