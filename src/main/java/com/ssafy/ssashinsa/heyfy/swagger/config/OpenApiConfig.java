@@ -51,7 +51,13 @@ public class OpenApiConfig {
 
         return new OpenAPI()
                 .servers(List.of(new Server().url("/").description("Default Server")))
-                .components(components)
+                .components(components.addSecuritySchemes(securitySchemeName,
+                        new SecurityScheme()
+                                .name(securitySchemeName)
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")
+                ))
                 .info(info);
     }
 }
