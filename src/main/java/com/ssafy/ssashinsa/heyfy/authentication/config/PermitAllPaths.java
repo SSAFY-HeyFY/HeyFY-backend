@@ -12,6 +12,8 @@ public class PermitAllPaths {
             "/css/**",
             "/js/**",
             "/images/**",
-            "/webjars/**"
+            "/webjars/**",
+            "/swagger-ui/**",
+            "/api-docs/**"
     );
 }
