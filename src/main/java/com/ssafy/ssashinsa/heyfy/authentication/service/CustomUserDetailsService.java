@@ -1,5 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.authentication.service;
 
+import com.ssafy.ssashinsa.heyfy.authentication.entity.Users;
+import com.ssafy.ssashinsa.heyfy.authentication.repository.UserRepository;
 import com.ssafy.ssashinsa.heyfy.common.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +9,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -15,21 +16,18 @@ import java.util.Collections;
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
-
-    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 현재 db가 없어 하드코딩으로 user : user, password : ssafy로 설정. 후에 변경할 예정
-        if (!"user".equals(username)) {
-            throw new CustomException(ErrorCode.LOGIN_FAILED);
-        }
+        System.out.println("탐색 로직");
+        // 현재 db에서 데이터 가져오도록 설정
+        Users user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(ErrorCode.LOGIN_FAILED));
 
-        String encodedPassword = passwordEncoder.encode("ssafy");
-
+        System.out.println("유저 불러옴 "+user.getUserId());
         return new User(
-                "user",
-                encodedPassword,
+                user.getUsername(),
+                user.getPassword(),
                 Collections.emptyList()
         );
     }

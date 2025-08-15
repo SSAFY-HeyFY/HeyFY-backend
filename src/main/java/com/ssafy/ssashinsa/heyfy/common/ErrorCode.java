@@ -19,7 +19,9 @@ public enum ErrorCode {
     TOKEN_PAIR_MISMATCH(HttpStatus.BAD_REQUEST, "액세스 토큰과 리프레쉬 토큰이 매치되지 않습니다"),
     MISSING_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "액세스 토큰이 포함되지 않았습니다."),
     MISSING_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "리프레쉬 토큰이 포함되지 않았습니다"),
-    NOT_EXPIRED_TOKEN(HttpStatus.BAD_REQUEST, "만료되지 않은 액세스 토큰입니다");
+    NOT_EXPIRED_TOKEN(HttpStatus.BAD_REQUEST, "만료되지 않은 액세스 토큰입니다"),
+    EXIST_USER_NAME(HttpStatus.BAD_REQUEST, "이미존재하는 유저 아이디입니다"),
+    INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "비밀번호 형식이 맞지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
