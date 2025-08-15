@@ -1,14 +1,16 @@
 import os
+import json
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
 
+from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
+
+from model import build_model
 
 # --- 모델 및 학습 설정 ---
 WINDOW_SIZE = 30          # 1. Window Size
@@ -23,7 +25,6 @@ MODEL_DIR = 'models'
 MODEL_EXT = '.pt'         # 파이토치 체크포인트 확장자
 
 # --- 공통 유틸 ---
-
 def create_dataset(data, window_size, prediction_days):
     """
     시계열 데이터를 학습용 (X, y)로 변환
@@ -48,57 +49,6 @@ class TimeSeriesDataset(Dataset):
         return self.X.shape[0]
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
-
-# --- 모델 빌드 ---
-
-class TimeSeriesModel(nn.Module):
-    def __init__(self, model_type: str, input_size: int, hidden_sizes, prediction_days: int, dropout=0.2):
-        super().__init__()
-        self.model_type = model_type
-
-        if model_type == 'LSTM':
-            self.rnn = nn.LSTM(input_size=input_size, hidden_size=64, batch_first=True)
-            last_hidden_size = 64
-        elif model_type == 'GRU':
-            self.rnn = nn.GRU(input_size=input_size, hidden_size=64, batch_first=True)
-            last_hidden_size = 64
-        elif model_type == 'StackedLSTM':
-            # 2층 LSTM: 첫 층 64, 둘째 층 32
-            self.rnn1 = nn.LSTM(input_size=input_size, hidden_size=64, batch_first=True)
-            self.rnn2 = nn.LSTM(input_size=64, hidden_size=32, batch_first=True)
-            last_hidden_size = 32
-        else:
-            raise ValueError("지원하지 않는 모델 타입입니다. 'LSTM', 'GRU', 'StackedLSTM' 중에서 선택하세요.")
-
-        self.dropout = nn.Dropout(dropout)
-        self.fc = nn.Linear(last_hidden_size, prediction_days)
-
-    def forward(self, x):
-        # x: (B, T, F)
-        if self.model_type in ['LSTM', 'GRU']:
-            out, h = self.rnn(x)              # out: (B, T, H)
-        else:
-            out1, _ = self.rnn1(x)
-            out, _  = self.rnn2(out1)
-
-        # 마지막 타임스텝의 hidden
-        last = out[:, -1, :]                  # (B, H)
-        last = self.dropout(last)
-        y = self.fc(last)                     # (B, PREDICTION_DAYS)
-        return y
-
-def build_model(model_type, input_shape, prediction_days):
-    """
-    지정된 타입의 PyTorch 모델을 생성
-    input_shape: (WINDOW_SIZE, 1)
-    """
-    _, in_features = input_shape
-    model = TimeSeriesModel(model_type=model_type,
-                            input_size=in_features,
-                            hidden_sizes=(64, 32),
-                            prediction_days=prediction_days,
-                            dropout=0.2)
-    return model
 
 # --- 학습/검증 루프 ---
 
@@ -176,7 +126,9 @@ if __name__ == "__main__":
 
     # 6. 모델 저장 경로 & 콜백(에뮬레이션)
     os.makedirs(MODEL_DIR, exist_ok=True)
-    model_filename = f"{MODEL_DIR}/{MODEL_TYPE}_W{WINDOW_SIZE}_P{PREDICTION_DAYS}_best_model{MODEL_EXT}"
+    model_basename = f"{MODEL_TYPE}_W{WINDOW_SIZE}_P{PREDICTION_DAYS}"  # ← 추가
+    model_filename = f"{MODEL_DIR}/{model_basename}_best_model{MODEL_EXT}"
+    config_filename = f"{MODEL_DIR}/{model_basename}.config.json"       # ← 추가
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     criterion = nn.MSELoss()
@@ -185,6 +137,50 @@ if __name__ == "__main__":
     patience = 10
     bad_epochs = 0
     history = {'loss': [], 'val_loss': []}
+
+    # 6.5 실행/재현을 위한 설정 스냅샷 (체크포인트 + JSON 저장)
+    CONFIG = {
+        "run": {
+            "framework": "pytorch",
+            "seed": 42,
+            "device": str(device),
+        },
+        "data": {
+            "file_path": DATA_FILE_PATH,
+            "feature_name": "DATA_VALUE",
+            "scaler": "MinMaxScaler",
+            "scaler_feature_range": [0.0, 1.0],
+            "window_size": WINDOW_SIZE,
+            "prediction_days": PREDICTION_DAYS,
+            "test_split": TEST_SPLIT,
+            "validation_split": VALIDATION_SPLIT,
+            "num_samples_total": int(len(df)),
+        },
+        "model": {
+            "type": MODEL_TYPE,             # 'LSTM' | 'GRU' | 'StackedLSTM'
+            "input_size": 1,
+            "hidden": {
+                "lstm_or_gru_hidden": 64,
+                "stacked_lstm_hidden_1": 64,
+                "stacked_lstm_hidden_2": 32
+            },
+            "dropout": 0.2,
+            "fc_out": PREDICTION_DAYS
+        },
+        "training": {
+            "epochs": EPOCHS,
+            "batch_size": BATCH_SIZE,
+            "optimizer": "Adam",
+            "learning_rate": 1e-3,
+            "criterion": "MSELoss",
+            "early_stopping_patience": patience
+        },
+        "artifacts": {
+            "model_dir": MODEL_DIR,
+            "checkpoint_path": model_filename,
+            "config_path": config_filename
+        }
+    }
 
     # 7. 모델 학습
     print("\n7. 모델 학습을 시작합니다...")
@@ -201,8 +197,16 @@ if __name__ == "__main__":
         if val_loss < best_val - 1e-9:
             best_val = val_loss
             bad_epochs = 0
-            torch.save({'model_state_dict': model.state_dict()}, model_filename)
+            # 체크포인트에 config 동봉
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'config': CONFIG
+            }, model_filename)
+            # 별도 JSON 설정 파일도 저장
+            with open(config_filename, "w", encoding="utf-8") as f:
+                json.dump(CONFIG, f, ensure_ascii=False, indent=2)
             print(f"  ↳ Best model updated and saved to {model_filename}")
+            print(f"  ↳ Config synced to {config_filename}")
         else:
             bad_epochs += 1
             if bad_epochs >= patience:
@@ -212,6 +216,11 @@ if __name__ == "__main__":
     # 베스트 모델 로드
     ckpt = torch.load(model_filename, map_location=device)
     model.load_state_dict(ckpt['model_state_dict'])
+
+    # 선택: 체크포인트에 들어있는 설정 확인
+    ckpt_config = ckpt.get('config', None)
+    if ckpt_config:
+        print("Loaded config from checkpoint:", ckpt_config['model'])
 
     print("\n✅ 모델 학습이 완료되었습니다.")
     print(f"최적의 모델이 '{model_filename}' 경로에 저장되었습니다.")

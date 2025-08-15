@@ -1,8 +1,3 @@
-"""
-Korea Eximbank 환율 API → Excel 저장 스크립트 (수정판)
-- pip install requests pandas openpyxl python-dateutil
-"""
-
 import os
 import time
 import argparse
@@ -81,11 +76,8 @@ def collect_range(start_date: str, end_date: str, authkey: str, data: str = "AP0
         return pd.DataFrame()
 
     df = pd.DataFrame(all_rows)
-
-    # 🔧 컬럼명을 전부 대문자로 통일 (API는 보통 소문자로 옴)
     df.columns = [str(c).upper() for c in df.columns]
 
-    # 컬럼 정리
     head_cols = [c for c in ["_DATE", "CUR_UNIT", "CUR_NM"] if c in df.columns]
     prefer_cols = head_cols + [c for c in NUM_COLS if c in df.columns]
     other_cols = [c for c in df.columns if c not in prefer_cols]
@@ -93,7 +85,6 @@ def collect_range(start_date: str, end_date: str, authkey: str, data: str = "AP0
 
     df = normalize_numeric(df)
 
-    # 통화코드 파생 컬럼
     if "CUR_UNIT" in df.columns:
         df["CUR"] = df["CUR_UNIT"].str.extract(r"^([A-Z]{3})")[0]
 
