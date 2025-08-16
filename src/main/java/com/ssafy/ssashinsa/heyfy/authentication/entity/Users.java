@@ -1,7 +1,15 @@
 package com.ssafy.ssashinsa.heyfy.authentication.entity;
 
+import com.github.f4b6a3.ulid.Ulid;
+import com.github.f4b6a3.ulid.UlidCreator;
+import com.ssafy.ssashinsa.heyfy.authentication.ulid.UlidUserType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,9 +22,13 @@ import lombok.*;
 public class Users {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "user_id", length = 50)
-    private String userId;
+    @Type(UlidUserType.class)
+    @Column(name = "user_id", length = 16)
+    private Ulid userId;
+
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "external_id", unique = true, length = 36)
+    private UUID externalId;
 
     @Column(name = "user_key")
     private String userKey;
@@ -38,4 +50,14 @@ public class Users {
 
     @Column(name = "univ_name")
     private String univName;
+
+    @PrePersist
+    public void generateIds() {
+        if (this.userId == null) {
+            this.userId = UlidCreator.getMonotonicUlid();
+        }
+        if (this.externalId == null) {
+            this.externalId = UUID.randomUUID();
+        }
+    }
 }
