@@ -5,9 +5,6 @@ import java.util.HashSet;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.zalando.logbook.Logbook;
-import org.zalando.logbook.core.Conditions;
-import org.zalando.logbook.core.HeaderFilters;
-import org.zalando.logbook.core.QueryFilters;
 
 @Configuration
 public class LogbookConfig {
