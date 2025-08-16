@@ -8,6 +8,8 @@ import com.ssafy.ssashinsa.heyfy.authentication.util.RedisUtil;
 import com.ssafy.ssashinsa.heyfy.authentication.util.SecurityUtil;
 import com.ssafy.ssashinsa.heyfy.common.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.service.ShinhanApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,6 +29,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RedisUtil redisUtil;
+    private final ShinhanApiService shinhanApiService;
 
     public SignInSuccessDto signIn(SignInDto signInDto) {
         try {
@@ -61,6 +64,15 @@ public class AuthService {
 
         String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
 
+        String userKey;
+        try {
+            ShinhanUserResponseDto apiResponse = shinhanApiService.signUp(signUpDto.getEmail());
+            userKey = apiResponse.getUserKey();
+        } catch (CustomException e) {
+            System.out.println("신한은행 API 에러발생");
+            throw e;
+        }
+
         Users user = Users.builder()
                 .username(signUpDto.getUsername())
                 .password(encodedPassword)
@@ -68,6 +80,7 @@ public class AuthService {
                 .email(signUpDto.getEmail())
                 .language(signUpDto.getLanguage())
                 .univName(signUpDto.getUnivName())
+                .userKey(userKey)
                 .build();
 
         Users savedUser = userRepository.save(user);
