@@ -24,4 +24,9 @@ public class ExceptionController {
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
         return ErrorResponse.responseEntity(e.getErrorCode());
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleAllExceptions(Exception e) {
+        return ErrorResponse.responseEntity(ErrorCode.INTERNAL_SERVER_ERROR);
+    }
 }

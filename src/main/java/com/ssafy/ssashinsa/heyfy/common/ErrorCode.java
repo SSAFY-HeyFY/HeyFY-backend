@@ -20,8 +20,13 @@ public enum ErrorCode {
     MISSING_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "액세스 토큰이 포함되지 않았습니다."),
     MISSING_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "리프레쉬 토큰이 포함되지 않았습니다"),
     NOT_EXPIRED_TOKEN(HttpStatus.BAD_REQUEST, "만료되지 않은 액세스 토큰입니다"),
-    EXIST_USER_NAME(HttpStatus.BAD_REQUEST, "이미존재하는 유저 아이디입니다"),
-    INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "비밀번호 형식이 맞지 않습니다.");
+    EXIST_USER_NAME(HttpStatus.BAD_REQUEST, "이미 존재하는 유저 아이디입니다"),
+    EXIST_EMAIL(HttpStatus.BAD_REQUEST,"이미 존재하는 이메일입니다" ),
+    INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "비밀번호 형식이 맞지 않습니다."),
+
+
+
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "에러가 발생했습니다");
 
     private final HttpStatus httpStatus;
     private final String message;

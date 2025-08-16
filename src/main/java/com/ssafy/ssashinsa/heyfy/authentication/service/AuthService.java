@@ -5,6 +5,7 @@ import com.ssafy.ssashinsa.heyfy.authentication.entity.Users;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
 import com.ssafy.ssashinsa.heyfy.authentication.repository.UserRepository;
 import com.ssafy.ssashinsa.heyfy.authentication.util.RedisUtil;
+import com.ssafy.ssashinsa.heyfy.authentication.util.SecurityUtil;
 import com.ssafy.ssashinsa.heyfy.common.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,10 @@ public class AuthService {
     public SignUpSuccessDto signUp(SignUpDto signUpDto) {
         userRepository.findByUsername(signUpDto.getUsername()).ifPresent(user -> {
             throw new CustomException(ErrorCode.EXIST_USER_NAME);
+        });
+
+        userRepository.findByEmail(signUpDto.getEmail()).ifPresent(user -> {
+            throw new CustomException(ErrorCode.EXIST_EMAIL);
         });
 
         String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
@@ -143,11 +148,17 @@ public class AuthService {
         }
     }
 
+    public Users getCurrentUser() {
+        String username = SecurityUtil.getCurrentUsername();
+        if (username == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED));
+    }
 
-
-
-
-
-
+    public String getCurrentUserKey() {
+        return getCurrentUser().getUserKey();
+    }
 
 }
