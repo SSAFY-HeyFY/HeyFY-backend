@@ -38,8 +38,8 @@ public class MaskingConverterTest {
 
     @Test
     public void testTokenKvMasking() {
-        assertEquals("accessToken=***", convert("accessToken=abcdefg12345"));
-        assertEquals("refreshToken=***", convert("refreshToken:xyz"));
+        assertEquals("access_token=***", convert("access_token=abcdefg12345"));
+        assertEquals("refresh-token=***", convert("refresh-token:xyz"));
     }
 
     @Test

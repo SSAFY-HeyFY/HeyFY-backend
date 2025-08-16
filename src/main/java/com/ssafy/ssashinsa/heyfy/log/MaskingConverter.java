@@ -11,15 +11,15 @@ public class MaskingConverter extends ClassicConverter {
     private static final Pattern EMAIL =
             Pattern.compile("([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+)");
     private static final Pattern RRN =
-            Pattern.compile("([0-9]{6})-([0-9]{7})");
+            Pattern.compile("([0-9]{6})-?([1-4][0-9]{6})");
     private static final Pattern PHONE_SIMPLE =
             Pattern.compile("([0-9]{3})-?([0-9]{4})-?([0-9]{4})");
     private static final Pattern BEARER_AUTH =
-            Pattern.compile("(?i)\\bAuthorization\\s*:\\s*Bearer\\s+[^\\s,]+");
+            Pattern.compile("(?i)\\bauthorization\\s*:\\s*bearer\\s+[^\\s,]+");
     private static final Pattern TOKEN_KV =
-            Pattern.compile("(?i)\\b(accessToken|refreshToken)\\s*[:=]\\s*([^\\s,;]+)");
+            Pattern.compile("(?i)\\b(access[_-]?token|refresh[_-]?token|authorization)\\s*[:=]\\s*([^\\s,;]+)");
     private static final Pattern ACCOUNT_NUMBER =
-            Pattern.compile("([0-9]{2,3})-?([0-9]{5,6})-?([0-9]{1,4})");
+            Pattern.compile("([0-9]{2,4})-?([0-9]{2,6})-?([0-9]{1,4})");
     private static final Pattern CARD_NUMBER =
             Pattern.compile("([0-9]{4})-?([0-9]{4})-?([0-9]{4})-?([0-9]{4})");
 
