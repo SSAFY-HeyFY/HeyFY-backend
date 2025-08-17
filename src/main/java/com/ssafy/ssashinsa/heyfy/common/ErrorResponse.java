@@ -1,5 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.common;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 @Setter
 @Builder
 @AllArgsConstructor
+@Schema(description = "공통 에러 응답 DTO")
 public class ErrorResponse {
     private final int status;
     private final String httpError;
