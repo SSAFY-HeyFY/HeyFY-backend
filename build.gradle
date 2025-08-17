@@ -38,6 +38,8 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.8.9'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
     implementation("org.zalando:logbook-spring-boot-starter:3.12.2")
+ 	  implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	  implementation 'com.github.f4b6a3:ulid-creator:5.2.2'
 
     compileOnly 'org.projectlombok:lombok'
 
