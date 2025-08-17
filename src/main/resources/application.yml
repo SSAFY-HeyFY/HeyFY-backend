@@ -2,4 +2,4 @@ spring:
   application:
     name: heyfy
   profiles:
-    active: local
+    active: secret

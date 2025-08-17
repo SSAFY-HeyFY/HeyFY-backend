@@ -10,7 +10,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -22,7 +24,9 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<SignInSuccessDto> signIn(@RequestBody SignInDto signInDto) {
         System.out.println("로그인 요청");
+        log.debug("로그인 요청: {}", signInDto.getUsername());
         return ResponseEntity.ok(authService.signIn(signInDto));
+
     }
 
     @AuthSignUpDocs
