@@ -11,6 +11,7 @@ public class PermitAllPaths {
             "/api/test/public",
             "/css/**",
             "/js/**",
+            "/api/transfers",
             "/images/**",
             "/webjars/**"
     );
