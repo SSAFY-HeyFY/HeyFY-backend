@@ -1,13 +1,9 @@
 package com.ssafy.ssashinsa.heyfy.swagger.config;
 
-import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.examples.Example;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
@@ -50,7 +46,7 @@ public class OpenApiConfig {
                         .value("{\"code\":500,\"message\":\"Internal Server Error\"}"));
 
         return new OpenAPI()
-                .servers(List.of(new Server().url("/").description("Default Server")))
+                .servers(List.of(new Server().url("/").description(apiTitle)))
                 .components(components.addSecuritySchemes(securitySchemeName,
                         new SecurityScheme()
                                 .name(securitySchemeName)

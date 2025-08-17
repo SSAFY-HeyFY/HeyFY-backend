@@ -1,8 +1,8 @@
-package com.ssafy.ssashinsa.heyfy.authentication.entity;
+package com.ssafy.ssashinsa.heyfy.user.domain;
 
 import com.github.f4b6a3.ulid.Ulid;
 import com.github.f4b6a3.ulid.UlidCreator;
-import com.ssafy.ssashinsa.heyfy.authentication.ulid.UlidUserType;
+import com.ssafy.ssashinsa.heyfy.user.ulid.UlidUserType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;

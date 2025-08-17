@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.log;
+package com.ssafy.ssashinsa.heyfy.log.config.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

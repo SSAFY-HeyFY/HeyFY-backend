@@ -34,6 +34,9 @@ spring:
     hibernate:
       ddl-auto: create   # 개발용. 운영은 validate 또는 none 권장
 
+shinhan:
+  manger-key:  #개인용 키. 각자 바꿔서 사용
+
 springdoc:
   default-produces-media-type: application/json
   api-docs:
@@ -59,7 +62,7 @@ logbook:
     exclude:
       - /actuator/**
       - /swagger-ui/**
-      - /v3/api-docs/**
+      - /api-docs/**
       - /error
       - /favicon.ico
   # 헤더/쿼리 파라미터 마스킹(***로 치환)
@@ -70,7 +73,7 @@ logbook:
       - Set-Cookie
     parameters:
       - password
-      - access_token
-      - refresh_token
+      - accessToken
+      - refreshToken
       - token
       - authorization

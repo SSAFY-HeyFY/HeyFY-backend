@@ -2,9 +2,9 @@ package com.ssafy.ssashinsa.heyfy.authentication.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.authentication.config.PermitAllPaths;
-import com.ssafy.ssashinsa.heyfy.common.CustomException;
-import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
-import com.ssafy.ssashinsa.heyfy.common.ErrorResponse;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

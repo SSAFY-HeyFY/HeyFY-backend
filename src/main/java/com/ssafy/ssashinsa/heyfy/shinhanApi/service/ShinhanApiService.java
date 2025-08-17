@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.shinhanApi.service;
 
-import com.ssafy.ssashinsa.heyfy.common.CustomException;
-import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanErrorResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserRequestDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserResponseDto;

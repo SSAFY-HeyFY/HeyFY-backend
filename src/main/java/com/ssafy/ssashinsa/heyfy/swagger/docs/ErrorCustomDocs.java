@@ -1,8 +1,7 @@
-package com.ssafy.ssashinsa.heyfy.swagger.response;
+package com.ssafy.ssashinsa.heyfy.swagger.docs;
 
-import com.ssafy.ssashinsa.heyfy.swagger.dto.ErrorResponse;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import com.ssafy.ssashinsa.heyfy.swagger.dto.ResultSuccessResponseDto;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,5 +28,5 @@ import java.lang.annotation.*;
                                         ref = "#/components/examples/NotParticipant")
                         }))
 })
-public @interface ErrorCustom {
+public @interface ErrorCustomDocs {
 }

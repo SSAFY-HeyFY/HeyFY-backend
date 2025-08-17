@@ -1,8 +1,8 @@
-package com.ssafy.ssashinsa.heyfy.authentication.repository;
+package com.ssafy.ssashinsa.heyfy.user.repository;
 
 
 import com.github.f4b6a3.ulid.Ulid;
-import com.ssafy.ssashinsa.heyfy.authentication.entity.Users;
+import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
