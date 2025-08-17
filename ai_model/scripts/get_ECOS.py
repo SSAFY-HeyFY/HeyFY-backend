@@ -9,6 +9,6 @@ df = fdr.DataReader('ECOS-KEYSTAT:K152', start_date)
 # df = fdr.SnapDataReader("ECOS/SNAP/529")
 print(df)
 
-excel_filename = "한국은행_USD_KRW_"+start_date+"_환율_데이터.xlsx"
+excel_filename = "USD_KRW_"+start_date+"_환율_데이터.xlsx"
 df.to_excel(excel_filename)
 print(f"   - ✅ 불러온 데이터를 '{excel_filename}' 파일로 저장했습니다.")
