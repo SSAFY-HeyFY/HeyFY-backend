@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- converterClass 대신 class 사용 (logback 1.5 권장) -->
+    <conversionRule conversionWord="mask" class="com.ssafy.ssashinsa.heyfy.log.MaskingConverter"/>
+
+    <property name="LOG_PATTERN"
+              value="%d{yyyy-MM-dd'T'HH:mm:ss.SSS,Asia/Seoul} %-5level [%X{traceId:-na}] %logger{36} - %mask%n"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
