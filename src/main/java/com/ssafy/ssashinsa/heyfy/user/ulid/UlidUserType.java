@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.authentication.ulid;
+package com.ssafy.ssashinsa.heyfy.user.ulid;
 
 import com.github.f4b6a3.ulid.Ulid;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;

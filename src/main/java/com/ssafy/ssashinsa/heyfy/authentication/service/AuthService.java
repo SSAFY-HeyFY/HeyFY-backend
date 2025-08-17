@@ -1,13 +1,13 @@
 package com.ssafy.ssashinsa.heyfy.authentication.service;
 
 import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
-import com.ssafy.ssashinsa.heyfy.authentication.entity.Users;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
-import com.ssafy.ssashinsa.heyfy.authentication.repository.UserRepository;
-import com.ssafy.ssashinsa.heyfy.authentication.util.RedisUtil;
-import com.ssafy.ssashinsa.heyfy.authentication.util.SecurityUtil;
-import com.ssafy.ssashinsa.heyfy.common.CustomException;
-import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.user.domain.Users;
+import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
+import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
+import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.service.ShinhanApiService;
 import lombok.RequiredArgsConstructor;

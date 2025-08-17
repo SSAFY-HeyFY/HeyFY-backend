@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.common;
+package com.ssafy.ssashinsa.heyfy.common.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

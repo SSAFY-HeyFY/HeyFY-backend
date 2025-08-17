@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.common;
+package com.ssafy.ssashinsa.heyfy.common.exception;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.authentication.util;
+package com.ssafy.ssashinsa.heyfy.common.util;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;

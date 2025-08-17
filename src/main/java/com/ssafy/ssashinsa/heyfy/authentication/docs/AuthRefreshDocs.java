@@ -1,7 +1,7 @@
-package com.ssafy.ssashinsa.heyfy.swagger.response;
+package com.ssafy.ssashinsa.heyfy.authentication.docs;
 
 import com.ssafy.ssashinsa.heyfy.authentication.dto.TokenDto;
-import com.ssafy.ssashinsa.heyfy.swagger.dto.ErrorResponse;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -44,5 +44,5 @@ import java.lang.annotation.Target;
                                 )
                         })),
 })
-public @interface ApiRefresh {
+public @interface AuthRefreshDocs {
 }

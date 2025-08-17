@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.common;
+package com.ssafy.ssashinsa.heyfy.common.exception;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Objects;
 
-import static com.ssafy.ssashinsa.heyfy.common.ErrorCode.INVALID_FIELD;
+import static com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode.INVALID_FIELD;
 
 
 @RestControllerAdvice

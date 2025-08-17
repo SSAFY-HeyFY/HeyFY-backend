@@ -1,9 +1,9 @@
 package com.ssafy.ssashinsa.heyfy.authentication.service;
 
-import com.ssafy.ssashinsa.heyfy.authentication.entity.Users;
-import com.ssafy.ssashinsa.heyfy.authentication.repository.UserRepository;
-import com.ssafy.ssashinsa.heyfy.common.CustomException;
-import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.user.domain.Users;
+import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
