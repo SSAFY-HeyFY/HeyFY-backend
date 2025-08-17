@@ -40,3 +40,9 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+
+ssafy:
+  fin-api:
+    base-url: "https://finopenapi.ssafy.io"
+    api-key: "654a1e9f8242492f8d75f5782d93381c"
