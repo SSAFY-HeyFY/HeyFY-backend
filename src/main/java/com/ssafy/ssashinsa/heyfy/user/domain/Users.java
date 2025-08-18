@@ -15,7 +15,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Entity
-@Table(name = "User")
+@Table(name = "Users")
 @NoArgsConstructor
 @AllArgsConstructor
 // 스프링 User 클래스와 구분하기위해 Users 사용. 테이블명은 User 그대로 사용
@@ -36,8 +36,8 @@ public class Users {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "username", unique = true, nullable = false)
-    private String username;
+    @Column(name = "student_id", unique = true, nullable = false)
+    private String studentId;
 
     @Column(name = "password", nullable = false)
     private String password;
