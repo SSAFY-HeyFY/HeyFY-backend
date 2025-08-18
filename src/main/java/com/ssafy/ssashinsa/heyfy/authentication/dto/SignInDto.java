@@ -10,6 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Schema(description = "로그인 요청 DTO")
 public class SignInDto {
-    private String username;
+    private String studentId;
     private String password;
 }

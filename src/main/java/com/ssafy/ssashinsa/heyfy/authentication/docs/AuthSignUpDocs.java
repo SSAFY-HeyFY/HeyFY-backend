@@ -15,13 +15,13 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
+@Operation(summary = "회원가입", description = "새로운 학생을 등록합니다.")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "회원가입 성공",
                 content = @Content(schema = @Schema(implementation = SignUpSuccessDto.class),
                         examples = @ExampleObject(
                                 name = "회원가입 성공 응답",
-                                value = "{\"message\":\"회원가입이 성공적으로 완료되었습니다.\", \"username\":\"testuser\"}"
+                                value = "{\"message\":\"회원가입이 성공적으로 완료되었습니다.\", \"studentId\":\"testuser\"}"
                         ))),
         @ApiResponse(responseCode = "400", description = "회원가입 실패",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class),

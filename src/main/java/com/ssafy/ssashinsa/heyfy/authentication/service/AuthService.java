@@ -35,7 +35,7 @@ public class AuthService {
     public SignInSuccessDto signIn(SignInDto signInDto) {
         try {
             UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(signInDto.getUsername(), signInDto.getPassword());
+                    new UsernamePasswordAuthenticationToken(signInDto.getStudentId(), signInDto.getPassword());
 
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
@@ -44,8 +44,8 @@ public class AuthService {
             String accessToken = jwtTokenProvider.createAccessToken(authentication, jti);
             String refreshToken = jwtTokenProvider.createRefreshToken(authentication, jti);
 
-            redisUtil.deleteRefreshToken(signInDto.getUsername());
-            redisUtil.setRefreshToken(signInDto.getUsername(), refreshToken);
+            redisUtil.deleteRefreshToken(signInDto.getPassword());
+            redisUtil.setRefreshToken(signInDto.getStudentId(), refreshToken);
 
             return new SignInSuccessDto(accessToken, refreshToken);
         } catch (BadCredentialsException  | InternalAuthenticationServiceException e) {
@@ -55,7 +55,7 @@ public class AuthService {
 
     @Transactional
     public SignUpSuccessDto signUp(SignUpDto signUpDto) {
-        userRepository.findByUsername(signUpDto.getUsername()).ifPresent(user -> {
+        userRepository.findByStudentId(signUpDto.getStudentId()).ifPresent(user -> {
             throw new CustomException(ErrorCode.EXIST_USER_NAME);
         });
 
@@ -75,7 +75,7 @@ public class AuthService {
         }
 
         Users user = Users.builder()
-                .username(signUpDto.getUsername())
+                .studentId(signUpDto.getStudentId())
                 .password(encodedPassword)
                 .name(signUpDto.getName())
                 .email(signUpDto.getEmail())
@@ -86,7 +86,7 @@ public class AuthService {
 
         Users savedUser = userRepository.save(user);
 
-        return new SignUpSuccessDto("회원가입이 성공적으로 완료되었습니다.", savedUser.getUsername());
+        return new SignUpSuccessDto("회원가입이 성공적으로 완료되었습니다.", savedUser.getStudentId());
     }
 
     // 리프레쉬 토큰 재발급
@@ -167,7 +167,7 @@ public class AuthService {
         if (username == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
-        return userRepository.findByUsername(username)
+        return userRepository.findByStudentId(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED));
     }
 

@@ -14,5 +14,5 @@ import lombok.Setter;
 @Schema(description = "로그인 성공 응답 DTO")
 public class SignUpSuccessDto {
     private String message;
-    private String username;
+    private String studentId;
 }
