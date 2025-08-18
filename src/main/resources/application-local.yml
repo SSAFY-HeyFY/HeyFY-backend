@@ -45,6 +45,11 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+ssafy:
+  fin-api:
+    base-url: "https://finopenapi.ssafy.io"
+    api-key: "654a1e9f8242492f8d75f5782d93381c"
+
 logging:
   # 콘솔 로그에 traceId(MDC) 노출
   pattern:
