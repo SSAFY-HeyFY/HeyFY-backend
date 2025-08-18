@@ -1,8 +1,8 @@
 package com.ssafy.ssashinsa.heyfy.authentication.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.ssashinsa.heyfy.common.ErrorCode;
-import com.ssafy.ssashinsa.heyfy.common.ErrorResponse;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

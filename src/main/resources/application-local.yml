@@ -34,15 +34,51 @@ spring:
     hibernate:
       ddl-auto: create   # 개발용. 운영은 validate 또는 none 권장
 
+shinhan:
+  manger-key:  #개인용 키. 각자 바꿔서 사용
+
 springdoc:
+  default-produces-media-type: application/json
   api-docs:
     version: OPENAPI_3_1
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
 
-
 ssafy:
   fin-api:
     base-url: "https://finopenapi.ssafy.io"
     api-key: "654a1e9f8242492f8d75f5782d93381c"
+
+logging:
+  # 콘솔 로그에 traceId(MDC) 노출
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSS,Asia/Seoul} %-5level [%X{traceId:-na}] %logger{36} - %msg%n"
+  level:
+    # 바디까지 상세히 보려면 TRACE (운영에서는 INFO/DEBUG 권장)
+    org.zalando.logbook: TRACE
+    # 배포서버에서 아래내용 추가
+    # org.hibernate.SQL: OFF
+    # org.hibernate.type.descriptor.sql.BasicBinder: OFF
+
+logbook:
+  # 로깅 제외 경로
+  filter:
+    exclude:
+      - /actuator/**
+      - /swagger-ui/**
+      - /api-docs/**
+      - /error
+      - /favicon.ico
+  # 헤더/쿼리 파라미터 마스킹(***로 치환)
+  obfuscate:
+    headers:
+      - Authorization
+      - Cookie
+      - Set-Cookie
+    parameters:
+      - password
+      - accessToken
+      - refreshToken
+      - token
+      - authorization
