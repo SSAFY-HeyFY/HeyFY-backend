@@ -10,10 +10,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
-
+import lombok.extern.slf4j.Slf4j;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+
+@Slf4j
 @Component
 public class JwtTokenProvider {
 
@@ -32,10 +34,10 @@ public class JwtTokenProvider {
         String roles = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-
+        log.debug("Creating access token for user: {}", username);
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessExpiration);
-
+        log.debug("Access token validity: {}", validity);
         return JWT.create()
                 .withSubject(username)
                 .withClaim("roles", roles) // 현 기획상으로는 유저, 관리자 계정이 분리되어 있지 않아 roles이 큰 의미는 없음

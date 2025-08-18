@@ -23,7 +23,7 @@ public class AuthController {
     @AuthSignInDocs
     @PostMapping("/signin")
     public ResponseEntity<SignInSuccessDto> signIn(@RequestBody SignInDto signInDto) {
-        System.out.println("로그인 요청");
+
         log.debug("로그인 요청: {}", signInDto.getUsername());
         return ResponseEntity.ok(authService.signIn(signInDto));
 
