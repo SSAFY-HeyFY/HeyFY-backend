@@ -175,16 +175,35 @@ def evaluate_model(model, test_loader, target_scaler, device):
     print("--- 모델 평가 완료 ---\n")
     return predictions, actuals
 
-def save_model(model, path):
-    """학습된 모델의 가중치(state_dict)를 지정된 경로에 저장합니다."""
+def save_model(model, config):
+    """
+    모델의 주요 하이퍼파라미터를 포함하는 폴더명에
+    학습된 모델의 가중치(state_dict)를 저장합니다.
+    """
     
-    folder_path = os.path.dirname(path)    
+    # 1. 하이퍼파라미터를 기반으로 폴더 이름을 생성합니다.
+    # 예: seq_20-hidden_128-layers_2-batch_16
+    folder_name = (
+        f"seq_{config.sequence_length}"
+        f"-hidden_{config.hidden_size}"
+        f"-layers_{config.num_layers}"
+        f"-batch_{config.batch_size}"
+    )
+    
+    # 2. 최종 저장 경로를 'models/생성된_폴더명/' 으로 설정합니다.
+    folder_path = os.path.join('models', folder_name)
+
+    # 3. 해당 폴더가 없으면 생성합니다.
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
         print(f"'{folder_path}' 폴더를 생성했습니다.")
         
-    torch.save(model.state_dict(), path)
-    print(f"✅ 학습된 모델이 '{path}' 경로에 저장되었습니다.\n")
+    # 4. 모델 파일 경로를 지정합니다.
+    model_path = os.path.join(folder_path, 'best_model.pth')
+
+    # 5. 모델의 학습된 가중치를 저장합니다.
+    torch.save(model.state_dict(), model_path)
+    print(f"✅ 학습된 모델이 '{model_path}' 경로에 저장되었습니다.\n")
 
 # -- 7. 메인 실행 블록 --
 if __name__ == '__main__':
