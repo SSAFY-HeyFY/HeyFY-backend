@@ -36,6 +36,7 @@ public class RedisUtil {
             redisTemplate.delete(key);
         } catch (Exception e) {
             log.error("Error deleting refresh token from Redis: {}", e.getMessage());
+            log.error(e.getStackTrace().toString());
             throw new RuntimeException("Failed to delete refresh token from Redis", e);
         }
     }
