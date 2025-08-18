@@ -1,8 +1,8 @@
 import pandas as pd
 import io
 
-file_name = "data/한국은행_20100101_20250812_자른거.xlsx"
-date_column_name = 'TIME'
+file_name = "한국은행_환율_데이터_2025-07-01.xlsx"
+date_column_name = 'Date'
 rate_column_name = 'DATA_VALUE'
 
 try:
@@ -12,7 +12,7 @@ try:
     print("\n원본 데이터 정보:")
     df.info()
 
-    df[date_column_name] = pd.to_datetime(df[date_column_name])
+    df[date_column_name] = pd.to_datetime(df[date_column_name], unit='D', origin='1899-12-30')
     df.set_index(date_column_name, inplace=True)
 
     start_date = df.index.min()
@@ -20,12 +20,8 @@ try:
     full_date_range = pd.date_range(start=start_date, end=end_date, freq='D')
 
     df_resampled = df.reindex(full_date_range)
+    df_resampled.index.name = date_column_name
     df_filled = df_resampled.ffill()
-
-    print("\n\n--- 전처리 후 데이터 (주말/공휴일 포함 및 forward-fill 적용) ---")
-    # 2024년 8월 8일(목) ~ 12일(월) 사이의 데이터 확인 (금,토,일 누락분 채워짐)
-    print(df_filled['2024-08-08':'2024-08-12'])    
-    print("\n전처리 후 데이터 정보:")
     df_filled.info()
 
     processed_file_name = "data/" + file_name.split('/')[-1].split('.')[0] + "_filled.xlsx"

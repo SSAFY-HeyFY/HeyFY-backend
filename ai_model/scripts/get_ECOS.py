@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import FinanceDataReader as fdr
 
-start_date = "2010-01-01"
+start_date = "2025-07-01"
 
 # 기간을 지정하지 않으면 1999-05-06 ~ 현재
 df = fdr.DataReader('ECOS-KEYSTAT:K152', start_date)
