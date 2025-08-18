@@ -36,18 +36,18 @@ public class AuthService {
         try {
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(signInDto.getUsername(), signInDto.getPassword());
-            log.debug("로그인 요청: {} in signIn", authenticationToken.getName());
+            log.info("로그인 요청: {} in signIn", authenticationToken.getName());
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
             // jti를 통해서 액세스 토큰-리프레쉬 토큰 쌍이 올바른지 체크
             String jti = UUID.randomUUID().toString();
             log.info("Generated JTI: {}", jti);
             String accessToken = jwtTokenProvider.createAccessToken(authentication, jti);
-            log.debug("Generated Access Token: {}", accessToken);
+            log.info("Generated Access Token: {}", accessToken);
             String refreshToken = jwtTokenProvider.createRefreshToken(authentication, jti);
-            log.debug("Generated Refresh Token: {}", refreshToken);
+            log.info("Generated Refresh Token: {}", refreshToken);
 
-            log.debug(signInDto.getUsername(), " 로그인 성공");
+            log.info(signInDto.getUsername(), " 로그인 성공");
             redisUtil.deleteRefreshToken(signInDto.getUsername());
             redisUtil.setRefreshToken(signInDto.getUsername(), refreshToken);
 

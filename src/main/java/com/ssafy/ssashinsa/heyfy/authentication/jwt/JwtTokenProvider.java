@@ -30,15 +30,15 @@ public class JwtTokenProvider {
 
 
     public String createAccessToken(Authentication authentication, String jti) {
-        log.debug("Creating access token with JTI: {}", jti);
+        log.info("Creating access token with JTI: {}", jti);
         String username = authentication.getName();
         String roles = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
-        log.debug("Creating access token for user: {}", username);
+        log.info("Creating access token for user: {}", username);
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessExpiration);
-        log.debug("Access token validity: {}", validity);
+        log.info("Access token validity: {}", validity);
         return JWT.create()
                 .withSubject(username)
                 .withClaim("roles", roles) // 현 기획상으로는 유저, 관리자 계정이 분리되어 있지 않아 roles이 큰 의미는 없음
