@@ -17,17 +17,16 @@ public class RedisUtil {
 
     public void setRefreshToken(String key, String value) {
         long timeoutSeconds = refreshExpirationMs / 1000;
-            redisTemplate.opsForValue().set(key, value, timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS);
-        }
+        redisTemplate.opsForValue().set(key, value, timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS);
     }
+
 
     public String getRefreshToken(String key) {
         return redisTemplate.opsForValue().get(key);
     }
 
     public void deleteRefreshToken(String key) {
-
-            redisTemplate.delete(key);
-        }
+        redisTemplate.delete(key);
     }
 }
+
