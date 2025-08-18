@@ -15,7 +15,11 @@ public class RedisUtil {
 
     public void setRefreshToken(String key, String value) {
         long timeoutSeconds = refreshExpirationMs / 1000;
-        redisTemplate.opsForValue().set(key, value, timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS);
+        try {
+            redisTemplate.opsForValue().set(key, value, timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set refresh token in Redis", e);
+        }
     }
 
     public String getRefreshToken(String key) {
@@ -23,6 +27,10 @@ public class RedisUtil {
     }
 
     public void deleteRefreshToken(String key) {
-        redisTemplate.delete(key);
+        try {
+            redisTemplate.delete(key);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete refresh token from Redis", e);
+        }
     }
 }
