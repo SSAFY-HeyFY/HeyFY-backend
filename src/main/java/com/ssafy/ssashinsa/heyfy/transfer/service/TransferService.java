@@ -1,6 +1,5 @@
 package com.ssafy.ssashinsa.heyfy.transfer.service;
 
-import com.ssafy.ssashinsa.heyfy.shinhanApi.service.ShinhanApiService;
 import com.ssafy.ssashinsa.heyfy.transfer.config.SsafyFinApiProperties;
 import com.ssafy.ssashinsa.heyfy.transfer.dto.FinHeader;
 import com.ssafy.ssashinsa.heyfy.transfer.dto.TransferRequestBody;
@@ -19,7 +18,6 @@ public class TransferService {
 
     private final SsafyFinApiClient finClient;
     private final SsafyFinApiProperties apiProperties;
-    private final ShinhanApiService shinhanApiService;
 
     // TODO: 추후 DB에서 사용자 정보를 조회하여 userKey를 가져오도록 수정
     private static final String TEMP_USER_KEY = "37c844c5-9b24-4daa-becb-ca52763a7b39";
