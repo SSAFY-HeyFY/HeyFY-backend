@@ -30,6 +30,7 @@ public class JwtTokenProvider {
 
 
     public String createAccessToken(Authentication authentication, String jti) {
+        log.debug("Creating access token with JTI: {}", jti);
         String username = authentication.getName();
         String roles = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
