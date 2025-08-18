@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
+
 import java.util.UUID;
 
 @Slf4j
@@ -47,10 +48,11 @@ public class AuthService {
             String refreshToken = jwtTokenProvider.createRefreshToken(authentication, jti);
             log.info("Generated Refresh Token: {}", refreshToken);
 
-            log.info(signInDto.getUsername(), " 로그인 성공");
+            log.info(signInDto.getUsername() + " 로그인 성공");
             redisUtil.deleteRefreshToken(signInDto.getUsername());
+            log.info("기존 리프레쉬 토큰 삭제 완료");
             redisUtil.setRefreshToken(signInDto.getUsername(), refreshToken);
-
+            log.info("새로운 리프레쉬 토큰 저장 완료");
             return new SignInSuccessDto(accessToken, refreshToken);
         } catch (BadCredentialsException e) {
             throw new CustomException(ErrorCode.LOGIN_FAILED);
@@ -104,7 +106,6 @@ public class AuthService {
         validateAccessTokenAndUserMatch(authorizationHeader, refreshToken);
 
 
-
         Authentication authentication = new UsernamePasswordAuthenticationToken(refreshTokenUsername, null, null);
 
         String newJti = UUID.randomUUID().toString();
@@ -117,6 +118,7 @@ public class AuthService {
 
         return new TokenDto(newAccessToken, newRefreshToken);
     }
+
     // RefreshToken 유효성 검증
     private void validateRefreshToken(String refreshToken) {
         if (refreshToken == null || refreshToken.isEmpty()) {
