@@ -13,6 +13,7 @@ import com.ssafy.ssashinsa.heyfy.shinhanApi.service.ShinhanApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,7 +48,7 @@ public class AuthService {
             redisUtil.setRefreshToken(signInDto.getUsername(), refreshToken);
 
             return new SignInSuccessDto(accessToken, refreshToken);
-        } catch (BadCredentialsException e) {
+        } catch (BadCredentialsException  | InternalAuthenticationServiceException e) {
             throw new CustomException(ErrorCode.LOGIN_FAILED);
         }
     }
