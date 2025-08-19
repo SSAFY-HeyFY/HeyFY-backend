@@ -1,10 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.transfer.controller;
 
+import com.ssafy.ssashinsa.heyfy.transfer.dto.*;
 import com.ssafy.ssashinsa.heyfy.transfer.exception.CustomExceptions;
-import com.ssafy.ssashinsa.heyfy.transfer.dto.CreateTransferRequest;
-import com.ssafy.ssashinsa.heyfy.transfer.dto.TransferHistory;
-import com.ssafy.ssashinsa.heyfy.transfer.dto.TransferHistoryResponse;
-import com.ssafy.ssashinsa.heyfy.transfer.dto.TransferResponseBody;
 import com.ssafy.ssashinsa.heyfy.transfer.service.TransferService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +13,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 
 @RestController
-@RequestMapping("/api/transfers")
+@RequestMapping("/transfers")
 @RequiredArgsConstructor
 public class TransferController {
 
@@ -26,12 +23,12 @@ public class TransferController {
     public TransferHistoryResponse transfer(@RequestBody CreateTransferRequest req) {
         validateRequest(req);
 
-        TransferResponseBody body = transferService.callTransfer(
+        EntireTransferResponseDto response = transferService.callTransfer(
                 req.withdrawalAccountNo(), req.depositAccountNo(), req.amount()
         );
 
-        if (!"H0000".equals(body.getHeader().getResponseCode())) {
-            throw new CustomExceptions.InvalidRequestException(body.getHeader().getResponseMessage()); //에러 발생
+        if (!"H0000".equals(response.getHeader().getResponseCode())) {
+            throw new CustomExceptions.InvalidRequestException(response.getHeader().getResponseMessage()); //에러 발생
         }
 
         var history = new TransferHistory(
@@ -39,7 +36,6 @@ public class TransferController {
                 req.depositAccountNo(),
                 req.amount(),
                 "KRW",
-                req.idempotencyKey(),
                 OffsetDateTime.now(ZoneId.of("Asia/Seoul"))
         );
 
@@ -52,9 +48,6 @@ public class TransferController {
         }
         if (isBlank(req.withdrawalAccountNo()) || isBlank(req.depositAccountNo())) {
             throw new CustomExceptions.InvalidRequestException("출금 및 입금 계좌번호는 필수입니다.");
-        }
-        if (isBlank(req.idempotencyKey())) {
-            throw new CustomExceptions.InvalidRequestException("요청 고유키(idempotencyKey)는 필수입니다.");
         }
     }
 
