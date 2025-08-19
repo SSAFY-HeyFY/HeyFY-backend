@@ -1,5 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.register.controller;
 
+import com.ssafy.ssashinsa.heyfy.register.docs.CreateDepositAccountDocs;
 import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.register.service.RegisterService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class RegisterController {
     private final RegisterService registerService;
 
 
+    @CreateDepositAccountDocs
     @PostMapping("/createdeposit")
     public ResponseEntity<ShinhanCreateDepositResponseDto> createDepositAccount() {
 

@@ -86,7 +86,7 @@ public class RegisterService {
                     .onStatus(HttpStatusCode::isError, r ->
                             r.bodyToMono(String.class).flatMap(body -> {
                                 log.error("API Error Body: {}", body);
-                                return Mono.error(new CustomException(ShinhanApiErrorCode.API_CALL_FAILED));
+                                return Mono.error(new CustomException(ShinhanRegisterApiErrorCode.API_CALL_FAILED));
                             }))
                     .bodyToMono(ShinhanCreateDepositResponseDto.class)
                     .doOnNext(this::logResponse)
