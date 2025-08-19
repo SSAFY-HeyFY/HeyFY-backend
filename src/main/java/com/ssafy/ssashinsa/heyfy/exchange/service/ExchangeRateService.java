@@ -1,18 +1,22 @@
 package com.ssafy.ssashinsa.heyfy.exchange.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.exchange.domain.ExchangeRate;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.EntireExchangeRateResponseDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ExchangeRateRequestDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanCommonRequestHeaderDto;
+import com.ssafy.ssashinsa.heyfy.exchange.repository.ExchangeRateRepository;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
-import lombok.extern.slf4j.Slf4j;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.EntireExchangeRateResponseDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.ShinhanCommonRequestHeaderDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.ExchangeRateRequestDto;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -21,7 +25,21 @@ public class ExchangeRateService {
 
     private final ShinhanApiClient apiClient;
     private final ShinhanApiUtil shinhanApiUtil;
+    private final ExchangeRateRepository exchangeRateRepository;
 
+    /**
+     * 특정 통화의 최근 30일 환율 조회
+     */
+    public List<ExchangeRate> getLast30DaysRates(String currencyCode) {
+        LocalDate endDate = LocalDate.now().minusDays(1); // 오늘은 외부 API로 처리하므로 제외
+        LocalDate startDate = endDate.minusDays(29);      // 총 30일치 (end 포함)
+
+        List<ExchangeRate> result =  exchangeRateRepository.findAllByCurrencyCodeAndBaseDateBetweenOrderByBaseDateAsc(
+                currencyCode, startDate, endDate
+        );
+
+        return result;
+    }
     /**
      * Calls the external API to retrieve the entire exchange rate.
      *

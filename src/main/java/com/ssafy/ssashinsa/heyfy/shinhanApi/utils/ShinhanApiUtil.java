@@ -1,6 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.shinhanApi.utils;
 
-import com.ssafy.ssashinsa.heyfy.exchange.dto.ShinhanCommonRequestHeaderDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanCommonRequestHeaderDto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang3.RandomStringUtils;
