@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShinhanCommonResponseHeaderDto {
+    private String responseCode;
+    private String responseMessage;
     private String apiName;
     private String transmissionDate;
     private String transmissionTime;
