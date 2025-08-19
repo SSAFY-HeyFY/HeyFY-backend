@@ -77,3 +77,19 @@ logbook:
       - refreshToken
       - token
       - authorization
+
+external:
+  api:
+    manager-key:
+    edu:
+      base-url: https://finopenapi.ssafy.io/ssafy/api/v1/edu  # 교육 관련 API 기본 URL
+    member:
+        base-url: https://finopenapi.ssafy.io/ssafy/api/v1/member  # 회원 관련 API 기본 URL
+  # 외부 API 호출 시 공통 설정
+  timeout: 5000  # ms 단위
+  retry:
+    enabled: true
+    max-attempts: 3
+    backoff:
+      delay: 1000  # ms 단위
+      multiplier: 1.5
