@@ -5,6 +5,13 @@ from bs4 import BeautifulSoup
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
+
 # ---------------------------
 # 기본 설정
 # ---------------------------
@@ -60,6 +67,7 @@ def _extract_number(text: str) -> float:
     except ValueError:
         return 0.0
 
+# 네이버 증권에서 신한은행 환율 상세 페이지를 파싱하는 함수
 def fetch_parsed_naver(url: str) -> dict:
     """네이버 환율 상세 페이지 파싱 → float 값으로 반환."""
     try:
@@ -141,58 +149,97 @@ def fetch_parsed_naver(url: str) -> dict:
         "change_pct": change_pct,          # 전일대비 퍼센트 변화 (%)
     }
 
+# 구글 finance에서 VND/KRW 환율을 파싱하는 함수
 def parse_google_vnd(soup: BeautifulSoup) -> dict:
     """
     Google Finance VND/KRW 메인 카드를 대상으로 파싱 (수정된 버전)
     """
-    # 메인 환율 카드 루트
-    root = soup.select_one('div[jsname="OYCkv"]') or soup
-
-    # 현재가 (기존 코드와 동일)
+    # 현재가
     price = 0.0
-    price_node = root.select_one('div[jsname="ip75Cb"] .YMlKec')
-    print("price_node", price_node)
+    price_node = soup.select_one('div.YMlKec.fxKbKc')
     if price_node:
         price = _extract_number(price_node.get_text(strip=True))
 
-    # --- 변동률 및 절대변동값 파싱 (개선된 부분) ---
+    # 변동률 및 절대변동값
     change_pct = 0.0
     change_abs = 0.0
     change_dir = ""
 
-    # 1. 변동률(%)을 포함하는 기준 요소를 선택합니다.
-    pct_wrap = root.select_one('span[jsname="Fe7oBc"]')
-    print("pct_wrap", pct_wrap)
-    if pct_wrap:
-        # 2. aria-label을 이용해 상승/하락 방향을 결정합니다.
-        aria = (pct_wrap.get("aria-label") or "").lower()
-        if "상승" in aria or "up" in aria:
-            change_dir = "▲"
-        elif "하락" in aria or "down" in aria:
-            change_dir = "▼"
+    # 변동 정보를 포함하는 부모 컨테이너를 먼저 선택합니다.
+    change_container = soup.select_one('div[jsname="CGyduf"]')
+    print("change_container", change_container)
+    
+    if change_container:
+        # 1. 변동률(%)을 포함하는 span 요소를 선택
+        pct_span = change_container.select_one('span[jsname="Fe7oBc"]')
+        print("pct_span", pct_span)
+        if pct_span:
+            # 2. aria-label을 이용해 상승/하락 방향 결정
+            aria = (pct_span.get("aria-label") or "").lower()
+            if "상승" in aria or "up" in aria:
+                change_dir = "▲"
+            elif "하락" in aria or "down" in aria:
+                change_dir = "▼"
+            
+            # 3. 변동률(%) 텍스트 추출 및 숫자 변환
+            pct_text = pct_span.get_text(strip=True)
+            change_pct = _extract_number(pct_text)
 
-        # 3. 변동률(%) 텍스트를 추출하고 숫자로 변환합니다.
-        pct_text = pct_wrap.get_text(" ", strip=True)
-        change_pct = _extract_number(pct_text)
-
-        # 4. 변동률 요소의 '바로 다음 형제' span 태그를 찾아 절대변동값을 추출합니다.
-        #    이 방법이 클래스 이름으로 찾는 것보다 구조적으로 더 안정적입니다.
-        abs_span = pct_wrap.find_next_sibling('span')
+        # 4. 등락 금액을 포함하는 span 요소를 클래스 이름으로 직접 선택 (더 안정적인 방법)
+        abs_span = change_container.select_one('span.P2Luy')
         if abs_span:
-            abs_text = abs_span.get_text(" ", strip=True)
+            abs_text = abs_span.get_text(strip=True)
             change_abs = _extract_number(abs_text)
 
-        # 5. 방향(▼)에 따라 부호를 맞춰줍니다.
+        # 5. 하락일 경우 부호 변경
         if change_dir == "▼":
             if change_pct > 0: change_pct *= -1
             if change_abs > 0: change_abs *= -1
-
+            
     return {
-        "unit_price_1": round(price, 6),      # 1 VND당 원화
+        "unit_price_1": f"{price:g}",      # 1 VND당 원화
         "change_direction": change_dir,       # ▲ / ▼ / ""
-        "change_abs": round(change_abs, 6),   # 절대변동 (원)
-        "change_pct": round(change_pct, 2),   # 변동률 (%)
+        "change_abs": f"{change_abs:.6f}",   # 절대변동 (원)
+        "change_pct": f"{change_pct:g}",   # 변동률 (%)
     }
+
+# --- Selenium으로 페이지 HTML을 가져오는 메인 로직 ---
+def get_vnd_krw_rate():
+    """
+    Selenium을 사용해 Google Finance 페이지를 열고,
+    환율 정보가 로드된 후의 HTML을 파싱하여 결과를 반환합니다.
+    """
+    # 크롬 드라이버를 자동으로 설정합니다.
+    service = Service(ChromeDriverManager().install())
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')  # 브라우저 창을 띄우지 않음
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    
+    driver = webdriver.Chrome(service=service, options=options)
+    
+    url = GOOGLE_URLS["VNDKRW"]
+    driver.get(url)
+    
+    try:
+        # 환율 정보가 표시될 때까지 최대 10초간 기다립니다.
+        # `div.YMlKec.fxKbKc`는 환율 가격을 담고 있는 요소로, 
+        # 이 요소가 나타나면 다른 정보도 로드되었다고 가정할 수 있습니다.
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.YMlKec.fxKbKc"))
+        )
+        
+        html_source = driver.page_source
+        soup = BeautifulSoup(html_source, 'html.parser')
+        
+        # 기존에 만들었던 파싱 함수를 그대로 사용합니다.
+        data = parse_google_vnd(soup)
+        
+        return data
+
+    finally:
+        # 작업이 끝나면 브라우저를 종료합니다.
+        driver.quit()
 
 def fetch_google_vnd(url: str) -> dict:
     """요청 → soup 생성 → 순수 파서 호출"""
@@ -200,8 +247,8 @@ def fetch_google_vnd(url: str) -> dict:
         html = requests.get(url, headers=HEADERS, timeout=10).text
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Google upstream fetch failed: {e}")
-    soup = BeautifulSoup(html, "lxml")
-    return parse_google_vnd(soup)
+    #soup = BeautifulSoup(html, "lxml")
+    return get_vnd_krw_rate()
 
 # ---------------------------
 # FastAPI 앱
