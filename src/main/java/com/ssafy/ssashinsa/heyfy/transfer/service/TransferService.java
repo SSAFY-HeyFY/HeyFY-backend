@@ -1,64 +1,89 @@
 package com.ssafy.ssashinsa.heyfy.transfer.service;
 
-import com.ssafy.ssashinsa.heyfy.transfer.config.SsafyFinApiProperties;
-import com.ssafy.ssashinsa.heyfy.transfer.dto.FinHeader;
-import com.ssafy.ssashinsa.heyfy.transfer.dto.TransferRequestBody;
-import com.ssafy.ssashinsa.heyfy.transfer.dto.TransferResponseBody;
-import com.ssafy.ssashinsa.heyfy.transfer.external.SsafyFinApiClient;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.ShinhanCommonRequestHeaderDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
+import com.ssafy.ssashinsa.heyfy.transfer.dto.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-
-import java.security.SecureRandom;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import reactor.core.publisher.Mono;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class TransferService {
 
-    private final SsafyFinApiClient finClient;
-    private final SsafyFinApiProperties apiProperties;
+    private final ShinhanApiClient shinhanApiClient;
+    private final ShinhanApiUtil shinhanApiUtil;
 
     // TODO: 추후 DB에서 사용자 정보를 조회하여 userKey를 가져오도록 수정
     private static final String TEMP_USER_KEY = "37c844c5-9b24-4daa-becb-ca52763a7b39";
 
-    private static final String INSTITUTION_CODE = "00100";
-    private static final String FINTECH_APP_NO  = "001";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HHmmss");
+    public EntireTransferResponseDto callTransfer(String withdrawalAccountNo, String depositAccountNo, long amount) {
+        try {
+            TransferRequestDto requestDto = createRequestDto(withdrawalAccountNo, depositAccountNo, amount);
+            logRequest(requestDto);
 
-    public TransferResponseBody callTransfer(String withdrawalAccountNo, String depositAccountNo, long amount) {
+            EntireTransferResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/demandDeposit/updateDemandDepositAccountTransfer")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(EntireTransferResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
 
-        LocalDateTime now = LocalDateTime.now();
-        String transmissionDate = now.format(DATE_FORMATTER);
-        String transmissionTime = now.format(TIME_FORMATTER);
+            logResponse(response);
+            return response;
+        } catch (Exception e) {
+            log.error("계좌 이체 API 호출 실패 : {}", e.getMessage(), e);
+            throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
+        }
+    }
 
-        SecureRandom random = new SecureRandom();
-        int sixDigitNumber = random.nextInt(900000) + 100000;
-        String uniqueSequence = String.valueOf(sixDigitNumber);
-        String institutionTransactionUniqueNo = transmissionDate + transmissionTime + uniqueSequence;
 
-        FinHeader header = FinHeader.builder()
-                .apiName("updateDemandDepositAccountTransfer")
-                .transmissionDate(transmissionDate)
-                .transmissionTime(transmissionTime)
-                .institutionCode(INSTITUTION_CODE)
-                .fintechAppNo(FINTECH_APP_NO)
-                .apiServiceCode("updateDemandDepositAccountTransfer")
-                .institutionTransactionUniqueNo(institutionTransactionUniqueNo)
-                .apiKey(apiProperties.apiKey())
-                .userKey(TEMP_USER_KEY)
-                .build();
+    private TransferRequestDto createRequestDto(String withdrawalAccountNo, String depositAccountNo, long amount) {
+        String apiKey = shinhanApiClient.getManagerKey();
 
-        TransferRequestBody body = TransferRequestBody.builder()
-                .Header(header)
+        ShinhanCommonRequestHeaderDto headerDto = shinhanApiUtil.createHeaderDto(
+                "updateDemandDepositAccountTransfer",
+                "updateDemandDepositAccountTransfer",
+                apiKey,
+                TEMP_USER_KEY
+        );
+
+        return TransferRequestDto.builder()
                 .withdrawalAccountNo(withdrawalAccountNo)
                 .depositAccountNo(depositAccountNo)
                 .transactionBalance(String.valueOf(amount))
-                .withdrawalTransactionSummary("(수시입출금) : 출금(이체)")
-                .depositTransactionSummary("(수시입출금) : 입금(이체)")
+                .Header(headerDto)
                 .build();
+    }
 
-        return finClient.transfer(body);
+
+    private void logRequest(Object requestDto) {
+        try {
+            log.info("Request JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(requestDto));
+        } catch (Exception e) {
+            log.error("Request logging error", e);
+        }
+    }
+
+    private void logResponse(Object responseDto) {
+        try {
+            log.info("Response JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(responseDto));
+        } catch (Exception e) {
+            log.error("Response logging error", e);
+        }
     }
 }
