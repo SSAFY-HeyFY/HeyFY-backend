@@ -1,8 +1,11 @@
 package com.ssafy.ssashinsa.heyfy.transfer.controller;
 
+import com.ssafy.ssashinsa.heyfy.swagger.docs.ErrorsCommonDocs;
+import com.ssafy.ssashinsa.heyfy.transfer.docs.TransferDocs;
 import com.ssafy.ssashinsa.heyfy.transfer.dto.*;
 import com.ssafy.ssashinsa.heyfy.transfer.exception.CustomExceptions;
 import com.ssafy.ssashinsa.heyfy.transfer.service.TransferService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,13 +16,16 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 
 @RestController
+@Tag(name = "Transfer", description = "이체 관련 API")
 @RequestMapping("/transfers")
 @RequiredArgsConstructor
+@ErrorsCommonDocs
 public class TransferController {
 
     private final TransferService transferService;
 
     @PostMapping
+    @TransferDocs
     public TransferHistoryResponse transfer(@RequestBody CreateTransferRequest req) {
         validateRequest(req);
 
