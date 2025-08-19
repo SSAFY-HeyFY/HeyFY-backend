@@ -27,8 +27,8 @@ public class TestController {
 
     @GetMapping("/protected")
     public ResponseEntity<MessageDto> protectedEndpoint() {
-        String username = SecurityUtil.getCurrentUsername();
-        String message = "안녕하세요, " + username + "님! JWT 토큰이 있어야만 접근 가능한 보호된 엔드포인트입니다.";
+        String studentId = SecurityUtil.getCurrentStudentId();
+        String message = "안녕하세요, " + studentId + "님! JWT 토큰이 있어야만 접근 가능한 보호된 엔드포인트입니다.";
         return ResponseEntity.ok(new MessageDto(message));
     }
 

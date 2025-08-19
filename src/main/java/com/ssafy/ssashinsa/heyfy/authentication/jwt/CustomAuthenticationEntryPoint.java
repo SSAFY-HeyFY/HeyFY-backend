@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.authentication.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        ResponseEntity<ErrorResponse> responseEntity = ErrorResponse.responseEntity(ErrorCode.UNAUTHORIZED);
+        ResponseEntity<ErrorResponse> responseEntity = ErrorResponse.responseEntity(AuthErrorCode.UNAUTHORIZED);
 
         response.setStatus(responseEntity.getStatusCode().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
