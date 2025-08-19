@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Currency30DaysRatesDto {
+public class ExchangeRateHistoriesDto {
     private String currency; // USD, CNY, VND 등
     private List<ExchangeRateDto> rates; // 30일간 환율정보
 }

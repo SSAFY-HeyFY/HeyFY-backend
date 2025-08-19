@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExchangeRate30DaysResponseDto {
+public class ExchangeRatePageResponseDto {
     // 3개 통화의 30일간 환율정보 리스트
-    private java.util.List<Currency30DaysRatesDto> exchangeRateHistories;
+    private ExchangeRateHistoriesDto exchangeRateHistories;
     // usd, cny, vnd에 대한 단일 환율정보를 묶은 그룹
     private ExchangeRateGroupDto latestExchangeRate;
     private PredictionDto prediction;
