@@ -1,9 +1,10 @@
 package com.ssafy.ssashinsa.heyfy.transfer.controller;
 
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.swagger.docs.ErrorsCommonDocs;
 import com.ssafy.ssashinsa.heyfy.transfer.docs.TransferDocs;
 import com.ssafy.ssashinsa.heyfy.transfer.dto.*;
-import com.ssafy.ssashinsa.heyfy.transfer.exception.CustomExceptions;
+import com.ssafy.ssashinsa.heyfy.transfer.exception.TransferApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.transfer.service.TransferService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +28,16 @@ public class TransferController {
     @PostMapping
     @TransferDocs
     public TransferHistoryResponse transfer(@RequestBody CreateTransferRequest req) {
-        validateRequest(req);
-
         EntireTransferResponseDto response = transferService.callTransfer(
                 req.withdrawalAccountNo(), req.depositAccountNo(), req.amount()
         );
 
-        if (!"H0000".equals(response.getHeader().getResponseCode())) {
-            throw new CustomExceptions.InvalidRequestException(response.getHeader().getResponseMessage()); //에러 발생
+        String responseCode = response.getHeader().getResponseCode();
+
+        if (!"H0000".equals(responseCode)) {
+            TransferApiErrorCode errorCode = TransferApiErrorCode.fromCode(responseCode);
+            System.out.println("responseCode = " + responseCode);
+            throw new CustomException(errorCode);
         }
 
         var history = new TransferHistory(
@@ -46,18 +49,5 @@ public class TransferController {
         );
 
         return TransferHistoryResponse.ok(history);
-    }
-
-    private void validateRequest(CreateTransferRequest req) {
-        if (req.amount() == null || req.amount() <= 0) {
-            throw new CustomExceptions.InvalidRequestException("이체 금액은 0보다 커야 합니다.");
-        }
-        if (isBlank(req.withdrawalAccountNo()) || isBlank(req.depositAccountNo())) {
-            throw new CustomExceptions.InvalidRequestException("출금 및 입금 계좌번호는 필수입니다.");
-        }
-    }
-
-    private boolean isBlank(String s) {
-        return s == null || s.isBlank();
     }
 }
