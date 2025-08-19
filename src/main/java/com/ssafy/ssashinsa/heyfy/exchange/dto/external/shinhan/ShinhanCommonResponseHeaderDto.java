@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.exchange.dto;
+package com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
