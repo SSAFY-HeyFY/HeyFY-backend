@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShinhanCommonresponseHeaderDto {
+public class ShinhanCommonResponseHeaderDto {
     private String apiName;
     private String transmissionDate;
     private String transmissionTime;
