@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 public class ShinhanApiService {
     private final WebClient webClient;
 
-    @Value("${shinhan.manger-key}")
+    @Value("${shinhan.manager-key}")
     private String mangerKey;
 
     public ShinhanUserResponseDto signUp(String email) {

@@ -235,4 +235,5 @@ gradle-app.setting
 
 ### yml
 application-secret.yml
+application.yml
 application-local.yml
