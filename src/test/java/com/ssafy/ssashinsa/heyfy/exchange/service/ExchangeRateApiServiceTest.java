@@ -1,11 +1,8 @@
 package com.ssafy.ssashinsa.heyfy.exchange.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ssafy.ssashinsa.heyfy.exchange.domain.ExchangeRate;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ExchangeRateRequestDto;
-import com.ssafy.ssashinsa.heyfy.exchange.service.ExchangeRateService;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.ExchangeRateGroupDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ExchangeRateResponseDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanCommonResponseHeaderDto;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.EntireExchangeRateResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.repository.ExchangeRateRepository;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
@@ -43,7 +40,7 @@ class ExchangeRateApiServiceTest {
     @Test
     void 전체_환율_조회() {
         // 실제 API 호출
-        EntireExchangeRateResponseDto response = exchangeRateService.getExchangeRate();
+        EntireExchangeRateResponseDto response = exchangeRateService.getExchangeRateFromExternalApi();
         assertNotNull(response, "API response should not be null");
         String responseString = response.toString();
         System.out.println("API Response: " + responseString);
@@ -82,5 +79,22 @@ class ExchangeRateApiServiceTest {
 
         verify(exchangeRateRepository, times(1))
                 .findAllByCurrencyCodeAndBaseDateBetweenOrderByBaseDateAsc(currencyCode, startDate, endDate);
+    }
+
+    @Test
+    void 환율_페이지_통합_조회() throws Exception {
+        // when
+        var result = exchangeRateService.getExchangeRatePage();
+        // then
+        assertNotNull(result, "ExchangeRatePageResponseDto should not be null");
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+        System.out.println("\n===== ExchangeRatePageResponseDto (JSON) =====\n" + json + "\n==============================================\n");
+        // 추가적으로 각 필드별 null 체크 등도 가능
+        assertNotNull(result.getExchangeRateHistories(), "exchangeRateHistories should not be null");
+        assertNotNull(result.getLatestExchangeRate(), "latestExchangeRate should not be null");
+        assertNotNull(result.getPrediction(), "prediction should not be null");
+        assertNotNull(result.getTuition(), "tuition should not be null");
     }
 }
