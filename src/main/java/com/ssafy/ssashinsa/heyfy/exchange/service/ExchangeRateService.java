@@ -2,14 +2,13 @@ package com.ssafy.ssashinsa.heyfy.exchange.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
-import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
-
 import lombok.extern.slf4j.Slf4j;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.EntireExchangeRateResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.ShinhanCommonRequestHeaderDto;
@@ -42,7 +41,7 @@ public class ExchangeRateService {
                     .onStatus(HttpStatusCode::isError, r ->
                             r.bodyToMono(String.class).flatMap(body -> {
                                 log.error("API Error Body: {}", body);
-                                return Mono.error(new CustomException(ErrorCode.API_CALL_FAILED));
+                                return Mono.error(new CustomException(ShinhanApiErrorCode.API_CALL_FAILED));
                             }))
                     .bodyToMono(EntireExchangeRateResponseDto.class)
                     .doOnNext(this::logRequest)
@@ -51,7 +50,7 @@ public class ExchangeRateService {
             return response;
         } catch (Exception e) {
             log.error("환율 조회 API 호출 실패: {}", e.getMessage(), e);
-            throw new CustomException(ErrorCode.API_CALL_FAILED);
+            throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
         }
     }
 

@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.shinhanApi.service;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
-import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanErrorResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserRequestDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserResponseDto;
@@ -33,9 +33,9 @@ public class ShinhanApiService {
                             response.bodyToMono(ShinhanErrorResponseDto.class)
                                     .flatMap(errorDto -> {
                                         if ("E4002".equals(errorDto.getResponseCode())) {
-                                            return Mono.error(new CustomException(ErrorCode.API_USER_ALREADY_EXISTS));
+                                            return Mono.error(new CustomException(ShinhanApiErrorCode.API_USER_ALREADY_EXISTS));
                                         }
-                                        return Mono.error(new CustomException(ErrorCode.API_CALL_FAILED));
+                                        return Mono.error(new CustomException(ShinhanApiErrorCode.API_CALL_FAILED));
                                     }))
                     .bodyToMono(ShinhanUserResponseDto.class)
                     .block();
@@ -44,7 +44,7 @@ public class ShinhanApiService {
             // =======================================================
             // 신한은행 API 에러코드 E4002일 경우, 유저 조회 로직
             // 주석 처리된 부분은 후에 보안 로직으로 지적받을 시 주석처리하거나 삭제
-            if (e.getErrorCode() == ErrorCode.API_USER_ALREADY_EXISTS) {
+            if (e.getErrorCode() == ShinhanApiErrorCode.API_USER_ALREADY_EXISTS) {
                 System.out.println("이미 존재하는 유저. 유저 조회 API 요청");
                 return searchUser(email);
             }
@@ -65,7 +65,7 @@ public class ShinhanApiService {
                 .onStatus(HttpStatusCode::is4xxClientError, response ->
                         response.bodyToMono(ShinhanErrorResponseDto.class)
                                 .flatMap(errorDto -> {
-                                    throw new CustomException(ErrorCode.API_CALL_FAILED);
+                                    throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
                                 })
                 )
                 .bodyToMono(ShinhanUserResponseDto.class)

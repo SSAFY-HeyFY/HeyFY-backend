@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Objects;
 
-import static com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode.INVALID_FIELD;
-
+import com.ssafy.ssashinsa.heyfy.common.exception.CommonErrorCode;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -17,7 +16,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException exception) {
         ObjectError objectError = Objects.requireNonNull(exception.getBindingResult().getAllErrors().stream().findFirst().orElse(null));
-        return ErrorResponse.responseEntity(INVALID_FIELD, objectError.getDefaultMessage());
+        return ErrorResponse.responseEntity(CommonErrorCode.INVALID_FIELD, objectError.getDefaultMessage());
     }
     // 커스텀 예외
     @ExceptionHandler(value = CustomException.class)
@@ -27,6 +26,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception e) {
-        return ErrorResponse.responseEntity(ErrorCode.INTERNAL_SERVER_ERROR);
+        return ErrorResponse.responseEntity(CommonErrorCode.INTERNAL_SERVER_ERROR);
     }
 }
