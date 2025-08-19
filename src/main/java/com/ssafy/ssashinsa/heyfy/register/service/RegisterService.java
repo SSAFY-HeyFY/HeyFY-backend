@@ -2,13 +2,17 @@ package com.ssafy.ssashinsa.heyfy.register.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.ShinhanCommonRequestHeaderDto;
+import com.ssafy.ssashinsa.heyfy.register.Exception.ShinhanRegisterApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositRequestDto;
 import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositRequestHeaderDto;
 import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
+import com.ssafy.ssashinsa.heyfy.user.domain.Users;
+import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,8 +28,7 @@ public class RegisterService {
     @Value("${shinhan.manager-key}")
     private String managerKey;
 
-    @Value("${shinhan.temp-user-key}")
-    private String TEMP_USER_KEY;
+    private final UserRepository userRepository;
 
 
     private final ShinhanApiClient shinhanApiClient;
@@ -38,13 +41,21 @@ public class RegisterService {
     public ShinhanCreateDepositResponseDto createDepositAccount() {
         try {
             String apiKey = managerKey;
-            System.out.println("매니저 키: "    + apiKey);
+
+            String studentId = SecurityUtil.getCurrentStudentId();
+            Users user = userRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
+
+            String userKey = user.getUserKey();
+            if (userKey == null || userKey.isEmpty()) {
+                throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
+            }
 
             ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
                     "createDemandDepositAccount",
                     "createDemandDepositAccount",
                     apiKey,
-                    TEMP_USER_KEY
+                    userKey
             );
 
             ShinhanCreateDepositRequestHeaderDto headerDto = ShinhanCreateDepositRequestHeaderDto.builder()
