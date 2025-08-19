@@ -39,14 +39,15 @@ public class ExchangeRateService {
                     .header("Content-Type", "application/json")
                     .bodyValue(requestDto)
                     .retrieve()
-                    .onStatus(HttpStatusCode::isError, response ->
-                            response.bodyToMono(String.class).flatMap(body -> {
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
                                 log.error("API Error Body: {}", body);
                                 return Mono.error(new CustomException(ErrorCode.API_CALL_FAILED));
                             }))
                     .bodyToMono(EntireExchangeRateResponseDto.class)
-                    .doOnNext(this::logResponse)
+                    .doOnNext(this::logRequest)
                     .block();
+            logResponse(response);
             return response;
         } catch (Exception e) {
             log.error("환율 조회 API 호출 실패: {}", e.getMessage(), e);
@@ -68,6 +69,13 @@ public class ExchangeRateService {
             log.info("Request JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(requestDto));
         } catch (Exception e) {
             log.error("Request logging error", e);
+        }
+    }
+    private void logResponse(Object responseDto) {
+        try {
+            log.info("Response JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(responseDto));
+        } catch (Exception e) {
+            log.error("Response logging error", e);
         }
     }
 }

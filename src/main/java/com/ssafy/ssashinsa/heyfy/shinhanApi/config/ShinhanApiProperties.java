@@ -9,7 +9,7 @@ import java.util.Map;
 
 
 @Configuration
-@ConfigurationProperties(prefix = "external.api")
+@ConfigurationProperties(prefix = "external.apis")
 @Getter @Setter
 public class ShinhanApiProperties {
     private Common common;
