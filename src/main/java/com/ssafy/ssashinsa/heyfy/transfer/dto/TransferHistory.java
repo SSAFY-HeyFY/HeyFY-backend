@@ -7,6 +7,5 @@ public record TransferHistory(
         String toAccountMasked,
         Long amount,
         String currency,
-        String idempotencyKey,
         OffsetDateTime completedAt
 ) {}
