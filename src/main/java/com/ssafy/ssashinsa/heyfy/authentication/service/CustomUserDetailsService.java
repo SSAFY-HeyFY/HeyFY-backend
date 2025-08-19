@@ -22,11 +22,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         System.out.println("탐색 로직");
         // 현재 db에서 데이터 가져오도록 설정
-        Users user = userRepository.findByUsername(username).orElseThrow(() -> new CustomException(AuthErrorCode.LOGIN_FAILED));
+        Users user = userRepository.findByStudentId(username).orElseThrow(() -> new CustomException(AuthErrorCode.LOGIN_FAILED));
 
         System.out.println("유저 불러옴 "+user.getUserId());
         return new User(
-                user.getUsername(),
+                user.getStudentId(),
                 user.getPassword(),
                 Collections.emptyList()
         );

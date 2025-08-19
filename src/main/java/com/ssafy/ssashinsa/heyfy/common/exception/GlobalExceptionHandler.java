@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Objects;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.CommonErrorCode;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 
 
 @RestControllerAdvice
@@ -28,7 +29,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException e) {
-        return ErrorResponse.responseEntity(ErrorCode.LOGIN_FAILED);
+        return ErrorResponse.responseEntity(AuthErrorCode.LOGIN_FAILED);
     }
 
     @ExceptionHandler(Exception.class)
