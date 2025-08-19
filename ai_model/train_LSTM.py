@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 # -- 1. 모델 및 학습 파라미터 설정 --
 class Config:
-    data_path = 'data/merged_USDKRW_달러_지수_US10Y_final_with_onehot.xlsx' 
+    data_path = 'data/train/train_final_with_onehot_20100104_20250812.xlsx' 
     
     target_column = 'ECOS_Close'    
     feature_columns = [
@@ -19,7 +19,7 @@ class Config:
     ]
     
     test_start_date = '2025-01-01' # 테스트 데이터 시작 날짜
-    sequence_length = 20 # 과거 20일의 데이터를 보고 다음날을 예측
+    sequence_length = 90
 
     # 모델 하이퍼파라미터
     input_size = len(feature_columns)
@@ -33,7 +33,6 @@ class Config:
     batch_size = 16
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    save_path = 'models/LSTM/lstm_exchange_rate_model.pth'
 
 
 # -- 2. 데이터 전처리 및 시퀀스 생성 --
@@ -121,7 +120,6 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs, device):
     # 전체 에포크에 대한 진행률 표시줄 (바깥쪽 루프)
     for epoch in range(num_epochs):
         
-        # ★★★ 수정된 부분: 각 에포크마다 tqdm으로 데이터로더를 감싸줍니다 ★★★
         # desc: 진행률 표시줄의 제목, leave=False: 내부 루프 완료 후 표시줄 삭제
         batch_iterator = tqdm(train_loader, 
                               desc=f"Epoch {epoch+1:03d}/{num_epochs:03d}", 
@@ -143,7 +141,6 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs, device):
             
             epoch_loss += loss.item()
             
-            # ★★★ 수정된 부분: 진행률 표시줄의 오른쪽에 현재 배치 Loss를 표시 ★★★
             batch_iterator.set_postfix(loss=f"{loss.item():.6f}")
 
         # 한 에포크의 학습이 끝나면 평균 Loss를 출력
@@ -221,7 +218,7 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
     
     train_model(model, train_loader, criterion, optimizer, config.num_epochs, config.device)
-    save_model(model, config.save_path)
+    save_model(model, config)
     
     predictions, actuals = evaluate_model(model, test_loader, target_scaler, config.device)
     
