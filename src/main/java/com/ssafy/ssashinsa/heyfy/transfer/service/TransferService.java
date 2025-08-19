@@ -1,11 +1,12 @@
 package com.ssafy.ssashinsa.heyfy.transfer.service;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.ShinhanCommonRequestHeaderDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanCommonRequestHeaderDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
-import com.ssafy.ssashinsa.heyfy.transfer.dto.*;
+import com.ssafy.ssashinsa.heyfy.transfer.dto.EntireTransferResponseDto;
+import com.ssafy.ssashinsa.heyfy.transfer.dto.TransferRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
