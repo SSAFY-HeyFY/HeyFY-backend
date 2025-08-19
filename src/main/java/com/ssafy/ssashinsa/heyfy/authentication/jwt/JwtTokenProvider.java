@@ -5,7 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
-import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -65,7 +65,7 @@ public class JwtTokenProvider {
             DecodedJWT jwt = JWT.decode(token);
             return jwt.getSubject();
         } catch (JWTVerificationException e) {
-            throw new CustomException(ErrorCode.INVALID_ACCESS_TOKEN);
+            throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
         }
     }
 
@@ -74,9 +74,9 @@ public class JwtTokenProvider {
         try {
             JWT.require(Algorithm.HMAC256(secretKey)).build().verify(token);
         } catch (com.auth0.jwt.exceptions.TokenExpiredException e) { //만료된 토큰
-            throw new CustomException(ErrorCode.EXPIRED_TOKEN);
+            throw new CustomException(AuthErrorCode.EXPIRED_TOKEN);
         } catch (JWTVerificationException e) { //유효하지 않은 토큰
-            throw new CustomException(ErrorCode.INVALID_ACCESS_TOKEN);
+            throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
         }
     }
 
@@ -85,7 +85,7 @@ public class JwtTokenProvider {
             DecodedJWT jwt = JWT.decode(token);
             return jwt.getClaim("jti").asString();
         } catch (JWTVerificationException e) {
-            throw new CustomException(ErrorCode.INVALID_ACCESS_TOKEN);
+            throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
         }
     }
 

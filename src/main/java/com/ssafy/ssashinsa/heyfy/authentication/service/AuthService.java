@@ -7,7 +7,7 @@ import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
 import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
 import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
-import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.service.ShinhanApiService;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class AuthService {
     public SignInSuccessDto signIn(SignInDto signInDto) {
         try {
             UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(signInDto.getStudentId(), signInDto.getPassword());
+                    new UsernamePasswordAuthenticationToken(signInDto.getUsername(), signInDto.getPassword());
 
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
@@ -44,23 +44,23 @@ public class AuthService {
             String accessToken = jwtTokenProvider.createAccessToken(authentication, jti);
             String refreshToken = jwtTokenProvider.createRefreshToken(authentication, jti);
 
-            redisUtil.deleteRefreshToken(signInDto.getPassword());
-            redisUtil.setRefreshToken(signInDto.getStudentId(), refreshToken);
+            redisUtil.deleteRefreshToken(signInDto.getUsername());
+            redisUtil.setRefreshToken(signInDto.getUsername(), refreshToken);
 
             return new SignInSuccessDto(accessToken, refreshToken);
         } catch (BadCredentialsException  | InternalAuthenticationServiceException e) {
-            throw new CustomException(ErrorCode.LOGIN_FAILED);
+            throw new CustomException(AuthErrorCode.LOGIN_FAILED);
         }
     }
 
     @Transactional
     public SignUpSuccessDto signUp(SignUpDto signUpDto) {
-        userRepository.findByStudentId(signUpDto.getStudentId()).ifPresent(user -> {
-            throw new CustomException(ErrorCode.EXIST_USER_NAME);
+        userRepository.findByUsername(signUpDto.getUsername()).ifPresent(user -> {
+            throw new CustomException(AuthErrorCode.EXIST_USER_NAME);
         });
 
         userRepository.findByEmail(signUpDto.getEmail()).ifPresent(user -> {
-            throw new CustomException(ErrorCode.EXIST_EMAIL);
+            throw new CustomException(AuthErrorCode.EXIST_EMAIL);
         });
 
         String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
@@ -75,7 +75,7 @@ public class AuthService {
         }
 
         Users user = Users.builder()
-                .studentId(signUpDto.getStudentId())
+                .username(signUpDto.getUsername())
                 .password(encodedPassword)
                 .name(signUpDto.getName())
                 .email(signUpDto.getEmail())
@@ -86,7 +86,7 @@ public class AuthService {
 
         Users savedUser = userRepository.save(user);
 
-        return new SignUpSuccessDto("회원가입이 성공적으로 완료되었습니다.", savedUser.getStudentId());
+        return new SignUpSuccessDto("회원가입이 성공적으로 완료되었습니다.", savedUser.getUsername());
     }
 
     // 리프레쉬 토큰 재발급
@@ -116,12 +116,12 @@ public class AuthService {
     // RefreshToken 유효성 검증
     private void validateRefreshToken(String refreshToken) {
         if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new CustomException(ErrorCode.MISSING_REFRESH_TOKEN);
+            throw new CustomException(AuthErrorCode.MISSING_REFRESH_TOKEN);
         }
         try {
             jwtTokenProvider.validateToken(refreshToken);
         } catch (CustomException e) {
-            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN); // 안드로이드 상에서는 INVALID_REFRESH_TOKEN 받았을때 재 로그인 하도록 로직 구분
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN); // 안드로이드 상에서는 INVALID_REFRESH_TOKEN 받았을때 재 로그인 하도록 로직 구분
         }
     }
 
@@ -129,14 +129,14 @@ public class AuthService {
     private void validateRefreshTokenInRedis(String refreshTokenUsername, String refreshToken) {
         String redisRefreshToken = redisUtil.getRefreshToken(refreshTokenUsername);
         if (redisRefreshToken == null || !redisRefreshToken.equals(refreshToken)) {
-            throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
     }
 
     // AccessToken 유효성 검증, AccessToken 만료여부 확인, AccessToken과 refreshToken 비교
     private void validateAccessTokenAndUserMatch(String authorizationHeader, String refreshToken) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new CustomException(ErrorCode.MISSING_ACCESS_TOKEN);
+            throw new CustomException(AuthErrorCode.MISSING_ACCESS_TOKEN);
         }
         String accessToken = authorizationHeader.substring(7);
         try {
@@ -148,16 +148,16 @@ public class AuthService {
             redisUtil.deleteRefreshToken(jwtTokenProvider.getUsernameFromToken(refreshToken));
             */
 
-            throw new CustomException(ErrorCode.NOT_EXPIRED_TOKEN);
+            throw new CustomException(AuthErrorCode.NOT_EXPIRED_TOKEN);
         } catch (CustomException e) {
-            if (!e.getErrorCode().equals(ErrorCode.EXPIRED_TOKEN)) {
+            if (!e.getErrorCode().equals(AuthErrorCode.EXPIRED_TOKEN)) {
                 throw e;
             }
             String accessTokenJti = jwtTokenProvider.getJtiFromToken(accessToken);
             String refreshTokenJti = jwtTokenProvider.getJtiFromToken(refreshToken);
 
             if (!accessTokenJti.equals(refreshTokenJti)) {
-                throw new CustomException(ErrorCode.TOKEN_PAIR_MISMATCH);
+                throw new CustomException(AuthErrorCode.TOKEN_PAIR_MISMATCH);
             }
         }
     }
@@ -165,10 +165,10 @@ public class AuthService {
     public Users getCurrentUser() {
         String username = SecurityUtil.getCurrentUsername();
         if (username == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
         }
-        return userRepository.findByStudentId(username)
-                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED));
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.UNAUTHORIZED));
     }
 
     public String getCurrentUserKey() {
