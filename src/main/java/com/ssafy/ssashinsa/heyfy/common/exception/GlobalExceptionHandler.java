@@ -12,7 +12,7 @@ import static com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode.INVALID_FIELD
 
 
 @RestControllerAdvice
-public class ExceptionController {
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException exception) {
