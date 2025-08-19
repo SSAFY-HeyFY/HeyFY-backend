@@ -10,12 +10,12 @@ import com.ssafy.ssashinsa.heyfy.exchange.dto.EntireExchangeRateResponseDto;
 class ExchangeRateApiServiceTest {
 
     @Autowired
-    private ExchangeRateApiService exchangeRateApiService;
+    private ExchangeRateService exchangeRateService;
 
     @Test
     void 전체_환율_조회() {
         // 실제 API 호출
-        EntireExchangeRateResponseDto response = exchangeRateApiService.getExchangeRate();
+        EntireExchangeRateResponseDto response = exchangeRateService.getExchangeRate();
         assertNotNull(response, "API response should not be null");
         String responseString = response.toString();
         System.out.println("API Response: " + responseString);

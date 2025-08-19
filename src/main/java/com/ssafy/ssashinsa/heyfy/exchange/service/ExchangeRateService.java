@@ -21,7 +21,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ExchangeRateApiService {
+public class ExchangeRateService {
 
     private final ShinhanApiClient apiClient;
 
