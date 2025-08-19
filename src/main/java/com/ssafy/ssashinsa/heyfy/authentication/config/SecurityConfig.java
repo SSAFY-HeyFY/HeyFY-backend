@@ -29,7 +29,6 @@ public class SecurityConfig {
     ) throws Exception {
 
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
-
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
