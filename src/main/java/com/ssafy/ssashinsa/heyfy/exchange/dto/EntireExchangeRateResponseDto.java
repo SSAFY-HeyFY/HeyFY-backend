@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class EntireExchangeRateResponseDto {
 
     @JsonProperty("Header")
-    private ShinhanCommonresponseHeaderDto Header;
+    private ShinhanCommonResponseHeaderDto Header;
     @JsonProperty("REC")
     private List<ExchangeRateResponseDto> REC = new ArrayList<>();
 }

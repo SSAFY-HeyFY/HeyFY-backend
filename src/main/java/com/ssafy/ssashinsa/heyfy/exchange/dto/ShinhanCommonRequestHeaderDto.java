@@ -18,5 +18,5 @@ public class ShinhanCommonRequestHeaderDto {
     private String apiKey;
     private String apiServiceCode;
     private String institutionTransactionUniqueNo;
+    private String userKey;
 }
-
