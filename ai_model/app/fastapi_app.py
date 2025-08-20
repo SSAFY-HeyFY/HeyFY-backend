@@ -1,6 +1,7 @@
 import re
 import requests
 import pandas as pd
+import warnings
 from bs4 import BeautifulSoup
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,7 +22,7 @@ HEADERS = {"User-Agent": "Mozilla/5.0"}
 URLS = {
     "USDKRW": "https://finance.naver.com/marketindex/exchangeDetail.naver?marketindexCd=FX_USDKRW_SHB",
     "CNYKRW": "https://finance.naver.com/marketindex/exchangeDetail.naver?marketindexCd=FX_CNYKRW_SHB",
-    "EURKRW": "https://finance.naver.com/marketindex/exchangeDetail.naver?marketindexCd=FX_EURKRW_SHB",    
+    #"EURKRW": "https://finance.naver.com/marketindex/exchangeDetail.naver?marketindexCd=FX_EURKRW_SHB",    
 }
 
 GOOGLE_URLS = {
@@ -76,7 +77,9 @@ def fetch_parsed_naver(url: str) -> dict:
         raise HTTPException(status_code=502, detail=f"Upstream fetch failed: {e}")
 
     try:
-        tables = pd.read_html(html)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=FutureWarning)
+            tables = pd.read_html(html)
     except ValueError:
         tables = []
 
@@ -167,12 +170,10 @@ def parse_google_vnd(soup: BeautifulSoup) -> dict:
 
     # 변동 정보를 포함하는 부모 컨테이너를 먼저 선택합니다.
     change_container = soup.select_one('div[jsname="CGyduf"]')
-    print("change_container", change_container)
     
     if change_container:
         # 1. 변동률(%)을 포함하는 span 요소를 선택
         pct_span = change_container.select_one('span[jsname="Fe7oBc"]')
-        print("pct_span", pct_span)
         if pct_span:
             # 2. aria-label을 이용해 상승/하락 방향 결정
             aria = (pct_span.get("aria-label") or "").lower()
@@ -289,6 +290,6 @@ def get_all_rates():
         out[pair] = {"provider": "Google Finance", "source": url, "data": fetch_google_vnd(url)}
     return {"data": out}
 
-# 실행: uvicorn fastapi_app:app --reload --port 8000
+# 실행: uvicorn app.fastapi_app:app --reload --port 8000
 # 전체: http://localhost:8000/rates
 # 개별: http://localhost:8000/rate/USDKRW
