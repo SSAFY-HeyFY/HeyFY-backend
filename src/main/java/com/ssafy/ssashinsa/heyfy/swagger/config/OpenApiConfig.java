@@ -4,6 +4,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
@@ -14,12 +15,13 @@ import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
-    final String securitySchemeName = "bearerAuth";
+    final String securitySchemeName = "Authorization";
     final String apiTitle = String.format("%s API", StringUtils.capitalize("HeyFY"));
     Info info = new Info()
             .version("v0.1.0")
             .title("HeyFY")
-            .description("토큰 입력 시 Bearer 꼭 추가!!");
+            .description("SSAFY 14기 싸신사 프로젝트 HeyFY의 API 문서입니다.");
+
     @Bean
     public OpenAPI openAPI() {
         Components components = new Components()
@@ -46,13 +48,14 @@ public class OpenApiConfig {
                                 "\"message\":\"에러가 발생했습니다\"}"));
 
         return new OpenAPI()
+                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .servers(List.of(new Server().url("/").description(apiTitle)))
                 .components(components.addSecuritySchemes(securitySchemeName,
-                        new SecurityScheme()
-                                .name(securitySchemeName)
-                                .type(SecurityScheme.Type.HTTP)
+                        new SecurityScheme().type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")
+                                .in(SecurityScheme.In.HEADER)
+                                .description("JWT 토큰 정보")
                 ))
                 .info(info);
     }
