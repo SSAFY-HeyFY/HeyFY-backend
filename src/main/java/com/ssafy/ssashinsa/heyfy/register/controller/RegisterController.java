@@ -25,4 +25,12 @@ public class RegisterController {
 
         return ResponseEntity.ok(responseDto);
     }
+
+    @PostMapping("/createforeigndeposit")
+    public ResponseEntity<ShinhanCreateDepositResponseDto> createDepositForeignAccount() {
+
+        ShinhanCreateDepositResponseDto responseDto = registerService.createForeignDepositAccount();
+
+        return ResponseEntity.ok(responseDto);
+    }
 }

@@ -3,9 +3,10 @@ package com.ssafy.ssashinsa.heyfy.register.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
-import com.ssafy.ssashinsa.heyfy.register.exception.ShinhanRegisterApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositRequestDto;
 import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositResponseDto;
+import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateforeignDepositRequestDto;
+import com.ssafy.ssashinsa.heyfy.register.exception.ShinhanRegisterApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanCommonRequestHeaderDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
@@ -14,7 +15,6 @@ import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -30,6 +30,10 @@ public class RegisterService {
     private final ShinhanApiClient shinhanApiClient;
     private final ShinhanApiUtil shinhanApiUtil;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+
+
+
 
     public ShinhanCreateDepositResponseDto createDepositAccount() {
         try {
@@ -62,6 +66,58 @@ public class RegisterService {
             ShinhanCreateDepositResponseDto response = shinhanApiClient.getClient("edu")
                     .post()
                     .uri("/demandDeposit/createDemandDepositAccount")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanRegisterApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(ShinhanCreateDepositResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("계좌 개설 API 호출 실패 : {}", e.getMessage(), e);
+            throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
+        }
+    }
+
+    public ShinhanCreateDepositResponseDto createForeignDepositAccount() {
+        try {
+            String apiKey = shinhanApiClient.getManagerKey();
+            String accountTypeUniqueNo = shinhanApiClient.getForeignAccountTypeUniqueNo();
+
+            String studentId = SecurityUtil.getCurrentStudentId();
+            Users user = userRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
+
+            String userKey = user.getUserKey();
+            if (userKey == null || userKey.isEmpty()) {
+                throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
+            }
+
+            ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
+                    "createForeignCurrencyDemandDepositAccount",
+                    "createForeignCurrencyDemandDepositAccount",
+                    apiKey,
+                    userKey
+            );
+
+            ShinhanCreateforeignDepositRequestDto requestDto = ShinhanCreateforeignDepositRequestDto.builder()
+                    .Header(commonHeaderDto)
+                    .accountTypeUniqueNo(accountTypeUniqueNo)
+                    .currency("USD") // 예시로 USD를 사용, 필요에 따라 변경
+                    .build();
+
+            logRequest(requestDto);
+
+            ShinhanCreateDepositResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/demandDeposit/foreignCurrency/createForeignCurrencyDemandDepositAccount")
                     .header("Content-Type", "application/json")
                     .bodyValue(requestDto)
                     .retrieve()

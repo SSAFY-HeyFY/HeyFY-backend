@@ -2,14 +2,14 @@ package com.ssafy.ssashinsa.heyfy.shinhanApi.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanErrorResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserRequestDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,13 +23,11 @@ public class ShinhanApiService {
     private static final Logger log = LoggerFactory.getLogger(ShinhanApiService.class);
 
     private final WebClient webClient;
-
-    @Value("${shinhan.manager-key}")
-    private String mangerKey;
+    private final ShinhanApiClient shinhanApiClient;
 
     public ShinhanUserResponseDto signUp(String email) {
 
-        ShinhanUserRequestDto requestDto = new ShinhanUserRequestDto(mangerKey, email);
+        ShinhanUserRequestDto requestDto = new ShinhanUserRequestDto(shinhanApiClient.getManagerKey(), email);
 
         try {
             return webClient.post()
@@ -39,7 +37,7 @@ public class ShinhanApiService {
                     .onStatus(HttpStatusCode::isError, response ->
                             response.bodyToMono(String.class)
                                     .flatMap(body -> {
-                                        log.debug("❌ 신한은행 API 에러 응답: " + body);
+                                        log.debug("신한은행 API 에러 응답: " + body);
 
                                         ObjectMapper mapper = new ObjectMapper();
                                         ShinhanErrorResponseDto errorDto;
@@ -71,7 +69,7 @@ public class ShinhanApiService {
 
     public ShinhanUserResponseDto searchUser(String email) {
 
-        ShinhanUserRequestDto requestDto = new ShinhanUserRequestDto(mangerKey, email);
+        ShinhanUserRequestDto requestDto = new ShinhanUserRequestDto(shinhanApiClient.getManagerKey(), email);
 
         return webClient.post()
                 .uri("https://finopenapi.ssafy.io/ssafy/api/v1/member/search")
@@ -80,7 +78,7 @@ public class ShinhanApiService {
                 .onStatus(HttpStatusCode::is4xxClientError, response ->
                         response.bodyToMono(String.class)
                                 .flatMap(body -> {
-                                    log.debug("❌ 신한은행 API 에러 응답 (유저 조회): " + body);
+                                    log.debug("신한은행 API 에러 응답 (유저 조회): " + body);
 
                                     return Mono.error(new CustomException(ShinhanApiErrorCode.API_CALL_FAILED));
                                 })
