@@ -4,6 +4,8 @@ import com.ssafy.ssashinsa.heyfy.inquire.docs.CheckAccountDocs;
 import com.ssafy.ssashinsa.heyfy.inquire.docs.InquireDepositListDocs;
 import com.ssafy.ssashinsa.heyfy.inquire.dto.AccountCheckDto;
 import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireDepositResponseDto;
+import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireDepositResponseRecDto;
+import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireSingleDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.inquire.service.InquireService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,23 @@ public class InquireController {
     @PostMapping("/depositlist")
     public ResponseEntity<ShinhanInquireDepositResponseDto> inquireDepositList() {
 
-        ShinhanInquireDepositResponseDto response = inquireService.inquireDepositResponseDto();
+        ShinhanInquireDepositResponseDto response = inquireService.inquireDepositList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/singledeposit")
+    public ResponseEntity<ShinhanInquireDepositResponseRecDto> inquireSingleDeposit() {
+
+        ShinhanInquireSingleDepositResponseDto response = inquireService.inquireSingleDeposit();
+
+        return ResponseEntity.ok(response.getREC());
+    }
+
+    @PostMapping("/singledeposittest") // 백엔드 테스트용 엔드포인트
+    public ResponseEntity<ShinhanInquireSingleDepositResponseDto> inquireSingleDepositTest() {
+
+        ShinhanInquireSingleDepositResponseDto response = inquireService.inquireSingleDeposit();
 
         return ResponseEntity.ok(response);
     }
@@ -36,4 +54,6 @@ public class InquireController {
 
         return ResponseEntity.ok(response);
     }
+
+
 }
