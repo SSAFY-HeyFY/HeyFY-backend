@@ -2,14 +2,14 @@ package com.ssafy.ssashinsa.heyfy.account.domain;
 
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "account")
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA를 위한 기본 생성자
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Account {
 
     @Id

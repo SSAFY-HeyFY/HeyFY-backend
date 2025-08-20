@@ -3,13 +3,13 @@ package com.ssafy.ssashinsa.heyfy.user.domain;
 import com.github.f4b6a3.ulid.Ulid;
 import com.github.f4b6a3.ulid.UlidCreator;
 import com.ssafy.ssashinsa.heyfy.account.domain.Account;
+import com.ssafy.ssashinsa.heyfy.account.domain.ForeignAccount;
 import com.ssafy.ssashinsa.heyfy.user.ulid.UlidUserType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
-import com.ssafy.ssashinsa.heyfy.account.domain.Account;
 
 import java.util.UUID;
 
@@ -54,7 +54,11 @@ public class Users {
     private String univName;
 
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Account account;
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private ForeignAccount foreignAccount;
 
     @PrePersist
     public void generateIds() {
