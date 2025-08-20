@@ -57,20 +57,8 @@ public class RegisterService {
                     userKey
             );
 
-            ShinhanCommonRequestHeaderDto headerDto = ShinhanCommonRequestHeaderDto.builder()
-                    .apiName(commonHeaderDto.getApiName())
-                    .transmissionDate(commonHeaderDto.getTransmissionDate())
-                    .transmissionTime(commonHeaderDto.getTransmissionTime())
-                    .fintechAppNo(commonHeaderDto.getFintechAppNo())
-                    .institutionCode(commonHeaderDto.getInstitutionCode())
-                    .apiServiceCode(commonHeaderDto.getApiServiceCode())
-                    .institutionTransactionUniqueNo(commonHeaderDto.getInstitutionTransactionUniqueNo())
-                    .apiKey(commonHeaderDto.getApiKey())
-                    .userKey(commonHeaderDto.getUserKey())
-                    .build();
-
             ShinhanCreateDepositRequestDto requestDto = ShinhanCreateDepositRequestDto.builder()
-                    .Header(headerDto)
+                    .Header(commonHeaderDto)
                     .accountTypeUniqueNo(ACCOUNT_TYPE_UNIQUE_NO)
                     .build();
 
