@@ -6,7 +6,6 @@ import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.ShinhanCommonRequestHeaderDto;
 import com.ssafy.ssashinsa.heyfy.register.Exception.ShinhanRegisterApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositRequestDto;
-import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositRequestHeaderDto;
 import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
@@ -58,7 +57,7 @@ public class RegisterService {
                     userKey
             );
 
-            ShinhanCreateDepositRequestHeaderDto headerDto = ShinhanCreateDepositRequestHeaderDto.builder()
+            ShinhanCommonRequestHeaderDto headerDto = ShinhanCommonRequestHeaderDto.builder()
                     .apiName(commonHeaderDto.getApiName())
                     .transmissionDate(commonHeaderDto.getTransmissionDate())
                     .transmissionTime(commonHeaderDto.getTransmissionTime())
