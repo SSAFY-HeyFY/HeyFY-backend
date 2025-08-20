@@ -1,13 +1,13 @@
 package com.ssafy.ssashinsa.heyfy.authentication.service;
 
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
+import com.ssafy.ssashinsa.heyfy.authentication.jwt.CustomUserDetails;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
-import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
-import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,13 +23,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 현재 db에서 데이터 가져오도록 설정
-        Users user = userRepository.findByStudentId(username).orElseThrow(() -> new CustomException(AuthErrorCode.LOGIN_FAILED));
+        Users user = userRepository.findByStudentId(username)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.LOGIN_FAILED));
 
-        log.debug("유저 데이터 가져옴 : "+user.getExternalId()); // 기존 userId는 바이너리 데이터로 저장되어 있어 로그에 찍으면 깨져서 나옴
-        return new User(
-                user.getStudentId(),
+        return new CustomUserDetails(
+                user.getStudentId(), // username 필드에 학번 저장
                 user.getPassword(),
+                user.getEmail(), // email 필드에 이메일 저장
                 Collections.emptyList()
         );
     }
