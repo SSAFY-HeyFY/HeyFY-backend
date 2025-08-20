@@ -1,6 +1,10 @@
 package com.ssafy.ssashinsa.heyfy.register.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.ssashinsa.heyfy.account.domain.Account;
+import com.ssafy.ssashinsa.heyfy.account.domain.ForeignAccount;
+import com.ssafy.ssashinsa.heyfy.account.repository.AccountRepository;
+import com.ssafy.ssashinsa.heyfy.account.repository.ForeignAccountRepository;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
 import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositRequestDto;
@@ -25,15 +29,13 @@ import reactor.core.publisher.Mono;
 public class RegisterService {
 
     private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
+    private final ForeignAccountRepository foreignAccountRepository;
 
 
     private final ShinhanApiClient shinhanApiClient;
     private final ShinhanApiUtil shinhanApiUtil;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-
-
-
 
     public ShinhanCreateDepositResponseDto createDepositAccount() {
         try {
@@ -49,12 +51,19 @@ public class RegisterService {
                 throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
             }
 
+
+            if (accountRepository.findByUser(user).isPresent()) {
+                log.warn("이미 계좌가 존재하는 유저입니다. studentId: {}", studentId);
+                throw new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_ALREADY_EXISTS);
+            }
+
             ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
                     "createDemandDepositAccount",
                     "createDemandDepositAccount",
                     apiKey,
                     userKey
             );
+
 
             ShinhanCreateDepositRequestDto requestDto = ShinhanCreateDepositRequestDto.builder()
                     .Header(commonHeaderDto)
@@ -78,8 +87,21 @@ public class RegisterService {
                     .doOnNext(this::logResponse)
                     .block();
 
+            String accountNo = response.getREC().getAccountNo();
+
+
+            Account account = Account.builder()
+                    .user(user)
+                    .accountNo(accountNo)
+                    .build();
+            accountRepository.save(account);
+
+
             return response;
 
+        } catch (CustomException ce) {
+            log.error("커스텀 예외 발생: {}", ce.getMessage());
+            throw ce;
         } catch (Exception e) {
             log.error("계좌 개설 API 호출 실패 : {}", e.getMessage(), e);
             throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
@@ -113,6 +135,13 @@ public class RegisterService {
                     .currency("USD") // 예시로 USD를 사용, 필요에 따라 변경
                     .build();
 
+
+            if (foreignAccountRepository.findByUser(user).isPresent()) {
+                log.warn("이미 계좌가 존재하는 유저입니다. studentId: {}", studentId);
+
+                throw new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_ALREADY_EXISTS);
+            }
+
             logRequest(requestDto);
 
             ShinhanCreateDepositResponseDto response = shinhanApiClient.getClient("edu")
@@ -130,8 +159,22 @@ public class RegisterService {
                     .doOnNext(this::logResponse)
                     .block();
 
+            String accountNo = response.getREC().getAccountNo();
+            String currencyCode = response.getREC().getCurrency().getCurrency();
+
+
+            ForeignAccount foreignAccount = ForeignAccount.builder()
+                    .user(user)
+                    .accountNo(accountNo)
+                    .currency(currencyCode)
+                    .build();
+            foreignAccountRepository.save(foreignAccount);
+
             return response;
 
+        } catch (CustomException ce) {
+            log.error("커스텀 예외 발생: {}", ce.getMessage());
+            throw ce;
         } catch (Exception e) {
             log.error("계좌 개설 API 호출 실패 : {}", e.getMessage(), e);
             throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
