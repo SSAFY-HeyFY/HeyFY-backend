@@ -1,4 +1,5 @@
 import os
+import joblib
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -10,16 +11,17 @@ from tqdm import tqdm
 
 # -- 1. 모델 및 학습 파라미터 설정 --
 class Config:
-    data_path = 'data/train/train_final_with_onehot_20100104_20250812.xlsx' 
+    data_path = 'data/train/train_final_with_onehot_20150102_20250812_with_diff.csv' 
     
-    target_column = 'ECOS_Close'    
+    target_column = 'target'    
     feature_columns = [
-        'Inv_Close', 'Inv_Open', 'Inv_High', 'Inv_Low', 'Inv_Change(%)', 'DXY_Close', 'US10Y_Close',
-        'is_Mon', 'is_Tue', 'is_Wed', 'is_Thu', 'is_Fri'
+        'Inv_Close', 'Inv_Open', 'Inv_High', 'Inv_Low', 'Inv_Change(%)', 'ECOS_Close', 'DXY_Close', 'US10Y_Close',
+        'is_Mon', 'is_Tue', 'is_Wed', 'is_Thu', 'is_Fri', 'diff'
     ]
     
+    train_start_date = '2015-01-02'  # 학습 데이터 시작 날짜
     test_start_date = '2025-01-01' # 테스트 데이터 시작 날짜
-    sequence_length = 90
+    sequence_length = 120
 
     # 모델 하이퍼파라미터
     input_size = len(feature_columns)
@@ -31,8 +33,6 @@ class Config:
     num_epochs = 200
     learning_rate = 0.001
     batch_size = 16
-    
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 # -- 2. 데이터 전처리 및 시퀀스 생성 --
@@ -54,6 +54,9 @@ def load_and_preprocess_data(config):
 
     scaled_features = feature_scaler.fit_transform(features_df)
     scaled_target = target_scaler.fit_transform(target_series.values.reshape(-1, 1))
+    
+    joblib.dump(feature_scaler, os.path.join(model_folder_name(config), 'feature_scaler.pkl') )
+    joblib.dump(target_scaler, os.path.join(model_folder_name(config), 'target_scaler.pkl') )
     
     X, y, dates = [], [], []
     for i in range(len(scaled_features) - config.sequence_length):
@@ -94,22 +97,36 @@ class ExchangeRateDataset(Dataset):
         return self.X[idx], self.y[idx]
 
 
-# -- 4. LSTM 모델 구조 정의 --
+# -- 4. LSTM 모델 구조 정의 (출력층 개선) --
 class LSTMModel(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, output_size):
+    def __init__(self, input_size, hidden_size, num_layers, output_size, dropout_prob=0.2):
+        """
+        모델 초기화 함수
+        Args:
+            input_size (int): 입력 피처의 수
+            hidden_size (int): LSTM 은닉 상태의 크기
+            num_layers (int): LSTM 레이어의 수
+            output_size (int): 최종 출력값의 크기
+            dropout_prob (float): 드롭아웃 확률
+        """
         super(LSTMModel, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True, dropout=0.2)
-        self.fc = nn.Linear(hidden_size, output_size)
+        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True, dropout=dropout_prob)
+        self.fc = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size // 2),  # 첫 번째 선형 레이어 (차원 축소)
+            nn.ReLU(),                                 # 비선형성을 추가하는 활성화 함수
+            nn.Dropout(dropout_prob),                  # 과적합 방지를 위한 드롭아웃
+            nn.Linear(hidden_size // 2, output_size)   # 최종 출력을 위한 두 번째 선형 레이어
+        )
     
     def forward(self, x):
-        h0 = torch.zeros(self.num_layers, x.size(0), self.lstm.hidden_size).to(x.device)
-        c0 = torch.zeros(self.num_layers, x.size(0), self.lstm.hidden_size).to(x.device)
+        out, _ = self.lstm(x)
+        last_hidden_state = out[:, -1, :]
         
-        out, _ = self.lstm(x, (h0, c0))
-        out = self.fc(out[:, -1, :])
-        return out
+        final_output = self.fc(last_hidden_state)
+        
+        return final_output
 
 
 # -- 5. 모델 학습 함수 --
@@ -176,35 +193,37 @@ def save_model(model, config):
     """
     모델의 주요 하이퍼파라미터를 포함하는 폴더명에
     학습된 모델의 가중치(state_dict)를 저장합니다.
+    """ 
+    folder_path = model_folder_name(config)
+    model_path = os.path.join(folder_path, 'best_model.pth')
+
+    torch.save(model.state_dict(), model_path)
+    print(f"✅ 학습된 모델이 '{model_path}' 경로에 저장되었습니다.\n")
+
+def model_folder_name(config):
     """
-    
-    # 1. 하이퍼파라미터를 기반으로 폴더 이름을 생성합니다.
-    # 예: seq_20-hidden_128-layers_2-batch_16
+    모델의 주요 하이퍼파라미터를 기반으로 폴더 이름을 생성합니다.
+    예: seq_120-hidden_128-layers_2-batch_16-date_20250102
+    """
     folder_name = (
         f"seq_{config.sequence_length}"
         f"-hidden_{config.hidden_size}"
         f"-layers_{config.num_layers}"
         f"-batch_{config.batch_size}"
+        f"-date_{config.train_start_date.replace('-', '')}"
     )
-    
-    # 2. 최종 저장 경로를 'models/생성된_폴더명/' 으로 설정합니다.
-    folder_path = os.path.join('models', folder_name)
 
-    # 3. 해당 폴더가 없으면 생성합니다.
+    folder_path = os.path.join('models', folder_name)
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
         print(f"'{folder_path}' 폴더를 생성했습니다.")
-        
-    # 4. 모델 파일 경로를 지정합니다.
-    model_path = os.path.join(folder_path, 'best_model.pth')
 
-    # 5. 모델의 학습된 가중치를 저장합니다.
-    torch.save(model.state_dict(), model_path)
-    print(f"✅ 학습된 모델이 '{model_path}' 경로에 저장되었습니다.\n")
+    return folder_path
 
 # -- 7. 메인 실행 블록 --
 if __name__ == '__main__':
     config = Config()
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
     X_train, y_train, X_test, y_test, target_scaler, test_dates = load_and_preprocess_data(config)
 
@@ -213,14 +232,14 @@ if __name__ == '__main__':
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=config.batch_size, shuffle=False)
     
-    model = LSTMModel(config.input_size, config.hidden_size, config.num_layers, config.output_size).to(config.device)
+    model = LSTMModel(config.input_size, config.hidden_size, config.num_layers, config.output_size).to(device)
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
     
-    train_model(model, train_loader, criterion, optimizer, config.num_epochs, config.device)
+    train_model(model, train_loader, criterion, optimizer, config.num_epochs, device)
     save_model(model, config)
     
-    predictions, actuals = evaluate_model(model, test_loader, target_scaler, config.device)
+    predictions, actuals = evaluate_model(model, test_loader, target_scaler, device)
     
     plt.figure(figsize=(15, 8))
     plt.plot(test_dates, actuals, label='Actual (ECOS Rate)', color='blue', marker='.')
