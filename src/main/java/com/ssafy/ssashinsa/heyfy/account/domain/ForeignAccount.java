@@ -7,14 +7,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "account")
+@Table(name = "foreign_account")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA를 위한 기본 생성자
-public class Account {
+public class ForeignAccount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "account_id")
+    @Column(name = "foreign_account_id")
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
