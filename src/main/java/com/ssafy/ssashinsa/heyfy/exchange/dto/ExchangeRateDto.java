@@ -13,5 +13,5 @@ public class ExchangeRateDto {
 
     private String currency;
     private String date;
-    private String exchangeRate;
+    private double exchangeRate;
 }
