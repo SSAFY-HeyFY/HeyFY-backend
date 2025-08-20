@@ -34,16 +34,29 @@ public class ExchangeRateService {
     /**
      * 특정 통화의 최근 30일 환율 조회
      */
-    public List<ExchangeRate> getLast30DaysRates(String currencyCode) {
-        LocalDate endDate = LocalDate.now().minusDays(1); // 오늘은 외부 API로 처리하므로 제외
-        LocalDate startDate = endDate.minusDays(29);      // 총 30일치 (end 포함)
+    @Transactional
+    public ExchangeRateHistoriesDto getExchangeRateHistories(String currencyCode, int day) {
+
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(day);
+
 
         List<ExchangeRate> result =  exchangeRateRepository.findAllByCurrencyCodeAndBaseDateBetweenOrderByBaseDateAsc(
                 currencyCode, startDate, endDate
         );
-
-        return result;
+        List<ExchangeRateDto> rateDtos = result.stream()
+                .map(rate -> ExchangeRateDto.builder()
+                        .currency(rate.getCurrencyCode())
+                        .date(rate.getBaseDate().toString())
+                        .exchangeRate(rate.getRate().doubleValue())
+                        .build())
+                .toList();
+        return ExchangeRateHistoriesDto.builder()
+                .currency(currencyCode)
+                .rates(rateDtos)
+                .build();
     }
+
     /**
      * Calls the external API to retrieve the entire exchange rate.
      *
@@ -112,19 +125,19 @@ public class ExchangeRateService {
                 usdDto = ExchangeRateDto.builder()
                         .currency("USD")
                         .date(rec.getCreatedAt())
-                        .exchangeRate(rec.getExchangeRate())
+                        .exchangeRate(parseExchangeRate(rec.getExchangeRate()))
                         .build();
             } else if ("CNY".equalsIgnoreCase(rec.getCurrency())) {
                 cnyDto = ExchangeRateDto.builder()
                         .currency("CNY")
                         .date(rec.getCreatedAt())
-                        .exchangeRate(rec.getExchangeRate())
+                        .exchangeRate(parseExchangeRate(rec.getExchangeRate()))
                         .build();
             } else if ("VND".equalsIgnoreCase(rec.getCurrency())) {
                 vndDto = ExchangeRateDto.builder()
                         .currency("VND")
                         .date(rec.getCreatedAt())
-                        .exchangeRate(rec.getExchangeRate())
+                        .exchangeRate(parseExchangeRate(rec.getExchangeRate()))
                         .build();
             }
         }
@@ -135,12 +148,16 @@ public class ExchangeRateService {
                 .build();
 
         // 2. DB에서 30일간 USD 환율정보 조회
-        List<ExchangeRate> usdRates = getLast30DaysRates("USD");
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(29);
+        List<ExchangeRate> usdRates = exchangeRateRepository.findAllByCurrencyCodeAndBaseDateBetweenOrderByBaseDateAsc(
+                "USD", startDate, endDate
+        );
         List<ExchangeRateDto> usdRateDtos = usdRates.stream()
                 .map(rate -> ExchangeRateDto.builder()
                         .currency(rate.getCurrencyCode())
                         .date(rate.getBaseDate().toString())
-                        .exchangeRate(rate.getRate().toString())
+                        .exchangeRate(rate.getRate().doubleValue())
                         .build())
                 .toList();
         ExchangeRateHistoriesDto exchangeRateHistories = ExchangeRateHistoriesDto.builder()
@@ -172,5 +189,76 @@ public class ExchangeRateService {
                 .prediction(prediction)
                 .tuition(tuition)
                 .build();
+    }
+
+    /**
+     * 외부 API에서 USD, CNY, VND 환율을 추출하여 반환
+     */
+    @Transactional
+    public ExchangeRateGroupDto getCurrentExchangeRates() {
+        EntireExchangeRateResponseDto apiResponse = getExchangeRateFromExternalApi();
+        ExchangeRateDto usdDto = null;
+        ExchangeRateDto cnyDto = null;
+        ExchangeRateDto vndDto = null;
+        for (ExchangeRateResponseDto rec : apiResponse.getREC()) {
+            if ("USD".equalsIgnoreCase(rec.getCurrency())) {
+                usdDto = ExchangeRateDto.builder()
+                        .currency("USD")
+                        .date(rec.getCreatedAt())
+                        .exchangeRate(parseExchangeRate(rec.getExchangeRate()))
+                        .build();
+            } else if ("CNY".equalsIgnoreCase(rec.getCurrency())) {
+                cnyDto = ExchangeRateDto.builder()
+                        .currency("CNY")
+                        .date(rec.getCreatedAt())
+                        .exchangeRate(parseExchangeRate(rec.getExchangeRate()))
+                        .build();
+            } else if ("VND".equalsIgnoreCase(rec.getCurrency())) {
+                vndDto = ExchangeRateDto.builder()
+                        .currency("VND")
+                        .date(rec.getCreatedAt())
+                        .exchangeRate(parseExchangeRate(rec.getExchangeRate()))
+                        .build();
+            }
+        }
+        return ExchangeRateGroupDto.builder()
+                .usd(usdDto)
+                .cny(cnyDto)
+                .vnd(vndDto)
+                .build();
+    }
+
+    /**
+     * 환율 예측 정보 반환 (더미 데이터)
+     */
+    @Transactional
+    public PredictionDto getPrediction() {
+        return PredictionDto.builder()
+                .trend("bearish")
+                .description("The rate might decline over the next 3 days")
+                .changePercent(-1.24)
+                .periodDays(3)
+                .actionLabel("Exchange")
+                .build();
+    }
+
+    /**
+     * 학비 환율 추천 정보 반환 (더미 데이터)
+     */
+    @Transactional
+    public TuitionDto getTuition() {
+        return TuitionDto.builder()
+                .period(PeriodDto.builder()
+                        .start(java.time.LocalDate.of(2024, 3, 1))
+                        .end(java.time.LocalDate.of(2024, 3, 31))
+                        .build())
+                .recommendedDate(java.time.LocalDate.of(2024, 3, 15))
+                .recommendationNote("The exchange rate is expected to be highest on this day")
+                .build();
+    }
+
+    private double parseExchangeRate(String rateStr) {
+        if (rateStr == null) return 0.0;
+        return Double.parseDouble(rateStr.replace(",", ""));
     }
 }
