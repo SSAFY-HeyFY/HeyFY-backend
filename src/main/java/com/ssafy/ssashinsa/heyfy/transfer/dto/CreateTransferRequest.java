@@ -1,7 +1,12 @@
 package com.ssafy.ssashinsa.heyfy.transfer.dto;
 
-public record CreateTransferRequest(
-        String withdrawalAccountNo,
-        String depositAccountNo,
-        Long amount
-) {}
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+public class CreateTransferRequest {
+    private String depositAccountNo;
+    private Long amount;
+}
