@@ -1,5 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.account.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,6 +20,7 @@ public class Account {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private Users user;
 
     @Column(name = "account_no", nullable = false, unique = true)
