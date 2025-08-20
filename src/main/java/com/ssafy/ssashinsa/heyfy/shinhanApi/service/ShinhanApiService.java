@@ -1,23 +1,30 @@
 package com.ssafy.ssashinsa.heyfy.shinhanApi.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanErrorResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserRequestDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+
 @Service
 @RequiredArgsConstructor
 public class ShinhanApiService {
+    private static final Logger log = LoggerFactory.getLogger(ShinhanApiService.class);
+
     private final WebClient webClient;
 
-    @Value("${shinhan.manger-key}")
+    @Value("${shinhan.manager-key}")
     private String mangerKey;
 
     public ShinhanUserResponseDto signUp(String email) {
@@ -30,8 +37,18 @@ public class ShinhanApiService {
                     .bodyValue(requestDto)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, response ->
-                            response.bodyToMono(ShinhanErrorResponseDto.class)
-                                    .flatMap(errorDto -> {
+                            response.bodyToMono(String.class)
+                                    .flatMap(body -> {
+                                        log.debug("❌ 신한은행 API 에러 응답: " + body);
+
+                                        ObjectMapper mapper = new ObjectMapper();
+                                        ShinhanErrorResponseDto errorDto;
+                                        try {
+                                            errorDto = mapper.readValue(body, ShinhanErrorResponseDto.class);
+                                        } catch (IOException e) {
+                                            return Mono.error(new CustomException(ShinhanApiErrorCode.API_CALL_FAILED));
+                                        }
+
                                         if ("E4002".equals(errorDto.getResponseCode())) {
                                             return Mono.error(new CustomException(ShinhanApiErrorCode.API_USER_ALREADY_EXISTS));
                                         }
@@ -42,10 +59,8 @@ public class ShinhanApiService {
         } catch (CustomException e) {
 
             // =======================================================
-            // 신한은행 API 에러코드 E4002일 경우, 유저 조회 로직
-            // 주석 처리된 부분은 후에 보안 로직으로 지적받을 시 주석처리하거나 삭제
             if (e.getErrorCode() == ShinhanApiErrorCode.API_USER_ALREADY_EXISTS) {
-                System.out.println("이미 존재하는 유저. 유저 조회 API 요청");
+                log.debug("이미 존재하는 유저. 유저 조회 API 요청");
                 return searchUser(email);
             }
             // =======================================================
@@ -63,14 +78,14 @@ public class ShinhanApiService {
                 .bodyValue(requestDto)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, response ->
-                        response.bodyToMono(ShinhanErrorResponseDto.class)
-                                .flatMap(errorDto -> {
-                                    throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
+                        response.bodyToMono(String.class)
+                                .flatMap(body -> {
+                                    log.debug("❌ 신한은행 API 에러 응답 (유저 조회): " + body);
+
+                                    return Mono.error(new CustomException(ShinhanApiErrorCode.API_CALL_FAILED));
                                 })
                 )
                 .bodyToMono(ShinhanUserResponseDto.class)
                 .block();
     }
 }
-
-
