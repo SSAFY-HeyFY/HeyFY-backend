@@ -1,16 +1,15 @@
 package com.ssafy.ssashinsa.heyfy.common.exception;
 
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.Objects;
-
-import com.ssafy.ssashinsa.heyfy.common.exception.CommonErrorCode;
-import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 
 
 @RestControllerAdvice
@@ -32,6 +31,10 @@ public class GlobalExceptionHandler {
         return ErrorResponse.responseEntity(AuthErrorCode.LOGIN_FAILED);
     }
 
+    @ExceptionHandler(value = NoHandlerFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(NoHandlerFoundException e) {
+        return ErrorResponse.responseEntity(CommonErrorCode.RESOURCE_NOT_FOUND);
+    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception e) {
         return ErrorResponse.responseEntity(CommonErrorCode.INTERNAL_SERVER_ERROR);
