@@ -15,6 +15,9 @@ public class ShinhanApiClient {
     public String getManagerKey() {
         return apiProperties.getCommon().getManagerKey();
     }
+    public String getAccountTypeUniqueNo() {
+        return apiProperties.getCommon().getAccountTypeUniqueNo();
+    }
     public WebClient getClient(String domain) {
         ShinhanApiProperties.Domain domainConfig = apiProperties.getDomains().get(domain);
 

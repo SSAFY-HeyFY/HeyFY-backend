@@ -18,6 +18,7 @@ public class ShinhanApiProperties {
     @Getter @Setter
     public static class Common {
         private String managerKey;
+        private String accountTypeUniqueNo;
     }
 
     @Getter @Setter

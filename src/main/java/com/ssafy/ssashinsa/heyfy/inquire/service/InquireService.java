@@ -24,9 +24,6 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InquireService {
 
-    @Value("${shinhan.manager-key}")
-    private String managerKey;
-
     private final UserRepository userRepository;
 
 
@@ -46,7 +43,7 @@ public class InquireService {
 
     public ShinhanInquireDepositResponseDto inquireDepositResponseDto() {
         try {
-            String apiKey = managerKey;
+            String apiKey = shinhanApiClient.getManagerKey();
 
             String studentId = SecurityUtil.getCurrentStudentId();
             Users user = userRepository.findByStudentId(studentId)

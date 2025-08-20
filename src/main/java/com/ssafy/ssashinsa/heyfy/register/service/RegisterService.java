@@ -24,12 +24,6 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class RegisterService {
 
-    @Value("${shinhan.manager-key}")
-    private String managerKey;
-
-    @Value("${shinhan.account-type-unique-no}")
-    private String accountTypeUniqueNo;
-
     private final UserRepository userRepository;
 
 
@@ -39,7 +33,8 @@ public class RegisterService {
 
     public ShinhanCreateDepositResponseDto createDepositAccount() {
         try {
-            String apiKey = managerKey;
+            String apiKey = shinhanApiClient.getManagerKey();
+            String accountTypeUniqueNo = shinhanApiClient.getAccountTypeUniqueNo();
 
             String studentId = SecurityUtil.getCurrentStudentId();
             Users user = userRepository.findByStudentId(studentId)
