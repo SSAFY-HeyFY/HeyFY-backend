@@ -1,11 +1,10 @@
 package com.ssafy.ssashinsa.heyfy.authentication.controller;
 
-import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
-import com.ssafy.ssashinsa.heyfy.authentication.service.AuthService;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthRefreshDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignInDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignUpDocs;
-import com.ssafy.ssashinsa.heyfy.swagger.docs.ErrorsCommonDocs;
+import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
+import com.ssafy.ssashinsa.heyfy.authentication.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,6 @@ public class AuthController {
     @AuthSignInDocs
     @PostMapping("/signin")
     public ResponseEntity<SignInSuccessDto> signIn(@RequestBody SignInDto signInDto) {
-        System.out.println("로그인 요청");
         return ResponseEntity.ok(authService.signIn(signInDto));
     }
 

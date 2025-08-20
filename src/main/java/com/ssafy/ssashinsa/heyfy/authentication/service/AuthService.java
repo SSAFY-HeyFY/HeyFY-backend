@@ -1,5 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.authentication.service;
 
+import com.ssafy.ssashinsa.heyfy.authentication.controller.AuthController;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
@@ -11,6 +12,8 @@ import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.service.ShinhanApiService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -31,9 +34,11 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RedisUtil redisUtil;
     private final ShinhanApiService shinhanApiService;
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     public SignInSuccessDto signIn(SignInDto signInDto) {
         try {
+            log.debug("로그인 요청");
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(signInDto.getStudentId(), signInDto.getPassword());
 
@@ -70,7 +75,6 @@ public class AuthService {
             ShinhanUserResponseDto apiResponse = shinhanApiService.signUp(signUpDto.getEmail());
             userKey = apiResponse.getUserKey();
         } catch (CustomException e) {
-            System.out.println("신한은행 API 에러발생");
             throw e;
         }
 
