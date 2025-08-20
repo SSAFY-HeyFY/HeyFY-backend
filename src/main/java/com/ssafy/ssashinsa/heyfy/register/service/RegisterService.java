@@ -27,15 +27,15 @@ public class RegisterService {
     @Value("${shinhan.manager-key}")
     private String managerKey;
 
+    @Value("${shinhan.account-type-unique-no}")
+    private String accountTypeUniqueNo;
+
     private final UserRepository userRepository;
 
 
     private final ShinhanApiClient shinhanApiClient;
     private final ShinhanApiUtil shinhanApiUtil;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-
-    private static final String ACCOUNT_TYPE_UNIQUE_NO = "001-1-5ca485c2547242";
 
     public ShinhanCreateDepositResponseDto createDepositAccount() {
         try {
@@ -59,7 +59,7 @@ public class RegisterService {
 
             ShinhanCreateDepositRequestDto requestDto = ShinhanCreateDepositRequestDto.builder()
                     .Header(commonHeaderDto)
-                    .accountTypeUniqueNo(ACCOUNT_TYPE_UNIQUE_NO)
+                    .accountTypeUniqueNo(accountTypeUniqueNo)
                     .build();
 
             logRequest(requestDto);
