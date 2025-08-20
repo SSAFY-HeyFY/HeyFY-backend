@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     // 커스텀 예외
     @ExceptionHandler(value = CustomException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
-        return ErrorResponse.responseEntity(e.getErrorCode());
+        return ErrorResponse.responseEntity(e.getErrorCode(), e.getMessage());
     }
 
     @ExceptionHandler(value = AuthenticationException.class)
@@ -39,4 +39,5 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception e) {
         return ErrorResponse.responseEntity(CommonErrorCode.INTERNAL_SERVER_ERROR);
     }
+
 }
