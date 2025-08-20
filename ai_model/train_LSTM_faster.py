@@ -22,7 +22,7 @@ class Config:
         'is_Mon', 'is_Tue', 'is_Wed', 'is_Thu', 'is_Fri', 'diff'
     ]
     
-    train_start_date = '2015-01-02'
+    train_start_date = '2010-01-04'
     test_start_date = '2025-01-01'
     sequence_length = 120
 
