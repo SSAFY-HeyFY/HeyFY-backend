@@ -3,12 +3,12 @@ package com.ssafy.ssashinsa.heyfy.inquire.controller;
 import com.ssafy.ssashinsa.heyfy.inquire.docs.CheckAccountDocs;
 import com.ssafy.ssashinsa.heyfy.inquire.docs.InquireDepositListDocs;
 import com.ssafy.ssashinsa.heyfy.inquire.docs.InquireSingleDepositDocs;
-import com.ssafy.ssashinsa.heyfy.inquire.docs.InquireSingleDepositTestDocs;
 import com.ssafy.ssashinsa.heyfy.inquire.dto.AccountCheckDto;
 import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireDepositResponseRecDto;
 import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireSingleDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.inquire.service.InquireService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -45,11 +45,28 @@ public class InquireController {
         return ResponseEntity.ok(response.getREC());
     }
 
-    @InquireSingleDepositTestDocs
+    @GetMapping("/singleforeigndeposit")
+    public ResponseEntity<ShinhanInquireDepositResponseRecDto> inquireForeignSingleDeposit() {
+
+        ShinhanInquireSingleDepositResponseDto response = inquireService.inquireSingleDeposit();
+
+        return ResponseEntity.ok(response.getREC());
+    }
+
+    @Hidden
     @GetMapping("/singledeposittest") // 백엔드 테스트용 엔드포인트
     public ResponseEntity<ShinhanInquireSingleDepositResponseDto> inquireSingleDepositTest() {
 
         ShinhanInquireSingleDepositResponseDto response = inquireService.inquireSingleDeposit();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Hidden
+    @GetMapping("/singleforeigndeposittest") // 백엔드 테스트용 엔드포인트
+    public ResponseEntity<ShinhanInquireSingleDepositResponseDto> inquireForeignSingleDepositTest() {
+
+        ShinhanInquireSingleDepositResponseDto response = inquireService.inquireSingleForeignDeposit();
 
         return ResponseEntity.ok(response);
     }

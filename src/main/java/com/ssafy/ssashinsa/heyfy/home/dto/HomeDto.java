@@ -20,7 +20,7 @@ public class HomeDto {
     @AllArgsConstructor
     public static class AccountInfo {
         private String accountNo;
-        private long balance;
+        private String balance;
         private String currency; // 외화 계좌용
     }
 }

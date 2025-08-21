@@ -49,13 +49,13 @@ public class HomeService {
 
 
             String currency = inquireResponse.getREC().getCurrency();
-            long balance = Long.parseLong(inquireResponse.getREC().getAccountBalance());
+            double balance = inquireResponse.getREC().getAccountBalance();
 
 
             homeDtoBuilder.normalAccount(
                     HomeDto.AccountInfo.builder()
                             .accountNo(accountNo)
-                            .balance(balance)
+                            .balance(String.format("%.2f", balance))
                             .currency(currency)
                             .build()
             );
@@ -70,12 +70,12 @@ public class HomeService {
 
 
             String currency = inquireResponse.getREC().getCurrency();
-            long balance = Long.parseLong(inquireResponse.getREC().getAccountBalance());
+            double balance = inquireResponse.getREC().getAccountBalance();
 
             homeDtoBuilder.foreignAccount(
                     HomeDto.AccountInfo.builder()
                             .accountNo(accountNo)
-                            .balance(balance)
+                            .balance(String.format("%.2f", balance))
                             .currency(currency)
                             .build()
             );

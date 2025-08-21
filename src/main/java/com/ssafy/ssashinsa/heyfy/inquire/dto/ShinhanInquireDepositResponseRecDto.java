@@ -13,9 +13,9 @@ public class ShinhanInquireDepositResponseRecDto {
     private String accountTypeName;
     private String accountCreatedDate;
     private String accountExpiryDate;
-    private String dailyTransferLimit;
-    private String oneTimeTransferLimit;
-    private String accountBalance;
+    private double dailyTransferLimit;
+    private double oneTimeTransferLimit;
+    private double accountBalance;
     private String lastTransactionDate;
     private String currency;
 }

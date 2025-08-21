@@ -2,6 +2,7 @@ package com.ssafy.ssashinsa.heyfy.inquire.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.account.repository.AccountRepository;
+import com.ssafy.ssashinsa.heyfy.account.repository.ForeignAccountRepository;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
 import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireDepositRequestDto;
@@ -29,6 +30,7 @@ public class InquireService {
 
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+    private final ForeignAccountRepository foreignAccountRepository;
 
     private final ShinhanApiClient shinhanApiClient;
     private final ShinhanApiUtil shinhanApiUtil;
@@ -132,6 +134,60 @@ public class InquireService {
             ShinhanInquireSingleDepositResponseDto response = shinhanApiClient.getClient("edu")
                     .post()
                     .uri("/demandDeposit/inquireDemandDepositAccount")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanInquireApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(ShinhanInquireSingleDepositResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
+
+
+            return response;
+        } catch (Exception e) {
+            log.error("계좌 등록 API 호출 실패 : {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    public ShinhanInquireSingleDepositResponseDto inquireSingleForeignDeposit() {
+        try {
+            String apiKey = shinhanApiClient.getManagerKey();
+
+            String studentId = SecurityUtil.getCurrentStudentId();
+            Users user = userRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new CustomException(ShinhanInquireApiErrorCode.USER_NOT_FOUND));
+
+            String userKey = user.getUserKey();
+            if (userKey == null || userKey.isEmpty()) {
+                throw new CustomException(ShinhanInquireApiErrorCode.MISSING_USER_KEY);
+            }
+
+            ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
+                    "inquireForeignCurrencyDemandDepositAccount",
+                    "inquireForeignCurrencyDemandDepositAccount",
+                    apiKey,
+                    userKey
+            );
+
+            String accountNo = foreignAccountRepository.findByUser(user)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND))
+                    .getAccountNo();
+
+            ShinhanInquireSingleDepositRequestDto requestDto = ShinhanInquireSingleDepositRequestDto.builder()
+                    .Header(commonHeaderDto)
+                    .accountNo(accountNo)
+                    .build();
+
+            logRequest(requestDto);
+
+            ShinhanInquireSingleDepositResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/demandDeposit/foreignCurrency/inquireForeignCurrencyDemandDepositAccount")
                     .header("Content-Type", "application/json")
                     .bodyValue(requestDto)
                     .retrieve()
