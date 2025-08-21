@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.exchange.dto;
+package com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

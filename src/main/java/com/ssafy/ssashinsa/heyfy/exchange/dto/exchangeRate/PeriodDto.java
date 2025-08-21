@@ -1,21 +1,21 @@
-package com.ssafy.ssashinsa.heyfy.exchange.dto;
+package com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate;
+
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TuitionDto {
-    private PeriodDto period;
+public class PeriodDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
-    private LocalDate recommendedDate;
-    private String recommendationNote;
+    private LocalDate start;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
+    private LocalDate end;
 }
-

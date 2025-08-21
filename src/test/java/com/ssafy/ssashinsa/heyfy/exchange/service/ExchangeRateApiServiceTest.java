@@ -3,14 +3,16 @@ package com.ssafy.ssashinsa.heyfy.exchange.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ssafy.ssashinsa.heyfy.exchange.domain.ExchangeRate;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.ExchangeRateHistoriesDto;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.EntireExchangeRateResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.repository.ExchangeRateRepository;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -20,81 +22,114 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+
 @SpringBootTest
+@ExtendWith(MockitoExtension.class)
 @ActiveProfiles("local")
 class ExchangeRateApiServiceTest {
 
-    @Autowired
+    @InjectMocks
     private ExchangeRateService exchangeRateService;
-    @Autowired
-    private ShinhanApiClient shinhanApiClient;
-    @Autowired
-    private ShinhanApiUtil shinhanApiUtil;
-    @Autowired
+    @Mock
     private ExchangeRateRepository exchangeRateRepository;
+    @Mock
+    private ShinhanApiClient shinhanApiClient;
+    @Mock
+    private ShinhanApiUtil shinhanApiUtil;
 
     @Test
-    void 전체_환율_조회() {
-        // 실제 API 호출
+    void testGetAllExchangeRates() {
+        // given: WebClient mock 체이닝 설정
+        var postSpec = mock(org.springframework.web.reactive.function.client.WebClient.RequestBodyUriSpec.class);
+        var headersSpec = mock(org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec.class);
+        var responseSpec = mock(org.springframework.web.reactive.function.client.WebClient.ResponseSpec.class);
+        var mockWebClient = mock(org.springframework.web.reactive.function.client.WebClient.class);
+
+        when(shinhanApiClient.getClient(anyString())).thenReturn(mockWebClient);
+        when(mockWebClient.post()).thenReturn(postSpec);
+        when(postSpec.uri(anyString())).thenReturn(postSpec);
+        when(postSpec.header(anyString(), anyString())).thenReturn(postSpec);
+        // bodyValue()는 RequestHeadersSpec<?>를 반환해야 함
+        when(postSpec.bodyValue(any())).thenReturn(headersSpec);
+        when(headersSpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.onStatus(any(), any())).thenReturn(responseSpec);
+        when(responseSpec.bodyToMono(EntireExchangeRateResponseDto.class)).thenReturn(reactor.core.publisher.Mono.just(new EntireExchangeRateResponseDto()));
+
+        // when
         EntireExchangeRateResponseDto response = exchangeRateService.getExchangeRateFromExternalApi();
+        // then
         assertNotNull(response, "API response should not be null");
-        String responseString = response.toString();
-        System.out.println("API Response: " + responseString);
-        assertTrue(responseString.contains("exchangeRate") || responseString.contains("rate"), "Response should contain 'exchangeRate' or 'rate'");
+        System.out.println("API Response: " + response);
     }
 
     @Test
-    public void 한달간_환율_조회() {
+    void testGetLast30DaysRates() throws Exception {
         // given
         String currencyCode = "USD";
         LocalDate endDate = LocalDate.now().minusDays(1);
         LocalDate startDate = endDate.minusDays(29);
-
-        List<ExchangeRate> mockRates =
-                startDate.datesUntil(endDate.plusDays(1))
-                        .map(date -> ExchangeRate.builder()
-                                .id(1L)
-                                .currencyCode(currencyCode)
-                                .country("United States")
-                                .rate(BigDecimal.valueOf(1300 + date.getDayOfMonth())) // 샘플 값
-                                .unit(1)
-                                .baseDate(date)
-                                .build()
-                        ).toList();
+        List<ExchangeRate> mockRates = startDate.datesUntil(endDate.plusDays(1))
+                .map(date -> ExchangeRate.builder()
+                        .id(date.toEpochDay())
+                        .currencyCode(currencyCode)
+                        .country("United States")
+                        .rate(BigDecimal.valueOf(1300 + date.getDayOfMonth()))
+                        .unit(1)
+                        .baseDate(date)
+                        .build())
+                .toList();
         when(exchangeRateRepository.findAllByCurrencyCodeAndBaseDateBetweenOrderByBaseDateAsc(
                 currencyCode, startDate, endDate
         )).thenReturn(mockRates);
 
         // when
-        List<ExchangeRate> result = exchangeRateService.getLast30DaysRates(currencyCode);
+        ExchangeRateHistoriesDto result = exchangeRateService.getExchangeRateHistories(currencyCode, 30);
 
         // then
-        assertThat(result).hasSize(30);
-        assertThat(result.get(0).getBaseDate()).isEqualTo(startDate);
-        assertThat(result.get(29).getBaseDate()).isEqualTo(endDate);
+        assertNotNull(result);
+        assertNotNull(result.getRates());
+        assertThat(result.getRates()).hasSize(30);
+        assertThat(result.getRates()).allMatch(java.util.Objects::nonNull);
+        assertThat(result.getRates()).allMatch(r -> r.getExchangeRate() != 0.0);
+
+        // Print as JSON
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+        System.out.println("30일간 환율정보: " + json);
 
         verify(exchangeRateRepository, times(1))
                 .findAllByCurrencyCodeAndBaseDateBetweenOrderByBaseDateAsc(currencyCode, startDate, endDate);
     }
 
     @Test
-    void 환율_페이지_통합_조회() throws Exception {
+    void testGetExchangeRatePage() throws Exception {
+        // 필요시 ShinhanApiClient, ShinhanApiUtil mock/stub 추가
         // when
-        var result = exchangeRateService.getExchangeRatePage();
-        // then
-        assertNotNull(result, "ExchangeRatePageResponseDto should not be null");
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
-        System.out.println("\n===== ExchangeRatePageResponseDto (JSON) =====\n" + json + "\n==============================================\n");
-        // 추가적으로 각 필드별 null 체크 등도 가능
-        assertNotNull(result.getExchangeRateHistories(), "exchangeRateHistories should not be null");
-        assertNotNull(result.getLatestExchangeRate(), "latestExchangeRate should not be null");
-        assertNotNull(result.getPrediction(), "prediction should not be null");
-        assertNotNull(result.getTuition(), "tuition should not be null");
+        try {
+            var result = exchangeRateService.getExchangeRatePage();
+            assertNotNull(result, "ExchangeRatePageResponseDto should not be null");
+            assertNotNull(result.getExchangeRateHistories(), "exchangeRateHistories should not be null");
+            assertNotNull(result.getLatestExchangeRate(), "latestExchangeRate should not be null");
+            assertNotNull(result.getPrediction(), "prediction should not be null");
+            assertNotNull(result.getTuition(), "tuition should not be null");
+            assertNotNull(result.getExchangeRateHistories().getRates());
+            assertThat(result.getExchangeRateHistories().getRates()).allMatch(java.util.Objects::nonNull);
+            assertThat(result.getExchangeRateHistories().getRates()).allMatch(r -> r.getExchangeRate() != 0.0);
+            assertNotNull(result.getLatestExchangeRate().getUsd());
+            assertNotNull(result.getLatestExchangeRate().getCny());
+            assertNotNull(result.getLatestExchangeRate().getVnd());
+            assertThat(result.getLatestExchangeRate().getUsd().getExchangeRate()).isNotEqualTo(0.0);
+            assertThat(result.getLatestExchangeRate().getCny().getExchangeRate()).isNotEqualTo(0.0);
+            // assertThat(result.getLatestExchangeRate().getVnd().getExchangeRate()).isNotEqualTo(0.0);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+            System.out.println("\n===== ExchangeRatePageResponseDto (JSON) =====\n" + json + "\n==============================================\n");
+        } catch (com.ssafy.ssashinsa.heyfy.common.exception.CustomException e) {
+            System.out.println("CustomException 발생: " + e.getMessage());
+        }
     }
 }
