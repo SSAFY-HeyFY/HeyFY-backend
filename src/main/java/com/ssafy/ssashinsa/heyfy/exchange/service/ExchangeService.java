@@ -62,6 +62,7 @@ public class ExchangeService {
                 .accountNo(foreignAccount.getAccountNo())
                 .accountBalance(Integer.parseInt(response.getREC().getAccountBalance()))
                 .currency(response.getREC().getCurrency())
+                .isForeign(true)
                 .build();
     }
 
