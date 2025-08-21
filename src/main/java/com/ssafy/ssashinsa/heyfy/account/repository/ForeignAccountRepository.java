@@ -11,5 +11,7 @@ public interface ForeignAccountRepository extends JpaRepository<ForeignAccount, 
 
     Optional<ForeignAccount> findByUser(Users user);
 
+    Optional<ForeignAccount> findByUserAndAccountNo(Users user, String accountNo);
+
 }
 

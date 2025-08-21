@@ -8,9 +8,7 @@ import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -44,10 +42,10 @@ public class AccountController {
     }
 
     @GetTransactionHistoryDocs
-    @GetMapping("/transactionhistory")
-    public ResponseEntity<InquireTransactionHistoryResponseRecDto> getTransactionHistoryTest() {
+    @PostMapping("/transactionhistory")
+    public ResponseEntity<InquireTransactionHistoryResponseRecDto> getTransactionHistoryTest(@RequestBody AccountNoDto accountNo) {
 
-        InquireTransactionHistoryResponseDto transactionHistoryDto = accountService.getTransactionHistory();
+        InquireTransactionHistoryResponseDto transactionHistoryDto = accountService.getTransactionHistory(accountNo.getAccountNo());
 
         InquireTransactionHistoryResponseRecDto rec = transactionHistoryDto.getREC();
 

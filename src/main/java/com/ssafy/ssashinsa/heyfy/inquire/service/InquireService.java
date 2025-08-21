@@ -1,6 +1,8 @@
 package com.ssafy.ssashinsa.heyfy.inquire.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.ssashinsa.heyfy.account.domain.Account;
+import com.ssafy.ssashinsa.heyfy.account.domain.ForeignAccount;
 import com.ssafy.ssashinsa.heyfy.account.repository.AccountRepository;
 import com.ssafy.ssashinsa.heyfy.account.repository.ForeignAccountRepository;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
@@ -124,6 +126,9 @@ public class InquireService {
                     userKey
             );
 
+            Account account = accountRepository.findByUserAndAccountNo(user, accountNo)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND));
+
             ShinhanInquireSingleDepositRequestDto requestDto = ShinhanInquireSingleDepositRequestDto.builder()
                     .Header(commonHeaderDto)
                     .accountNo(accountNo)
@@ -227,6 +232,9 @@ public class InquireService {
                     apiKey,
                     userKey
             );
+
+            ForeignAccount account = foreignAccountRepository.findByUserAndAccountNo(user, accountNo)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND));
 
             ShinhanInquireSingleDepositRequestDto requestDto = ShinhanInquireSingleDepositRequestDto.builder()
                     .Header(commonHeaderDto)

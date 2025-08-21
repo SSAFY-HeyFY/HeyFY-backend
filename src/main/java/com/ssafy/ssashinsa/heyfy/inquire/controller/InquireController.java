@@ -1,8 +1,10 @@
 package com.ssafy.ssashinsa.heyfy.inquire.controller;
 
+import com.ssafy.ssashinsa.heyfy.account.dto.AccountNoDto;
 import com.ssafy.ssashinsa.heyfy.inquire.docs.CheckAccountDocs;
 import com.ssafy.ssashinsa.heyfy.inquire.docs.InquireDepositListDocs;
 import com.ssafy.ssashinsa.heyfy.inquire.docs.InquireSingleDepositDocs;
+import com.ssafy.ssashinsa.heyfy.inquire.docs.InquireSingleForeignDepositDocs;
 import com.ssafy.ssashinsa.heyfy.inquire.dto.AccountCheckDto;
 import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireDepositResponseRecDto;
@@ -12,9 +14,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -37,19 +37,16 @@ public class InquireController {
     }
 
     @InquireSingleDepositDocs
-    @GetMapping("/singledeposit")
-    public ResponseEntity<ShinhanInquireDepositResponseRecDto> inquireSingleDeposit() {
-
-        ShinhanInquireSingleDepositResponseDto response = inquireService.inquireSingleDeposit();
-
+    @PostMapping("/singledeposit") // POST로 변경
+    public ResponseEntity<ShinhanInquireDepositResponseRecDto> inquireSingleDeposit(@RequestBody AccountNoDto accountNo) {
+        ShinhanInquireSingleDepositResponseDto response = inquireService.inquireSingleDeposit(accountNo.getAccountNo());
         return ResponseEntity.ok(response.getREC());
     }
 
-    @GetMapping("/singleforeigndeposit")
-    public ResponseEntity<ShinhanInquireDepositResponseRecDto> inquireForeignSingleDeposit() {
-
-        ShinhanInquireSingleDepositResponseDto response = inquireService.inquireSingleDeposit();
-
+    @InquireSingleForeignDepositDocs
+    @PostMapping("/singleforeigndeposit") // POST로 변경
+    public ResponseEntity<ShinhanInquireDepositResponseRecDto> inquireForeignSingleDeposit(@RequestBody AccountNoDto accountNo) {
+        ShinhanInquireSingleDepositResponseDto response = inquireService.inquireSingleForeignDeposit(accountNo.getAccountNo());
         return ResponseEntity.ok(response.getREC());
     }
 

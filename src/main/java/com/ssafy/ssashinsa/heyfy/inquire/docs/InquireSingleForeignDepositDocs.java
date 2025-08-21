@@ -18,16 +18,16 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-        summary = "예금주 계좌 상세 조회",
-        description = "단일 계좌 정보를 조회합니다.",
+        summary = "예금주 단일 외화 계좌 상세 조회",
+        description = "단일 외화 계좌 정보를 조회합니다.",
         requestBody = @RequestBody(
-                description = "조회할 계좌번호",
+                description = "조회할 외화 계좌번호",
                 required = true,
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = AccountNoDto.class),
                         examples = @ExampleObject(
-                                name = "계좌번호 요청 예시",
+                                name = "외화 계좌번호 요청 예시",
                                 value = "{\n  \"accountNo\": \"001********76480\"\n}"
                         )
                 )
@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
 @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
-                description = "성공적으로 계좌 정보를 조회했습니다.",
+                description = "성공적으로 외화 계좌 정보를 조회했습니다.",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = ShinhanInquireDepositResponseRecDto.class)
@@ -76,5 +76,5 @@ import java.lang.annotation.Target;
                 )
         )
 })
-public @interface InquireSingleDepositDocs {
+public @interface InquireSingleForeignDepositDocs {
 }
