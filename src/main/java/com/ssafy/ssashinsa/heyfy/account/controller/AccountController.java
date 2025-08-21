@@ -5,6 +5,7 @@ import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountsDocs;
 import com.ssafy.ssashinsa.heyfy.account.docs.GetTransactionHistoryDocs;
 import com.ssafy.ssashinsa.heyfy.account.dto.*;
 import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "계좌/거래내역 관리", description = "계좌/거래내역 관리 API")
 public class AccountController {
 
     private final AccountService accountService;
