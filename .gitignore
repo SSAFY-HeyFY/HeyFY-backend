@@ -238,8 +238,7 @@ gradle-app.setting
 
 ### Python ###
 # AI Model
-ai_model/__pycache__/
-ai_model/utils/__pycache__/
+__pycache__/
 ai_model/env/
 ai_model/data/
 ai_model/models/
