@@ -24,7 +24,7 @@ app.include_router(
 # (B) 그래프용 데이터 API 라우터 포함
 app.include_router(
     rate_graph.router,
-    prefix="/api/v1",
+    prefix="/api/v1", # 이 라우터의 모든 API도 /api/v1/ 로 시작됩니다. (예: /api/v1/rate-graph)
     tags=["환율 그래프 (Rate Graph with AI Prediction)"]
 )
 
@@ -40,4 +40,4 @@ def read_root():
 
 # --- 4. 서버 실행 방법 ---
 # 프로젝트 최상위 폴더의 터미널에서 아래 명령어로 서버를 실행합니다.
-# uvicorn app.main:app --reload
+# uvicorn app.main:app --reload --port 8000
