@@ -13,7 +13,7 @@ public class ShinhanExchangeRequestDto {
     private ShinhanCommonRequestHeaderDto Header;
     private String accountNo;
     @Schema(description = "환전할 통화 코드, 예: USD, EUR 등")
-    private String exchangeCurrent;
+    private String exchangeCurrency;
     @Schema(description = "환전할 금액(환전할 통화 기준)")
-    private double exchangeAmount;
+    private Long exchangeAmount;
 }
