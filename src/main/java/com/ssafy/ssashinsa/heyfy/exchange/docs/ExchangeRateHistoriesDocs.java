@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.exchange.docs;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.ExchangeRateHistoriesDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.ExchangeRateHistoriesDto;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
