@@ -348,7 +348,7 @@ if __name__ == '__main__':
         dropout_prob=args.dropout_prob
     ).to(device)
     criterion = nn.MSELoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
     
     # [변경] train_model 호출 방식 수정
     model = train_model(args, model, train_loader, val_loader, criterion, optimizer, device)
