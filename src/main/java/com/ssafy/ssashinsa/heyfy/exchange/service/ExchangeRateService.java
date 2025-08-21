@@ -2,7 +2,7 @@ package com.ssafy.ssashinsa.heyfy.exchange.service;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.exchange.domain.ExchangeRate;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.*;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.*;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.EntireExchangeRateResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ExchangeRateRequestDto;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ExchangeRateResponseDto;

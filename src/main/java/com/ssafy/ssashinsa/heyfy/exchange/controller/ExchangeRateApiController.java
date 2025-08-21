@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.exchange.controller;
 
 import com.ssafy.ssashinsa.heyfy.exchange.docs.*;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.*;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.*;
 import com.ssafy.ssashinsa.heyfy.exchange.service.ExchangeRateService;
 import com.ssafy.ssashinsa.heyfy.swagger.docs.ErrorsCommonDocs;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @ErrorsCommonDocs
-@Tag(name = "환전 페이지 api")
+@Tag(name = "환율 페이지 api")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/exchange-rate")

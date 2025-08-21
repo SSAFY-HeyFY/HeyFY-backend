@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.exchange.dto;
+package com.ssafy.ssashinsa.heyfy.exchange.dto.exchange;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExchangeRateDto {
-
+public class AccountBalanceResponseDto {
+    private String  accountNo;
+    private int accountBalance;
     private String currency;
-    private String date;
-    private double exchangeRate;
+    private boolean isForeign;
 }
