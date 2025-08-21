@@ -1,6 +1,8 @@
 package com.ssafy.ssashinsa.heyfy.register.controller;
 
 import com.ssafy.ssashinsa.heyfy.register.docs.CreateDepositAccountDocs;
+import com.ssafy.ssashinsa.heyfy.register.docs.CreateForeignDepositAccountDocs;
+import com.ssafy.ssashinsa.heyfy.register.dto.AccountCreationResponseDto;
 import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.register.service.RegisterService;
 import lombok.RequiredArgsConstructor;
@@ -19,18 +21,31 @@ public class RegisterController {
 
     @CreateDepositAccountDocs
     @PostMapping("/createdeposit")
-    public ResponseEntity<ShinhanCreateDepositResponseDto> createDepositAccount() {
+    public ResponseEntity<AccountCreationResponseDto> createDepositAccount() {
 
-        ShinhanCreateDepositResponseDto responseDto = registerService.createDepositAccount();
+        ShinhanCreateDepositResponseDto response = registerService.createDepositAccount();
 
-        return ResponseEntity.ok(responseDto);
+        String message = response.getHeader().getResponseMessage();
+        String accountNo = response.getREC().getAccountNo();
+        String currency = response.getREC().getCurrency().getCurrency();
+
+        AccountCreationResponseDto simplifiedResponse = new AccountCreationResponseDto(message, accountNo, currency);
+
+        return ResponseEntity.ok(simplifiedResponse);
     }
 
+    @CreateForeignDepositAccountDocs
     @PostMapping("/createforeigndeposit")
-    public ResponseEntity<ShinhanCreateDepositResponseDto> createDepositForeignAccount() {
+    public ResponseEntity<AccountCreationResponseDto> createDepositForeignAccount() {
 
-        ShinhanCreateDepositResponseDto responseDto = registerService.createForeignDepositAccount();
+        ShinhanCreateDepositResponseDto response = registerService.createForeignDepositAccount();
 
-        return ResponseEntity.ok(responseDto);
+        String message = response.getHeader().getResponseMessage();
+        String accountNo = response.getREC().getAccountNo();
+        String currency = response.getREC().getCurrency().getCurrency();
+
+        AccountCreationResponseDto simplifiedResponse = new AccountCreationResponseDto(message, accountNo, currency);
+
+        return ResponseEntity.ok(simplifiedResponse);
     }
 }

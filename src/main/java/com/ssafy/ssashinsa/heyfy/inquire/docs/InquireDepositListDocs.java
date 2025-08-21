@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.inquire.docs;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
-import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireDepositResponseDto;
+import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireDepositResponseRecDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -21,10 +21,10 @@ import java.lang.annotation.Target;
 @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
-                description = "성공적으로 계좌 목록을 조회했습니다. (계좌가 없으면 REC 배열이 비어있음)",
+                description = "성공적으로 계좌 목록을 조회했습니다. (계좌가 없으면 배열이 비어있음)",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = ShinhanInquireDepositResponseDto.class)
+                        schema = @Schema(implementation = ShinhanInquireDepositResponseRecDto.class, type = "array")
                 )
         ),
         @ApiResponse(
