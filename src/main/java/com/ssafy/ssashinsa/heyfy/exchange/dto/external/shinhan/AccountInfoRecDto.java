@@ -7,6 +7,6 @@ import lombok.Data;
 @Builder
 public class AccountInfoRecDto {
     private String accountNo;
-    private double amount;
-    private double balance;
+    private String amount;
+    private String balance;
 }
