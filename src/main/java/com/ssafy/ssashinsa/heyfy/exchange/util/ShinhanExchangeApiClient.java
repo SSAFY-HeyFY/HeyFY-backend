@@ -97,7 +97,7 @@ public class ShinhanExchangeApiClient {
         logRequest(requestDto);
         ShinhanInquireDemandDepositAccountBalanceResponseDto response = apiClient.getClient("edu")
                 .post()
-                .uri("/demandDeposit/inquireForeignCurrencyDemandDepositAccountBalance")
+                .uri("/demandDeposit/foreignCurrency/inquireForeignCurrencyDemandDepositAccountBalance")
                 .header("Content-Type", "application/json")
                 .bodyValue(requestDto)
                 .retrieve()
