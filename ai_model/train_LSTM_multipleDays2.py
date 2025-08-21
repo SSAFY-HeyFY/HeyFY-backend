@@ -1,7 +1,7 @@
 import os
 import joblib
 import json
-import argparse # [추가] argparse 라이브러리
+import argparse
 import matplotlib.pyplot as plt
 import random
 import pandas as pd
@@ -28,19 +28,16 @@ def get_args():
     """
     parser = argparse.ArgumentParser(description='Time Series Forecasting Model Training')
 
-    # 피처 및 데이터 관련 인자
     parser.add_argument('--tag', type=str, default='base', help='실험을 식별하기 위한 태그')
     parser.add_argument('--use_all_features', action='store_true', help='True로 설정 시 모든 피처(요일, diff 포함)를 사용합니다.')
     parser.add_argument('--scaler', type=str, default='minmax', choices=['minmax', 'standard'], help='사용할 스케일러 선택')
 
-    # 모델 하이퍼파라미터
     parser.add_argument('--sequence_length', type=int, default=120, help='입력 시퀀스 길이')
     parser.add_argument('--prediction_horizon', type=int, default=5, help='예측할 기간(일)')
     parser.add_argument('--hidden_size', type=int, default=128, help='LSTM 은닉층의 크기')
     parser.add_argument('--num_layers', type=int, default=2, help='LSTM 레이어의 수')
     parser.add_argument('--dropout_prob', type=float, default=0.2, help='드롭아웃 확률')
 
-    # 학습 관련 하이퍼파라미터
     parser.add_argument('--num_epochs', type=int, default=200, help='학습 에포크 수')
     parser.add_argument('--learning_rate', type=float, default=0.001, help='학습률')
     parser.add_argument('--batch_size', type=int, default=16, help='배치 크기')
@@ -63,7 +60,6 @@ def load_and_preprocess_data(args):
     features_df = df[args.feature_columns]
     target_series = df[args.target_column]
 
-    # [변경] args.scaler 값에 따라 스케일러 동적 선택
     if args.scaler == 'standard':
         feature_scaler = StandardScaler()
         target_scaler = StandardScaler()
@@ -186,7 +182,6 @@ def save_model(model, args):
     print(f"✅ 학습된 모델이 '{model_path}' 경로에 저장되었습니다.")
     
     config_path = os.path.join(folder_path, 'config.json')
-    # args 객체를 dict로 변환하여 저장
     with open(config_path, 'w', encoding='utf-8') as f:
         json.dump(vars(args), f, ensure_ascii=False, indent=4)
     print(f"✅ 모델 설정이 '{config_path}' 경로에 저장되었습니다.\n")
@@ -229,7 +224,6 @@ def plot_test_results(args, test_dates, predictions, actuals):
 if __name__ == '__main__':
     args = get_args()
     
-    # [변경] args에 따라 동적으로 피처 및 기타 설정 구성
     # 1. 피처 컬럼 설정
     simple_features = ['Inv_Close', 'ECOS_Close', 'DXY_Close', 'US10Y_Close']
     all_features = [
