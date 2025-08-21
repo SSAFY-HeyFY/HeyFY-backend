@@ -1,8 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.account.docs;
 
-
 import com.ssafy.ssashinsa.heyfy.account.dto.AccountNoDto;
-import com.ssafy.ssashinsa.heyfy.account.dto.TransactionHistoryResponseRecDto; // 수정된 응답 DTO 임포트
+import com.ssafy.ssashinsa.heyfy.account.dto.TransactionHistoryResponseRecDto;
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,17 +18,17 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-        summary = "계좌 거래 내역 조회",
-        description = "연결된 계좌의 거래 내역을 조회합니다.",
+        summary = "외화 계좌 거래 내역 조회",
+        description = "연결된 외화 계좌의 거래 내역을 조회합니다.",
         requestBody = @RequestBody(
-                description = "거래 내역을 조회할 계좌번호",
+                description = "거래 내역을 조회할 외화 계좌번호",
                 required = true,
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = AccountNoDto.class),
                         examples = @ExampleObject(
-                                name = "계좌번호 요청 예시",
-                                value = "{\n  \"accountNo\": \"0014555423195469\"\n}"
+                                name = "외화 계좌번호 요청 예시",
+                                value = "{\n  \"accountNo\": \"0010475174188665\"\n}"
                         )
                 )
         )
@@ -37,15 +36,13 @@ import java.lang.annotation.Target;
 @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
-                description = "성공적으로 거래 내역을 조회했습니다.",
+                description = "성공적으로 외화 거래 내역을 조회했습니다.",
                 content = @Content(
                         mediaType = "application/json",
-                        // 스키마를 실제 반환되는 DTO로 변경
                         schema = @Schema(implementation = TransactionHistoryResponseRecDto.class),
-                        // 제공된 성공 예시 추가
                         examples = @ExampleObject(
-                                name = "거래 내역 조회 성공 예시",
-                                value = "{\n  \"totalCount\": \"1\",\n  \"list\": [\n    {\n      \"transactionUniqueNo\": \"101438\",\n      \"transactionDate\": \"20250821\",\n      \"transactionTime\": \"225202\",\n      \"transactionType\": \"1\",\n      \"transactionTypeName\": \"입금\",\n      \"transactionAccountNo\": \"\",\n      \"transactionBalance\": \"1\",\n      \"transactionAfterBalance\": \"1\",\n      \"transactionSummary\": \"SSAFY 7335\",\n      \"transactionMemo\": \"\"\n    }\n  ]\n}"
+                                name = "외화 거래 내역 조회 성공 예시",
+                                value = "{\n  \"totalCount\": \"1\",\n  \"list\": [\n    {\n      \"transactionUniqueNo\": \"101439\",\n      \"transactionDate\": \"20250821\",\n      \"transactionTime\": \"225301\",\n      \"transactionType\": \"1\",\n      \"transactionTypeName\": \"입금\",\n      \"transactionAccountNo\": \"\",\n      \"transactionBalance\": \"1.00\",\n      \"transactionAfterBalance\": \"1.00\",\n      \"transactionSummary\": \"SSAFY 7335\",\n      \"transactionMemo\": \"\"\n    }\n  ]\n}"
                         )
                 )
         ),
@@ -75,5 +72,5 @@ import java.lang.annotation.Target;
                 )
         )
 })
-public @interface GetTransactionHistoryDocs {
+public @interface GetForeignTransactionHistoryDocs {
 }

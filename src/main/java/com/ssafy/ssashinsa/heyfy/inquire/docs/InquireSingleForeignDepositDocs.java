@@ -1,9 +1,8 @@
-package com.ssafy.ssashinsa.heyfy.account.docs;
-
+package com.ssafy.ssashinsa.heyfy.inquire.docs;
 
 import com.ssafy.ssashinsa.heyfy.account.dto.AccountNoDto;
-import com.ssafy.ssashinsa.heyfy.account.dto.TransactionHistoryResponseRecDto; // 수정된 응답 DTO 임포트
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
+import com.ssafy.ssashinsa.heyfy.inquire.dto.ForeignSingleDepositResponseDto; // DTO import
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -19,17 +18,17 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-        summary = "계좌 거래 내역 조회",
-        description = "연결된 계좌의 거래 내역을 조회합니다.",
+        summary = "예금주 단일 외화 계좌 상세 조회",
+        description = "단일 외화 계좌 정보를 조회합니다.",
         requestBody = @RequestBody(
-                description = "거래 내역을 조회할 계좌번호",
+                description = "조회할 외화 계좌번호",
                 required = true,
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = AccountNoDto.class),
                         examples = @ExampleObject(
-                                name = "계좌번호 요청 예시",
-                                value = "{\n  \"accountNo\": \"0014555423195469\"\n}"
+                                name = "외화 계좌번호 요청 예시",
+                                value = "{\n  \"accountNo\": \"0010475174188665\"\n}"
                         )
                 )
         )
@@ -37,15 +36,13 @@ import java.lang.annotation.Target;
 @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
-                description = "성공적으로 거래 내역을 조회했습니다.",
+                description = "성공적으로 외화 계좌 정보를 조회했습니다.",
                 content = @Content(
                         mediaType = "application/json",
-                        // 스키마를 실제 반환되는 DTO로 변경
-                        schema = @Schema(implementation = TransactionHistoryResponseRecDto.class),
-                        // 제공된 성공 예시 추가
+                        schema = @Schema(implementation = ForeignSingleDepositResponseDto.class),
                         examples = @ExampleObject(
-                                name = "거래 내역 조회 성공 예시",
-                                value = "{\n  \"totalCount\": \"1\",\n  \"list\": [\n    {\n      \"transactionUniqueNo\": \"101438\",\n      \"transactionDate\": \"20250821\",\n      \"transactionTime\": \"225202\",\n      \"transactionType\": \"1\",\n      \"transactionTypeName\": \"입금\",\n      \"transactionAccountNo\": \"\",\n      \"transactionBalance\": \"1\",\n      \"transactionAfterBalance\": \"1\",\n      \"transactionSummary\": \"SSAFY 7335\",\n      \"transactionMemo\": \"\"\n    }\n  ]\n}"
+                                name = "성공 응답 예시",
+                                value = "{\n  \"bankName\": \"한국은행\",\n  \"userName\": \"test0820\",\n  \"accountNo\": \"0010475174188665\",\n  \"accountName\": \"한국은행 외화 수시입출금 상품\",\n  \"accountBalance\": \"0.00\",\n  \"currency\": \"USD\"\n}"
                         )
                 )
         ),
@@ -64,16 +61,24 @@ import java.lang.annotation.Target;
         ),
         @ApiResponse(
                 responseCode = "500",
-                description = "서버 내부 오류 또는 API 호출 실패",
+                description = "서버 내부 오류",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = ErrorResponse.class),
-                        examples = @ExampleObject(
-                                name = "API 호출 실패",
-                                value = "{\n  \"status\": 500,\n  \"httpError\": \"INTERNAL_SERVER_ERROR\",\n  \"errorCode\": \"API_CALL_FAILED\",\n  \"message\": \"신한 API 호출에 실패했습니다.\"\n}"
-                        )
+                        examples = {
+                                @ExampleObject(
+                                        name = "유저를 찾을 수 없음",
+                                        summary = "JWT 토큰의 사용자 정보를 찾을 수 없는 경우",
+                                        value = "{\"status\": 500, \"httpError\": \"INTERNAL_SERVER_ERROR\", \"errorCode\": \"USER_NOT_FOUND\", \"message\": \"유저를 찾을 수 없습니다.\"}"
+                                ),
+                                @ExampleObject(
+                                        name = "외부 API 호출 실패",
+                                        summary = "신한은행 API 응답 오류 또는 서버 내부 오류",
+                                        value = "{\"status\": 500, \"httpError\": \"INTERNAL_SERVER_ERROR\", \"errorCode\": \"API_CALL_FAILED\", \"message\": \"신한API 호출 에러\"}"
+                                )
+                        }
                 )
         )
 })
-public @interface GetTransactionHistoryDocs {
+public @interface InquireSingleForeignDepositDocs {
 }

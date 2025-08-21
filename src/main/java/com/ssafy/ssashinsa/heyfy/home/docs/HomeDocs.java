@@ -27,15 +27,19 @@ import java.lang.annotation.Target;
                                 name = "성공 응답 예시",
                                 value = """
                                         {
-                                          "studentId": "2024123456",
+                                          "studentId": "1234567",
                                           "normalAccount": {
-                                            "accountNo": "0016956302770649",
-                                            "balance": 5000000,
+                                            "accountNo": "0014555423195469",
+                                            "accountName": "한국은행 수시입출금 상품",
+                                            "bankName": "한국은행",
+                                            "balance": "1",
                                             "currency": "KRW"
                                           },
                                           "foreignAccount": {
-                                            "accountNo": "0019290964871122",
-                                            "balance": 1000,
+                                            "accountNo": "0010475174188665",
+                                            "accountName": "한국은행 외화 수시입출금 상품",
+                                            "bankName": "한국은행",
+                                            "balance": "0.00",
                                             "currency": "USD"
                                           }
                                         }

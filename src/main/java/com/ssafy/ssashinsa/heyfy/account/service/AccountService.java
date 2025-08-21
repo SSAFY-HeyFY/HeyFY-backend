@@ -1,6 +1,8 @@
 package com.ssafy.ssashinsa.heyfy.account.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.ssashinsa.heyfy.account.domain.Account;
+import com.ssafy.ssashinsa.heyfy.account.domain.ForeignAccount;
 import com.ssafy.ssashinsa.heyfy.account.dto.*;
 import com.ssafy.ssashinsa.heyfy.account.repository.AccountRepository;
 import com.ssafy.ssashinsa.heyfy.account.repository.ForeignAccountRepository;
@@ -98,7 +100,6 @@ public class AccountService {
             log.error("커스텀 예외 발생: {}", ce.getMessage());
             throw ce;
         } catch (Exception e) {
-            log.error("계좌 개설 API 호출 실패 : {}", e.getMessage(), e);
             throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
         }
     }
@@ -142,6 +143,128 @@ public class AccountService {
             InquireTransactionHistoryResponseDto response = shinhanApiClient.getClient("edu")
                     .post()
                     .uri("/demandDeposit/inquireTransactionHistoryList")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanRegisterApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(InquireTransactionHistoryResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
+
+            return response;
+
+        } catch (CustomException ce) {
+            log.error("커스텀 예외 발생: {}", ce.getMessage());
+            throw ce;
+        } catch (Exception e) {
+            log.error("계좌 개설 API 호출 실패 : {}", e.getMessage(), e);
+            throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
+        }
+    }
+
+    public InquireTransactionHistoryResponseDto getTransactionHistory(String accountNo) {
+        try {
+            String apiKey = shinhanApiClient.getManagerKey();
+
+            String studentId = SecurityUtil.getCurrentStudentId();
+            Users user = userRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
+
+            String userKey = user.getUserKey();
+            if (userKey == null || userKey.isEmpty()) {
+                throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
+            }
+
+            ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
+                    "inquireTransactionHistoryList",
+                    "inquireTransactionHistoryList",
+                    apiKey,
+                    userKey
+            );
+
+            Account account = accountRepository.findByUserAndAccountNo(user, accountNo)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND));
+
+            LocalDateTime now = LocalDateTime.now();
+            InquireTransactionHistoryRequestDto requestDto = InquireTransactionHistoryRequestDto.builder()
+                    .Header(commonHeaderDto)
+                    .accountNo(accountNo)
+                    .startDate("20230101")
+                    .endDate(now.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                    .transactionType("A")
+                    .orderByType("DESC")
+                    .build();
+
+            logRequest(requestDto);
+
+            InquireTransactionHistoryResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/demandDeposit/inquireTransactionHistoryList")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanRegisterApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(InquireTransactionHistoryResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
+
+            return response;
+
+        } catch (CustomException ce) {
+            log.error("커스텀 예외 발생: {}", ce.getMessage());
+            throw ce;
+        } catch (Exception e) {
+            log.error("계좌 개설 API 호출 실패 : {}", e.getMessage(), e);
+            throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
+        }
+    }
+
+    public InquireTransactionHistoryResponseDto getForeignTransactionHistory(String accountNo) {
+        try {
+            String apiKey = shinhanApiClient.getManagerKey();
+
+            String studentId = SecurityUtil.getCurrentStudentId();
+            Users user = userRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
+
+            String userKey = user.getUserKey();
+            if (userKey == null || userKey.isEmpty()) {
+                throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
+            }
+
+            ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
+                    "inquireForeignCurrencyTransactionHistoryList",
+                    "inquireForeignCurrencyTransactionHistoryList",
+                    apiKey,
+                    userKey
+            );
+
+            ForeignAccount account = foreignAccountRepository.findByUserAndAccountNo(user, accountNo)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND));
+
+            LocalDateTime now = LocalDateTime.now();
+            InquireTransactionHistoryRequestDto requestDto = InquireTransactionHistoryRequestDto.builder()
+                    .Header(commonHeaderDto)
+                    .accountNo(accountNo)
+                    .startDate("20230101")
+                    .endDate(now.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                    .transactionType("A")
+                    .orderByType("DESC")
+                    .build();
+
+            logRequest(requestDto);
+
+            InquireTransactionHistoryResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/demandDeposit/foreignCurrency/inquireForeignCurrencyTransactionHistoryList")
                     .header("Content-Type", "application/json")
                     .bodyValue(requestDto)
                     .retrieve()

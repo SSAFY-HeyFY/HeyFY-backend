@@ -3,6 +3,7 @@ package com.ssafy.ssashinsa.heyfy.authentication.service;
 import com.ssafy.ssashinsa.heyfy.authentication.controller.AuthController;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
+import com.ssafy.ssashinsa.heyfy.register.service.RegisterService;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
 import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
@@ -34,6 +35,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RedisUtil redisUtil;
     private final ShinhanApiService shinhanApiService;
+    private final RegisterService registerService;
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     public SignInSuccessDto signIn(SignInDto signInDto) {
@@ -51,6 +53,8 @@ public class AuthService {
 
             redisUtil.deleteRefreshToken(signInDto.getStudentId());
             redisUtil.setRefreshToken(signInDto.getStudentId(), refreshToken);
+
+            registerService.createAccountsForUser(signInDto.getStudentId());
 
             return new SignInSuccessDto(accessToken, refreshToken);
         } catch (BadCredentialsException  | InternalAuthenticationServiceException e) {

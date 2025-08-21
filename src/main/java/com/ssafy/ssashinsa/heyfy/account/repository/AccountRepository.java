@@ -12,6 +12,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findByUser(Users user);
 
+
+    Optional<Account> findByUserAndAccountNo(Users user, String accountNo);
+
+
     @Query("""
             SELECT a
             FROM Users u
@@ -19,4 +23,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             WHERE LOWER(u.email) = LOWER(:email)
             """)
     Optional<Account> findAccountByUserEmail(String email);
+
 }

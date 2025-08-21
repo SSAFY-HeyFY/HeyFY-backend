@@ -1,5 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.account.controller;
 
+import com.ssafy.ssashinsa.heyfy.account.docs.GetForeignTransactionHistoryDocs;
 import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountAuthDocs;
 import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountsDocs;
 import com.ssafy.ssashinsa.heyfy.account.docs.GetTransactionHistoryDocs;
@@ -8,11 +9,12 @@ import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,13 +46,63 @@ public class AccountController {
     }
 
     @GetTransactionHistoryDocs
-    @GetMapping("/transactionhistory")
-    public ResponseEntity<InquireTransactionHistoryResponseRecDto> getTransactionHistoryTest() {
+    @PostMapping("/transactionhistory")
+    public ResponseEntity<TransactionHistoryResponseRecDto> getTransactionHistoryTest(@RequestBody AccountNoDto accountNo) {
 
-        InquireTransactionHistoryResponseDto transactionHistoryDto = accountService.getTransactionHistory();
+        InquireTransactionHistoryResponseDto originalResponseDto = accountService.getTransactionHistory(accountNo.getAccountNo());
+        InquireTransactionHistoryResponseRecDto originalRec = originalResponseDto.getREC();
 
-        InquireTransactionHistoryResponseRecDto rec = transactionHistoryDto.getREC();
+        List<TransactionHistoryDto> newList = originalRec.getList().stream()
+                .map(originalItem -> TransactionHistoryDto.builder()
+                        .transactionUniqueNo(originalItem.getTransactionUniqueNo())
+                        .transactionDate(originalItem.getTransactionDate())
+                        .transactionTime(originalItem.getTransactionTime())
+                        .transactionType(originalItem.getTransactionType())
+                        .transactionTypeName(originalItem.getTransactionTypeName())
+                        .transactionAccountNo(originalItem.getTransactionAccountNo())
+                        .transactionBalance(String.valueOf((int) originalItem.getTransactionBalance()))
+                        .transactionAfterBalance(String.valueOf((int) originalItem.getTransactionAfterBalance()))
+                        .transactionSummary(originalItem.getTransactionSummary())
+                        .transactionMemo(originalItem.getTransactionMemo())
+                        .build())
+                .collect(Collectors.toList());
 
-        return ResponseEntity.ok(rec);
+        TransactionHistoryResponseRecDto finalResponse = TransactionHistoryResponseRecDto.builder()
+                .totalCount(originalRec.getTotalCount())
+                .list(newList)
+                .build();
+
+        return ResponseEntity.ok(finalResponse);
+    }
+
+    @GetForeignTransactionHistoryDocs
+    @PostMapping("/foreigntransactionhistory")
+    public ResponseEntity<TransactionHistoryResponseRecDto> getForeignTransactionHistoryTest(@RequestBody AccountNoDto accountNo) {
+
+        InquireTransactionHistoryResponseDto originalResponseDto = accountService.getForeignTransactionHistory(accountNo.getAccountNo());
+        InquireTransactionHistoryResponseRecDto originalRec = originalResponseDto.getREC();
+
+        DecimalFormat df = new DecimalFormat("0.00");
+        List<TransactionHistoryDto> newList = originalRec.getList().stream()
+                .map(originalItem -> TransactionHistoryDto.builder()
+                        .transactionUniqueNo(originalItem.getTransactionUniqueNo())
+                        .transactionDate(originalItem.getTransactionDate())
+                        .transactionTime(originalItem.getTransactionTime())
+                        .transactionType(originalItem.getTransactionType())
+                        .transactionTypeName(originalItem.getTransactionTypeName())
+                        .transactionAccountNo(originalItem.getTransactionAccountNo())
+                        .transactionBalance(df.format(originalItem.getTransactionBalance()))
+                        .transactionAfterBalance(df.format(originalItem.getTransactionAfterBalance()))
+                        .transactionSummary(originalItem.getTransactionSummary())
+                        .transactionMemo(originalItem.getTransactionMemo())
+                        .build())
+                .collect(Collectors.toList());
+
+        TransactionHistoryResponseRecDto finalResponse = TransactionHistoryResponseRecDto.builder()
+                .totalCount(originalRec.getTotalCount())
+                .list(newList)
+                .build();
+
+        return ResponseEntity.ok(finalResponse);
     }
 }

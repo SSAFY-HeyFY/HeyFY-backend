@@ -12,6 +12,10 @@ public interface ForeignAccountRepository extends JpaRepository<ForeignAccount, 
 
     Optional<ForeignAccount> findByUser(Users user);
 
+
+    Optional<ForeignAccount> findByUserAndAccountNo(Users user, String accountNo);
+
+
     @Query("""
             SELECT fa
             FROM Users u
@@ -19,5 +23,6 @@ public interface ForeignAccountRepository extends JpaRepository<ForeignAccount, 
             WHERE LOWER(u.email) = LOWER(:email)
             """)
     Optional<ForeignAccount> findForeignAccountByUserEmail(String email);
+
 }
 
