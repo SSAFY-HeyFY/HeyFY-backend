@@ -6,11 +6,11 @@ import com.ssafy.ssashinsa.heyfy.account.repository.AccountRepository;
 import com.ssafy.ssashinsa.heyfy.account.repository.ForeignAccountRepository;
 import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.exchange.AIPredictionResponseDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.exchange.AccountBalanceResponseDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.exchange.ExchangePageResponseDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.exchange.HistoricalAnalysisResponseDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.exchange.*;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanExchangeResponseDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanExchangeResponseRecDto;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanInquireDemandDepositAccountBalanceResponseDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanUpdateAccountResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.exception.ExchangeErrorCode;
 import com.ssafy.ssashinsa.heyfy.exchange.util.ShinhanExchangeApiClient;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
@@ -31,6 +31,37 @@ public class ExchangeService {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final ForeignAccountRepository foreignAccountRepository;
+
+    @Transactional
+    public ShinhanExchangeResponseRecDto exchangeToForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
+        Users user = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+        Account account = accountRepository.findAccountByUserEmail(user.getEmail())
+                .orElseThrow(() -> new CustomException(ExchangeErrorCode.ACCOUNT_NOT_FOUND));
+
+        ShinhanExchangeResponseDto exchangeResponse = apiClient.exchange(
+                account.getAccountNo(), exchangeRequestDto.getWithdrawalAccountCurrency(), exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+
+        ShinhanUpdateAccountResponseDto updateAccountResponse = apiClient.updateForeignAccount(
+                exchangeRequestDto.getWithdrawalAccountNo(),exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+
+        return exchangeResponse.getREC();
+    }
+    @Transactional
+    public ShinhanExchangeResponseRecDto exchangeFromForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
+        Users user = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+        ForeignAccount account = foreignAccountRepository.findForeignAccountByUserEmail(user.getEmail())
+                .orElseThrow(() -> new CustomException(ExchangeErrorCode.ACCOUNT_NOT_FOUND));
+
+        ShinhanExchangeResponseDto exchangeResponse = apiClient.exchange(
+                account.getAccountNo(), exchangeRequestDto.getWithdrawalAccountCurrency(), exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+
+        ShinhanUpdateAccountResponseDto updateAccountResponse = apiClient.updateAccount(
+                exchangeRequestDto.getWithdrawalAccountNo(),exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+
+        return exchangeResponse.getREC();
+    }
 
     @Transactional
     public AccountBalanceResponseDto getAccountBalance(String studentId) {
