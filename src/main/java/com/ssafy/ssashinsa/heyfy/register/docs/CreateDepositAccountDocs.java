@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.register.docs;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
-import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositResponseDto;
+import com.ssafy.ssashinsa.heyfy.register.dto.AccountCreationResponseDto; // 💡 이 DTO로 변경
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -19,16 +19,18 @@ import java.lang.annotation.Target;
 @Tag(name = "Register", description = "계좌 등록 API")
 @Operation(summary = "예금 계좌 등록", description = "신한은행 API를 이용하여 새로운 예금 계좌를 개설합니다.")
 @ApiResponses({
-        // 🔹 1. 성공 응답 (200 OK)
         @ApiResponse(
                 responseCode = "200",
                 description = "성공적으로 계좌를 등록했습니다.",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = ShinhanCreateDepositResponseDto.class)
+                        schema = @Schema(implementation = AccountCreationResponseDto.class),
+                        examples = @ExampleObject(
+                                name = "성공 응답 예시",
+                                value = "{\"message\": \"정상처리 되었습니다.\", \"accountNo\": \"0016956302770649\"}"
+                        )
                 )
         ),
-        // 🔹 2. 실패 응답 (400 Bad Request)
         @ApiResponse(
                 responseCode = "400",
                 description = "잘못된 요청",

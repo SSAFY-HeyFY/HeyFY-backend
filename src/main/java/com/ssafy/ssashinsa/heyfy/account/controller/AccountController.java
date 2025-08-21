@@ -1,15 +1,16 @@
 package com.ssafy.ssashinsa.heyfy.account.controller;
 
-import com.ssafy.ssashinsa.heyfy.account.dto.AccountPairDto;
-import com.ssafy.ssashinsa.heyfy.account.dto.InquireTransactionHistoryResponseDto;
+import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountAuthDocs;
+import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountsDocs;
+import com.ssafy.ssashinsa.heyfy.account.docs.GetTransactionHistoryDocs;
+import com.ssafy.ssashinsa.heyfy.account.dto.*;
 import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -18,6 +19,7 @@ public class AccountController {
 
     private final AccountService accountService;
 
+    @GetMyAccountsDocs
     @GetMapping("/accounts")
     public ResponseEntity<AccountPairDto> getMyAccounts() {
 
@@ -27,21 +29,26 @@ public class AccountController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/accountauth")
-    public ResponseEntity<Map<String, String>> getMyAccountAuth() { // 프론트엔드 구현을 위한 로직
-        accountService.AccountAuth();
+    @GetMyAccountAuthDocs
+    @PostMapping("/accountauth")
+    public ResponseEntity<AccountAuthHttpResponseDto> getMyAccountAuth() {
+        AccountAuthResponseDto accountAuthResponse = accountService.AccountAuth();
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "1원 계좌 인증에 성공했습니다.");
-        return ResponseEntity.ok(response);
+        String message = "1원 계좌 인증에 성공했습니다.";
+        String accountNo = accountAuthResponse.getREC().getAccountNo();
+        AccountAuthHttpResponseDto responseDto = new AccountAuthHttpResponseDto(message, accountNo);
 
+        return ResponseEntity.ok(responseDto);
     }
 
+    @GetTransactionHistoryDocs
     @GetMapping("/transactionhistory")
-    public ResponseEntity<InquireTransactionHistoryResponseDto> getTransactionHistoryTest() {
+    public ResponseEntity<InquireTransactionHistoryResponseRecDto> getTransactionHistoryTest() {
 
-        InquireTransactionHistoryResponseDto transactionHistory = accountService.getTransactionHistory();
+        InquireTransactionHistoryResponseDto transactionHistoryDto = accountService.getTransactionHistory();
 
-        return ResponseEntity.ok(transactionHistory);
+        InquireTransactionHistoryResponseRecDto rec = transactionHistoryDto.getREC();
+
+        return ResponseEntity.ok(rec);
     }
 }

@@ -35,12 +35,17 @@ public class InquireService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public boolean checkAccount() {
-        ShinhanInquireDepositResponseDto response = inquireDepositList();
-
-        if (response.getREC() == null || response.getREC().isEmpty()) {
+        String studentId = SecurityUtil.getCurrentStudentId();
+        if (studentId == null) {
             return false;
         }
-        return true;
+
+        Users user = userRepository.findByStudentId(studentId).orElse(null);
+
+        if (user != null && accountRepository.findByUser(user).isPresent()) {
+            return true;
+        }
+        return false;
     }
 
     public ShinhanInquireSingleDepositResponseDto inquireSingleDeposit() {
@@ -93,7 +98,7 @@ public class InquireService {
             return response;
         } catch (Exception e) {
             log.error("계좌 등록 API 호출 실패 : {}", e.getMessage(), e);
-            throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
+            throw e;
         }
     }
 
