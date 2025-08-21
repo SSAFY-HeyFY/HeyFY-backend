@@ -85,7 +85,8 @@ class Predictor:
         predicted_return = self.target_scaler.inverse_transform(predicted_scaled_return)
         
         # 수익률을 가격으로 변환하기 위한 기준 가격 (시퀀스의 마지막 날 종가)
-        base_price = last_sequence[self.config['target_column']].iloc[-1]
+        #base_price = last_sequence[self.config['target_column']].iloc[-1]
+        base_price = last_sequence['ECOS_Close'].iloc[-1] 
         
         # 예측된 가격 계산
         predicted_prices = returns_to_prices(np.array([base_price]), predicted_return)
