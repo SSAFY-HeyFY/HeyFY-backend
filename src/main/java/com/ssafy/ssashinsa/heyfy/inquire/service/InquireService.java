@@ -102,6 +102,105 @@ public class InquireService {
         }
     }
 
+    public ShinhanInquireSingleDepositResponseDto inquireSingleDeposit(String accountNo) {
+        try {
+            String apiKey = shinhanApiClient.getManagerKey();
+
+            String studentId = SecurityUtil.getCurrentStudentId();
+            Users user = userRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new CustomException(ShinhanInquireApiErrorCode.USER_NOT_FOUND));
+
+            String userKey = user.getUserKey();
+            if (userKey == null || userKey.isEmpty()) {
+                throw new CustomException(ShinhanInquireApiErrorCode.MISSING_USER_KEY);
+            }
+
+            ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
+                    "inquireDemandDepositAccount",
+                    "inquireDemandDepositAccount",
+                    apiKey,
+                    userKey
+            );
+
+            ShinhanInquireSingleDepositRequestDto requestDto = ShinhanInquireSingleDepositRequestDto.builder()
+                    .Header(commonHeaderDto)
+                    .accountNo(accountNo)
+                    .build();
+
+            logRequest(requestDto);
+
+            ShinhanInquireSingleDepositResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/demandDeposit/inquireDemandDepositAccount")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanInquireApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(ShinhanInquireSingleDepositResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
+
+
+            return response;
+        } catch (Exception e) {
+            log.error("계좌 등록 API 호출 실패 : {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    public ShinhanInquireSingleDepositResponseDto inquireSingleForeignDeposit(String accountNo) {
+        try {
+            String apiKey = shinhanApiClient.getManagerKey();
+
+            String studentId = SecurityUtil.getCurrentStudentId();
+            Users user = userRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new CustomException(ShinhanInquireApiErrorCode.USER_NOT_FOUND));
+
+            String userKey = user.getUserKey();
+            if (userKey == null || userKey.isEmpty()) {
+                throw new CustomException(ShinhanInquireApiErrorCode.MISSING_USER_KEY);
+            }
+
+            ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
+                    "inquireForeignCurrencyDemandDepositAccount",
+                    "inquireForeignCurrencyDemandDepositAccount",
+                    apiKey,
+                    userKey
+            );
+
+            ShinhanInquireSingleDepositRequestDto requestDto = ShinhanInquireSingleDepositRequestDto.builder()
+                    .Header(commonHeaderDto)
+                    .accountNo(accountNo)
+                    .build();
+
+            logRequest(requestDto);
+
+            ShinhanInquireSingleDepositResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/demandDeposit/foreignCurrency/inquireForeignCurrencyDemandDepositAccount")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanInquireApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(ShinhanInquireSingleDepositResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
+
+
+            return response;
+        } catch (Exception e) {
+            log.error("계좌 등록 API 호출 실패 : {}", e.getMessage(), e);
+            throw e;
+        }
+    }
 
 
     public ShinhanInquireDepositResponseDto inquireDepositList() {
