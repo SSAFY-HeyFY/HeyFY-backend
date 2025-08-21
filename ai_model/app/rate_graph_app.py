@@ -10,6 +10,7 @@ import FinanceDataReader as fdr
 class ChartDataPoint(BaseModel):
     date: str
     rate: float
+    isPredition: bool = False  # 예측 데이터 여부
 
 # 통계 정보 모델
 class RateStatistics(BaseModel):
