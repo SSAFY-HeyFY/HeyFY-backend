@@ -1,6 +1,8 @@
 import os
 import joblib
+import json
 import matplotlib.pyplot as plt
+import random
 import pandas as pd
 import numpy as np
 import torch
@@ -9,17 +11,17 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import MinMaxScaler
 from tqdm import tqdm
 
-# -- 1. 모델 및 학습 파라미터 설정 --
 class Config:
-    data_path = 'data/train/train_final_with_onehot_20150102_20250812_with_diff.csv' 
+    data_path = 'data/train/train_final_with_onehot_20100104_20250811_with_diff_cutted.xlsx' 
     
-    target_column = 'target'    
+    target_column = 'target'
     feature_columns = [
         'Inv_Close', 'Inv_Open', 'Inv_High', 'Inv_Low', 'Inv_Change(%)', 'ECOS_Close', 'DXY_Close', 'US10Y_Close',
         'is_Mon', 'is_Tue', 'is_Wed', 'is_Thu', 'is_Fri', 'diff'
     ]
     
-    train_start_date = '2015-01-02'  # 학습 데이터 시작 날짜
+    tag = 'simple'
+    train_start_date = '2010-01-04'  # 학습 데이터 시작 날짜
     test_start_date = '2025-01-01' # 테스트 데이터 시작 날짜
     sequence_length = 120
 
@@ -34,8 +36,22 @@ class Config:
     learning_rate = 0.001
     batch_size = 16
 
+def set_seed(seed):
+    """
+    재현성을 위해 모든 랜덤 시드를 고정하는 함수
+    """
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    # torch.cuda.manual_seed(seed)
+    # torch.cuda.manual_seed_all(seed)  # if use multi-GPU
+    
+    # cuDNN 설정
+    # 이 설정은 연산 속도를 느리게 할 수 있지만, 재현성을 보장합니다.
+    # torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.benchmark = False
 
-# -- 2. 데이터 전처리 및 시퀀스 생성 --
 def load_and_preprocess_data(config):
     if config.data_path.endswith('.csv'):
         df = pd.read_csv(config.data_path)
@@ -200,6 +216,14 @@ def save_model(model, config):
     torch.save(model.state_dict(), model_path)
     print(f"✅ 학습된 모델이 '{model_path}' 경로에 저장되었습니다.\n")
 
+    config_path = os.path.join(folder_path, 'config.json')
+    config_dict = {key: getattr(config, key) for key in dir(config) if not key.startswith('__') and not callable(getattr(config, key))}
+    
+    with open(config_path, 'w', encoding='utf-8') as f:
+        json.dump(config_dict, f, ensure_ascii=False, indent=4)
+        
+    print(f"✅ 모델 설정이 '{config_path}' 경로에 저장되었습니다.\n")
+
 def model_folder_name(config):
     """
     모델의 주요 하이퍼파라미터를 기반으로 폴더 이름을 생성합니다.
@@ -220,8 +244,30 @@ def model_folder_name(config):
 
     return folder_path
 
+def plot_test_results(config, test_dates, predictions, actuals):
+    """
+    테스트 결과를 시각화합니다.
+    """
+    plt.figure(figsize=(15, 8))
+    plt.plot(test_dates, actuals, label='Actual (ECOS Rate)', color='blue', marker='.')
+    plt.plot(test_dates, predictions, label='Predicted Rate', color='red', linestyle='--', marker='.')
+    plt.title('Exchange Rate Prediction vs Actual', fontsize=16)
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('KRW / USD', fontsize=12)
+    plt.legend()
+    plt.grid(True)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    folder_path = model_folder_name(config)
+    fig_path = os.path.join(folder_path, 'Figure1.png')
+    plt.savefig(fig_path)
+    plt.show()
+
 # -- 7. 메인 실행 블록 --
 if __name__ == '__main__':
+    set_seed(42)
+
     config = Config()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
@@ -240,15 +286,5 @@ if __name__ == '__main__':
     save_model(model, config)
     
     predictions, actuals = evaluate_model(model, test_loader, target_scaler, device)
-    
-    plt.figure(figsize=(15, 8))
-    plt.plot(test_dates, actuals, label='Actual (ECOS Rate)', color='blue', marker='.')
-    plt.plot(test_dates, predictions, label='Predicted Rate', color='red', linestyle='--', marker='.')
-    plt.title('Exchange Rate Prediction vs Actual', fontsize=16)
-    plt.xlabel('Date', fontsize=12)
-    plt.ylabel('KRW / USD', fontsize=12)
-    plt.legend()
-    plt.grid(True)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
+
+    plot_test_results(config, test_dates, predictions, actuals)
