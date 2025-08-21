@@ -2,7 +2,7 @@ package com.ssafy.ssashinsa.heyfy.inquire.docs;
 
 import com.ssafy.ssashinsa.heyfy.account.dto.AccountNoDto;
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
-import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireDepositResponseRecDto;
+import com.ssafy.ssashinsa.heyfy.inquire.dto.ForeignSingleDepositResponseDto; // DTO import
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
                         schema = @Schema(implementation = AccountNoDto.class),
                         examples = @ExampleObject(
                                 name = "외화 계좌번호 요청 예시",
-                                value = "{\n  \"accountNo\": \"001********76480\"\n}"
+                                value = "{\n  \"accountNo\": \"0010475174188665\"\n}"
                         )
                 )
         )
@@ -39,7 +39,11 @@ import java.lang.annotation.Target;
                 description = "성공적으로 외화 계좌 정보를 조회했습니다.",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = ShinhanInquireDepositResponseRecDto.class)
+                        schema = @Schema(implementation = ForeignSingleDepositResponseDto.class),
+                        examples = @ExampleObject(
+                                name = "성공 응답 예시",
+                                value = "{\n  \"bankName\": \"한국은행\",\n  \"userName\": \"test0820\",\n  \"accountNo\": \"0010475174188665\",\n  \"accountName\": \"한국은행 외화 수시입출금 상품\",\n  \"accountBalance\": \"0.00\",\n  \"currency\": \"USD\"\n}"
+                        )
                 )
         ),
         @ApiResponse(

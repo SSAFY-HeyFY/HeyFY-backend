@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
                         schema = @Schema(implementation = AccountNoDto.class),
                         examples = @ExampleObject(
                                 name = "계좌번호 요청 예시",
-                                value = "{\n  \"accountNo\": \"001********76480\"\n}"
+                                value = "{\n  \"accountNo\": \"0014555423195469\"\n}"
                         )
                 )
         )
@@ -39,7 +39,11 @@ import java.lang.annotation.Target;
                 description = "성공적으로 거래 내역을 조회했습니다.",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = InquireTransactionHistoryResponseRecDto.class)
+                        schema = @Schema(implementation = InquireTransactionHistoryResponseRecDto.class),
+                        examples = @ExampleObject(
+                                name = "거래 내역 조회 성공 예시",
+                                value = "{\n  \"totalCount\": \"1\",\n  \"list\": [\n    {\n      \"transactionUniqueNo\": \"101438\",\n      \"transactionDate\": \"20250821\",\n      \"transactionTime\": \"225202\",\n      \"transactionType\": \"1\",\n      \"transactionTypeName\": \"입금\",\n      \"transactionAccountNo\": \"\",\n      \"transactionBalance\": \"1\",\n      \"transactionAfterBalance\": \"1\",\n      \"transactionSummary\": \"SSAFY 7335\",\n      \"transactionMemo\": \"\"\n    }\n  ]\n}"
+                        )
                 )
         ),
         @ApiResponse(
