@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ExchangeCurrencyRecDto {
+public class ShinhanExchangeCurrencyRecDto {
     private double amount;
     private double exchangeRate;
     private String currency;

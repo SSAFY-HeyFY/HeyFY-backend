@@ -5,14 +5,11 @@ import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanCommonRequestHeaderDto;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
 @Builder
-public class ExchangeResponseDto {
+public class ShinhanExchangeResponseDto {
     @JsonProperty("Header")
     private ShinhanCommonRequestHeaderDto Header;
     @JsonProperty("REC")
-    private ExchangeResponseRecDto REC;
+    private ShinhanExchangeResponseRecDto REC;
 }

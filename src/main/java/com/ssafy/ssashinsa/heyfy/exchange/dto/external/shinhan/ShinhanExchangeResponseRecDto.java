@@ -7,9 +7,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ExchangeResponseRecDto {
-    @JsonProperty("Header")
-    private ShinhanCommonResponseHeaderDto header;
-    private ExchangeCurrencyRecDto exchangeCurrency;
+public class ShinhanExchangeResponseRecDto {
+    private ShinhanExchangeCurrencyRecDto exchangeCurrency;
     private AccountInfoRecDto accountInfo;
 }

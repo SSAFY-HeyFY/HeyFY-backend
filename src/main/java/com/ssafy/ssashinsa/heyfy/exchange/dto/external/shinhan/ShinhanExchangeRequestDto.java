@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ExchangeRequestDto {
+public class ShinhanExchangeRequestDto {
     @JsonProperty("Header")
     private ShinhanCommonRequestHeaderDto Header;
     private String accountNo;
