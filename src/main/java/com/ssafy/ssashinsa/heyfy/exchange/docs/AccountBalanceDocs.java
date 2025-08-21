@@ -2,7 +2,7 @@ package com.ssafy.ssashinsa.heyfy.exchange.docs;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.exchange.AccountBalanceResponseDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.ExchangeRateGroupDto;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,6 +13,7 @@ import java.lang.annotation.*;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
+@Operation(summary = "한국 계좌 잔액 조회")
 @Documented
 @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공",
