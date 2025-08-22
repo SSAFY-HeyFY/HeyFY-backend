@@ -198,6 +198,9 @@ public class RegisterService {
         }
     }
 
+
+
+
     public void createAccountsForUser(String studentId) {
         try {
             Users user = userRepository.findByStudentId(studentId)

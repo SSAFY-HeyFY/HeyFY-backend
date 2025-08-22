@@ -6,6 +6,8 @@ import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountsDocs;
 import com.ssafy.ssashinsa.heyfy.account.docs.GetTransactionHistoryDocs;
 import com.ssafy.ssashinsa.heyfy.account.dto.*;
 import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.register.exception.ShinhanRegisterApiErrorCode;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,14 +37,37 @@ public class AccountController {
 
     @GetMyAccountAuthDocs
     @PostMapping("/accountauth")
-    public ResponseEntity<AccountAuthHttpResponseDto> getMyAccountAuth() {
-        AccountAuthResponseDto accountAuthResponse = accountService.AccountAuth();
+    public ResponseEntity<AccountAuthHttpResponseDto> getMyAccountAuth(@RequestBody AccountNoDto accountNoDto) {
+        String accountNo = accountNoDto.getAccountNo();
+        AccountAuthResponseDto accountAuthResponse = accountService.AccountAuth(accountNo);
 
-        String message = "1원 계좌 인증에 성공했습니다.";
-        String accountNo = accountAuthResponse.getREC().getAccountNo();
-        AccountAuthHttpResponseDto responseDto = new AccountAuthHttpResponseDto(message, accountNo);
+        InquireSingleTransactionHistoryResponseDto singleTransactionHistoryResponse = accountService.getSingleTransactionHistory(accountNo, accountAuthResponse.getREC().getTransactionUniqueNo());
+
+        String message = singleTransactionHistoryResponse.getREC().getTransactionSummary();
+        String[] parts = message.split(" ");
+        String lastFour = parts[parts.length - 1];
+        AccountAuthHttpResponseDto responseDto = new AccountAuthHttpResponseDto(lastFour, accountNo);
 
         return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMyAccountAuthDocs
+    @PostMapping("/accouncheck")
+    public ResponseEntity<AccountAuthCheckResponseDto> AccountCheck(@RequestBody AuthCheckDto authCheckDto) {
+
+        try {
+            AccountAuthCheckResponseDto accountAuthCheckResponse =
+                    accountService.accountAuthCheck(authCheckDto.getAccountNo(), authCheckDto.getAuthCode());
+            return ResponseEntity.ok(accountAuthCheckResponse);
+        } catch (CustomException e) {
+            if (e.getErrorCode() == ShinhanRegisterApiErrorCode.API_CALL_FAILED) {
+                throw new CustomException(ShinhanRegisterApiErrorCode.FAIL_CHECK_AUTH);
+            }
+            throw e;
+        }
+
+
+
     }
 
     @GetTransactionHistoryDocs
