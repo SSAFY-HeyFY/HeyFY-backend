@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -198,79 +199,35 @@ public class RegisterService {
         }
     }
 
+    @Transactional
+    public void registerAccount(String accountNo) {
+        String studentId = SecurityUtil.getCurrentStudentId();
+        log.info("학생 ID [{}]의 계좌 등록을 시작합니다.", studentId);
 
 
-
-    public void createAccountsForUser(String studentId) {
-        try {
             Users user = userRepository.findByStudentId(studentId)
                     .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
 
-            // 일반 계좌 확인 및 생성 시도
-            if (!accountRepository.findByUser(user).isPresent()) {
-                log.info("[{}] 일반 계좌가 없어 신규 개설을 시도합니다.", studentId);
-                createDepositAccount(user);
-            }
-
-            // 외화 계좌 확인 및 생성 시도
-            if (!foreignAccountRepository.findByUser(user).isPresent()) {
-                log.info("[{}] 외화 계좌가 없어 신규 개설을 시도합니다.", studentId);
-                createForeignDepositAccount(user);
-            }
-        } catch (CustomException ce) {
-            log.error("학생 ID [{}]의 계좌 생성 중 커스텀 예외 발생: {}", studentId, ce.getMessage());
-        } catch (Exception e) {
-            log.error("학생 ID [{}]의 계좌 생성 중 예상치 못한 예외 발생: {}", studentId, e.getMessage(), e);
-        }
-    }
-
-    // 외부에서 직접 호출되지 않도록 private 메서드로 변경
-    private void createDepositAccount(Users user) {
         try {
-            String apiKey = shinhanApiClient.getManagerKey();
-            String accountTypeUniqueNo = shinhanApiClient.getAccountTypeUniqueNo();
+            // 2) 있는 경우에만 삭제 (API 성공 후)
+            if (accountRepository.existsByUser(user)) {
+                // 양방향 참조라면 잠깐 끊어주는 거 권장 (mappedBy로 잔상 방지)
+                user.setAccount(null);
 
-            String userKey = user.getUserKey();
-            if (userKey == null || userKey.isEmpty()) {
-                throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
+                accountRepository.deleteByUser(user); // 벌크 삭제 + auto flush & clear
+
+                // clear 때문에 user가 detach 되었을 수 있으니 다시 attach
+                user = userRepository.getReferenceById(user.getId());
             }
 
-            ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
-                    "createDemandDepositAccount",
-                    "createDemandDepositAccount",
-                    apiKey,
-                    userKey
-            );
-
-            ShinhanCreateDepositRequestDto requestDto = ShinhanCreateDepositRequestDto.builder()
-                    .Header(commonHeaderDto)
-                    .accountTypeUniqueNo(accountTypeUniqueNo)
-                    .build();
-
-            logRequest(requestDto);
-
-            ShinhanCreateDepositResponseDto response = shinhanApiClient.getClient("edu")
-                    .post()
-                    .uri("/demandDeposit/createDemandDepositAccount")
-                    .header("Content-Type", "application/json")
-                    .bodyValue(requestDto)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::isError, r ->
-                            r.bodyToMono(String.class).flatMap(body -> {
-                                log.error("API Error Body: {}", body);
-                                return Mono.error(new CustomException(ShinhanRegisterApiErrorCode.API_CALL_FAILED));
-                            }))
-                    .bodyToMono(ShinhanCreateDepositResponseDto.class)
-                    .doOnNext(this::logResponse)
-                    .block();
-
-            String accountNo = response.getREC().getAccountNo();
-
-            Account account = Account.builder()
+            // 3) 새 계좌 insert
+            Account newAccount = Account.builder()
                     .user(user)
                     .accountNo(accountNo)
                     .build();
-            accountRepository.save(account);
+
+            accountRepository.save(newAccount); // 커밋 시 flush
+
 
             log.info("학생 ID [{}]의 일반 계좌가 성공적으로 개설되었습니다. 계좌번호: {}", user.getStudentId(), accountNo);
 

@@ -3,7 +3,9 @@ package com.ssafy.ssashinsa.heyfy.account.repository;
 import com.ssafy.ssashinsa.heyfy.account.domain.Account;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -12,8 +14,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findByUser(Users user);
 
+    boolean existsByUser(Users user);
 
     Optional<Account> findByUserAndAccountNo(Users user, String accountNo);
+
 
 
     @Query("""
@@ -23,5 +27,9 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             WHERE LOWER(u.email) = LOWER(:email)
             """)
     Optional<Account> findAccountByUserEmail(String email);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("delete from Account a where a.user = :user")
+    void deleteByUser(@Param("user") Users user);
 
 }

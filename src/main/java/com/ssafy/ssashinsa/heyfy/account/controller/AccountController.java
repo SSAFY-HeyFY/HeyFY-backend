@@ -8,10 +8,14 @@ import com.ssafy.ssashinsa.heyfy.account.dto.*;
 import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.register.exception.ShinhanRegisterApiErrorCode;
+import com.ssafy.ssashinsa.heyfy.register.service.RegisterService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 public class AccountController {
 
     private final AccountService accountService;
+    private final RegisterService registerService;
 
     @GetMyAccountsDocs
     @GetMapping("/accounts")
@@ -51,14 +56,18 @@ public class AccountController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @GetMyAccountAuthDocs
     @PostMapping("/accouncheck")
-    public ResponseEntity<AccountAuthCheckResponseDto> AccountCheck(@RequestBody AuthCheckDto authCheckDto) {
+    public ResponseEntity<AccountNoDto> AccountCheck(@RequestBody AuthCheckDto authCheckDto) {
 
         try {
-            AccountAuthCheckResponseDto accountAuthCheckResponse =
-                    accountService.accountAuthCheck(authCheckDto.getAccountNo(), authCheckDto.getAuthCode());
-            return ResponseEntity.ok(accountAuthCheckResponse);
+            AccountAuthCheckResponseDto accountAuthCheckResponse = accountService.accountAuthCheck(authCheckDto.getAccountNo(), authCheckDto.getAuthCode());
+
+            // 인증 완료시, db상에 일반 계좌 등록.
+            registerService.registerAccount(accountAuthCheckResponse.getREC().getAccountNo());
+
+            AccountNoDto AccountNoDto = new AccountNoDto(accountAuthCheckResponse.getREC().getAccountNo());
+
+            return ResponseEntity.ok(AccountNoDto);
         } catch (CustomException e) {
             if (e.getErrorCode() == ShinhanRegisterApiErrorCode.API_CALL_FAILED) {
                 throw new CustomException(ShinhanRegisterApiErrorCode.FAIL_CHECK_AUTH);
