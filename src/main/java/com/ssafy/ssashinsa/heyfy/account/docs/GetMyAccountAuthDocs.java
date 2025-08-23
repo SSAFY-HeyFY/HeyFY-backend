@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
                         schema = @Schema(implementation = AccountAuthHttpResponseDto.class), // 💡 변경된 부분
                         examples = @ExampleObject(
                                 name = "성공 응답 예시",
-                                value = "{\"message\": \"1원 계좌 인증에 성공했습니다.\", \"accountNo\": \"110123456789\"}"
+                                value = "{\"code\": \"1234\", \"accountNo\": \"110123456789\"}"
                         )
                 )
         ),

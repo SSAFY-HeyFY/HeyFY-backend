@@ -54,7 +54,7 @@ public class AuthService {
             redisUtil.deleteRefreshToken(signInDto.getStudentId());
             redisUtil.setRefreshToken(signInDto.getStudentId(), refreshToken);
 
-            registerService.createAccountsForUser(signInDto.getStudentId());
+            //registerService.createAccountsForUser(signInDto.getStudentId());
 
             return new SignInSuccessDto(accessToken, refreshToken);
         } catch (BadCredentialsException  | InternalAuthenticationServiceException e) {

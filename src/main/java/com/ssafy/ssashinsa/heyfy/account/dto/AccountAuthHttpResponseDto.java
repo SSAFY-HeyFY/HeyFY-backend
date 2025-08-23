@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccountAuthHttpResponseDto {
-    private String message;
+    private String code;
     private String accountNo;
 }

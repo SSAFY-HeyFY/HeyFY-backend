@@ -1,14 +1,16 @@
 package com.ssafy.ssashinsa.heyfy.account.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountNoDto {
+public class AccountAuthCheckResponseRecDto {
+    private String status;
+    private String transactionUniqueNo;
     private String accountNo;
 }

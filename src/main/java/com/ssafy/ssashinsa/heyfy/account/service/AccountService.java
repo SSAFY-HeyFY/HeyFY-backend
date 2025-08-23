@@ -104,6 +104,115 @@ public class AccountService {
         }
     }
 
+    public AccountAuthResponseDto AccountAuth(String accountNo) {
+        try {
+            String apiKey = shinhanApiClient.getManagerKey();
+            String accountTypeUniqueNo = shinhanApiClient.getForeignAccountTypeUniqueNo();
+
+            String studentId = SecurityUtil.getCurrentStudentId();
+            Users user = userRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
+
+            String userKey = user.getUserKey();
+            if (userKey == null || userKey.isEmpty()) {
+                throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
+            }
+
+            ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
+                    "openAccountAuth",
+                    "openAccountAuth",
+                    apiKey,
+                    userKey
+            );
+
+            AccountAuthRequestDto requestDto = AccountAuthRequestDto.builder()
+                    .Header(commonHeaderDto)
+                    .accountNo(accountNo)
+                    .authText("SSAFY")
+                    .build();
+
+            logRequest(requestDto);
+
+            AccountAuthResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/accountAuth/openAccountAuth")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanRegisterApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(AccountAuthResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
+
+            return response;
+
+        } catch (CustomException ce) {
+            log.error("커스텀 예외 발생: {}", ce.getMessage());
+            throw ce;
+        } catch (Exception e) {
+            throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
+        }
+    }
+
+    public AccountAuthCheckResponseDto accountAuthCheck(String accountNo, String authCode) {
+        try {
+            String apiKey = shinhanApiClient.getManagerKey();
+            String accountTypeUniqueNo = shinhanApiClient.getForeignAccountTypeUniqueNo();
+
+            String studentId = SecurityUtil.getCurrentStudentId();
+            Users user = userRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
+
+            String userKey = user.getUserKey();
+            if (userKey == null || userKey.isEmpty()) {
+                throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
+            }
+
+            ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
+                    "checkAuthCode",
+                    "checkAuthCode",
+                    apiKey,
+                    userKey
+            );
+
+            AccountAuthCheckRequestDto requestDto = AccountAuthCheckRequestDto.builder()
+                    .Header(commonHeaderDto)
+                    .accountNo(accountNo)
+                    .authText("SSAFY")
+                    .authCode(authCode)
+                    .build();
+
+            logRequest(requestDto);
+
+            AccountAuthCheckResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/accountAuth/checkAuthCode")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanRegisterApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(AccountAuthCheckResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
+
+            return response;
+
+        } catch (CustomException ce) {
+            log.error("커스텀 예외 발생: {}", ce.getMessage());
+            throw ce;
+        } catch (Exception e) {
+            throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
+        }
+    }
+
     public InquireTransactionHistoryResponseDto getTransactionHistory() {
         try {
             String apiKey = shinhanApiClient.getManagerKey();
@@ -213,6 +322,60 @@ public class AccountService {
                                 return Mono.error(new CustomException(ShinhanRegisterApiErrorCode.API_CALL_FAILED));
                             }))
                     .bodyToMono(InquireTransactionHistoryResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
+
+            return response;
+
+        } catch (CustomException ce) {
+            log.error("커스텀 예외 발생: {}", ce.getMessage());
+            throw ce;
+        } catch (Exception e) {
+            log.error("계좌 개설 API 호출 실패 : {}", e.getMessage(), e);
+            throw new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
+        }
+    }
+
+    public InquireSingleTransactionHistoryResponseDto getSingleTransactionHistory(String accountNo, String transactionUniqueNo) {
+        try {
+            String apiKey = shinhanApiClient.getManagerKey();
+
+            String studentId = SecurityUtil.getCurrentStudentId();
+            Users user = userRepository.findByStudentId(studentId)
+                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
+
+            String userKey = user.getUserKey();
+            if (userKey == null || userKey.isEmpty()) {
+                throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
+            }
+
+            ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
+                    "inquireTransactionHistory",
+                    "inquireTransactionHistory",
+                    apiKey,
+                    userKey
+            );
+
+            InquireSingleTransactionHistoryRequestDto requestDto = InquireSingleTransactionHistoryRequestDto.builder()
+                    .Header(commonHeaderDto)
+                    .accountNo(accountNo)
+                    .transactionUniqueNo(transactionUniqueNo)
+                    .build();
+
+            logRequest(requestDto);
+
+            InquireSingleTransactionHistoryResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/demandDeposit/inquireTransactionHistory")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanRegisterApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(InquireSingleTransactionHistoryResponseDto.class)
                     .doOnNext(this::logResponse)
                     .block();
 
