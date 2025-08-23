@@ -1,9 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.account.controller;
 
-import com.ssafy.ssashinsa.heyfy.account.docs.GetForeignTransactionHistoryDocs;
-import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountAuthDocs;
-import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountsDocs;
-import com.ssafy.ssashinsa.heyfy.account.docs.GetTransactionHistoryDocs;
+import com.ssafy.ssashinsa.heyfy.account.docs.*;
 import com.ssafy.ssashinsa.heyfy.account.dto.*;
 import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
@@ -56,6 +53,7 @@ public class AccountController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @AccountCheckDocs
     @PostMapping("/accouncheck")
     public ResponseEntity<AccountNoDto> AccountCheck(@RequestBody AuthCheckDto authCheckDto) {
 
