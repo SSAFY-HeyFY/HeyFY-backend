@@ -34,3 +34,36 @@ class LSTMModel(nn.Module):
         final_output = self.fc(last_hidden_state)
         
         return final_output
+
+class LSTMDirectMH(nn.Module):
+    """
+    LSTM + Direct Multi-output_size Head
+    - 입력:  (B, T, F)
+    - 출력:  (B, H)  # H = output_size (예: 5, 7 등)
+    """
+    def __init__(self, input_size, hidden_size, num_layers, output_size, dropout_prob):
+        super().__init__()
+        self.output_size = output_size
+
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            batch_first=True,
+            dropout=dropout_prob if num_layers > 1 else 0.0
+        )
+
+        # 직선화 완화를 위한 얕은 MLP 헤드
+        self.head = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size // 2),
+            nn.ReLU(),
+            nn.Dropout(dropout_prob),
+            nn.Linear(hidden_size // 2, output_size)
+        )
+
+    def forward(self, x):
+        # x: (B, T, F)
+        out, _ = self.lstm(x)          # (B, T, H)
+        last_hidden = out[:, -1, :]    # (B, H)
+        preds = self.head(last_hidden) # (B, output_size)
+        return preds
