@@ -3,6 +3,7 @@ package com.ssafy.ssashinsa.heyfy.authentication.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
@@ -77,6 +78,18 @@ public class JwtTokenProvider {
             throw new CustomException(AuthErrorCode.EXPIRED_TOKEN);
         } catch (JWTVerificationException e) { //유효하지 않은 토큰
             throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
+        }
+    }
+
+    public void validateRefreshToken(String refreshToken) {
+        try {
+            JWT.require(Algorithm.HMAC256(secretKey)).build().verify(refreshToken);
+        } catch (TokenExpiredException e) {
+            // 리프레시 토큰이 만료되면, 재로그인을 유도하는 별도 예외를 던짐
+            throw new CustomException(AuthErrorCode.EXPIRED_REFRESH_TOKEN);
+        } catch (JWTVerificationException e) {
+            // 유효하지 않은(위변조된) 리프레시 토큰
+            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
     }
 

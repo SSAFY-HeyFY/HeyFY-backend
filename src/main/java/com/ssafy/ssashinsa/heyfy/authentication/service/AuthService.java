@@ -126,11 +126,9 @@ public class AuthService {
         if (refreshToken == null || refreshToken.isEmpty()) {
             throw new CustomException(AuthErrorCode.MISSING_REFRESH_TOKEN);
         }
-        try {
-            jwtTokenProvider.validateToken(refreshToken);
-        } catch (CustomException e) {
-            throw new CustomException(AuthErrorCode.INVALID_REFRESH_TOKEN); // 안드로이드 상에서는 INVALID_REFRESH_TOKEN 받았을때 재 로그인 하도록 로직 구분
-        }
+
+        // jwtTokenProvider의 새로운 전용 메서드를 호출
+        jwtTokenProvider.validateRefreshToken(refreshToken);
     }
 
     // RefreshToken이 redis에 저장되어 있는지 검증
