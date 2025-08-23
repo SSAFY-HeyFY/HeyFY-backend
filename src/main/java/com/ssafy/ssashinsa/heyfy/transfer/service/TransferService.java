@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.account.exception.AccountErrorCode;
 import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
 import com.ssafy.ssashinsa.heyfy.register.exception.ShinhanRegisterApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
@@ -34,7 +35,7 @@ public class TransferService {
     private final AccountService accountService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public EntireTransferResponseDto callTransfer(String depositAccountNo, long amount) {
+    public EntireTransferResponseDto callTransfer(String depositAccountNo, String amount, String transactionSummary) {
         Users user = findCurrentUser();
 
         String withdrawalAccountNo = accountService.getAccounts()
@@ -43,13 +44,13 @@ public class TransferService {
                 .getAccountNo();
 
         String serviceCode = "updateDemandDepositAccountTransfer";
-        TransferRequestDto requestDto = createRequestDto(withdrawalAccountNo, depositAccountNo, amount, user.getUserKey(), serviceCode);
+        TransferRequestDto requestDto = createRequestDto(withdrawalAccountNo, depositAccountNo, amount, user.getUserKey(), serviceCode, transactionSummary);
 
         String uri = "/demandDeposit/updateDemandDepositAccountTransfer";
         return executeTransferApi(uri, requestDto);
     }
 
-    public EntireTransferResponseDto callForeignTransfer(String depositAccountNo, long amount) {
+    public EntireTransferResponseDto callForeignTransfer(String depositAccountNo, String amount, String transactionSummary) {
         Users user = findCurrentUser();
 
         String withdrawalAccountNo = accountService.getAccounts()
@@ -58,7 +59,7 @@ public class TransferService {
                 .getAccountNo();
 
         String serviceCode = "updateForeignCurrencyDemandDepositAccountTransfer";
-        TransferRequestDto requestDto = createRequestDto(withdrawalAccountNo, depositAccountNo, amount, user.getUserKey(), serviceCode);
+        TransferRequestDto requestDto = createRequestDto(withdrawalAccountNo, depositAccountNo, amount, user.getUserKey(), serviceCode, transactionSummary);
 
         String uri = "/demandDeposit/foreignCurrency/updateForeignCurrencyDemandDepositAccountTransfer";
         return executeTransferApi(uri, requestDto);
@@ -86,20 +87,28 @@ public class TransferService {
     }
 
     private Mono<? extends Throwable> handleApiError(ClientResponse response) {
-        return response.bodyToMono(ShinhanErrorResponseDto.class)
+        // DTO 파싱 성공 시의 에러 처리 로직
+        Mono<Throwable> successCase = response.bodyToMono(ShinhanErrorResponseDto.class)
                 .map(errorBody -> {
-                    log.error("External API Error Body: {}", errorBody);
                     String errorMessage = String.format("[%s] %s", errorBody.getResponseCode(), errorBody.getResponseMessage());
-                    return new CustomException(ShinhanApiErrorCode.API_CALL_FAILED, errorMessage);
-                })
-                .onErrorResume(e ->
-                        response.bodyToMono(String.class)
-                                .map(body -> {
-                                    log.error("Failed to parse error response. Raw body: {}", body, e);
-                                    return new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
-                                })
-                )
-                .flatMap(Mono::error);
+                    ErrorCode errorCode;
+                    if (response.statusCode().is4xxClientError()) {
+                        errorCode = ShinhanApiErrorCode.API_INVALID_REQUEST;
+                    } else {
+                        errorCode = ShinhanApiErrorCode.API_CALL_FAILED;
+                    }
+                    return new CustomException(errorCode, errorMessage);
+                });
+
+        // DTO 파싱 실패 시의 에러 처리 로직 (body를 String으로 읽어 로그 남김)
+        Mono<Throwable> failureCase = response.bodyToMono(String.class)
+                .map(rawBody -> {
+                    log.error("Failed to parse Shinhan API error response. Raw body: {}", rawBody);
+                    return new CustomException(ShinhanApiErrorCode.API_CALL_FAILED);
+                });
+
+        // successCase를 시도하고, 실패하면(onErrorResume) failureCase를 실행
+        return successCase.onErrorResume(e -> failureCase);
     }
 
     private Users findCurrentUser() {
@@ -116,13 +125,15 @@ public class TransferService {
     }
 
 
-    private TransferRequestDto createRequestDto(String withdrawalAccountNo, String depositAccountNo, long amount, String userKey, String serviceCode) {
+    private TransferRequestDto createRequestDto(String withdrawalAccountNo, String depositAccountNo, String amount, String userKey, String serviceCode, String transactionSummary) {
         String apiKey = shinhanApiClient.getManagerKey();
         ShinhanCommonRequestHeaderDto headerDto = shinhanApiUtil.createHeaderDto(serviceCode, serviceCode, apiKey, userKey);
         return TransferRequestDto.builder()
                 .withdrawalAccountNo(withdrawalAccountNo)
                 .depositAccountNo(depositAccountNo)
                 .transactionBalance(String.valueOf(amount))
+                .depositTransactionSummary(transactionSummary)
+                .withdrawalTransactionSummary(transactionSummary)
                 .Header(headerDto)
                 .build();
     }

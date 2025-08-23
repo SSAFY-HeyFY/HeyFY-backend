@@ -1,13 +1,11 @@
 package com.ssafy.ssashinsa.heyfy.transfer.docs;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
-import com.ssafy.ssashinsa.heyfy.transfer.dto.CreateTransferRequest;
 import com.ssafy.ssashinsa.heyfy.transfer.dto.TransferHistoryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.lang.annotation.ElementType;
@@ -17,7 +15,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Operation(summary = "국내 계좌 이체", description = "출금 계좌에서 입금 계좌로 금액을 이체합니다.")
+@Operation(summary = "외환 계좌 이체", description = "계좌로 금액을 이체합니다.")
 @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
@@ -27,7 +25,7 @@ import java.lang.annotation.Target;
                         schema = @Schema(implementation = TransferHistoryResponse.class),
                         examples = @ExampleObject(
                                 name = "계좌 이체 성공 예시",
-                                value = "{\n  \"success\": true,\n  \"history\": {\n    \"fromAccountMasked\": \"string\",\n    \"toAccountMasked\": \"string\",\n    \"amount\": \"string\",\n    \"currency\": \"KRW\",\n    \"transactionSummary\": \"string\",\n    \"completedAt\": \"2025-08-23T23:13:49.593964+09:00\"\n  },\n  \"error\": null\n}"
+                                value = "{\n  \"success\": true,\n  \"history\": {\n    \"fromAccountMasked\": \"string\",\n    \"toAccountMasked\": \"string\",\n    \"amount\": \"string\",\n    \"currency\": \"USD\",\n    \"transactionSummary\": \"string\",\n    \"completedAt\": \"2025-08-23T23:13:49.593964+09:00\"\n  },\n  \"error\": null\n}"
                         )
                 )
         ),
@@ -58,5 +56,5 @@ import java.lang.annotation.Target;
                 )
         )
 })
-public @interface TransferDocs {
+public @interface ForeignTransferDocs {
 }

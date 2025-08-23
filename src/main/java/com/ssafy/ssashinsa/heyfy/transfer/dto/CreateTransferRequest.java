@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateTransferRequest {
     private String depositAccountNo;
-    private Long amount;
+    private String amount;
+    private String transactionSummary;
 }

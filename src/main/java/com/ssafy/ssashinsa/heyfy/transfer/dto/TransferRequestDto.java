@@ -18,4 +18,6 @@ public class TransferRequestDto {
     private String withdrawalAccountNo;
     private String depositAccountNo;
     private String transactionBalance;
+    private String depositTransactionSummary;
+    private String withdrawalTransactionSummary;
 }

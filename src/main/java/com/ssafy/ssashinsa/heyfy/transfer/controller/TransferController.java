@@ -3,6 +3,7 @@ package com.ssafy.ssashinsa.heyfy.transfer.controller;
 import com.ssafy.ssashinsa.heyfy.account.exception.AccountErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.swagger.docs.ErrorsCommonDocs;
+import com.ssafy.ssashinsa.heyfy.transfer.docs.ForeignTransferDocs;
 import com.ssafy.ssashinsa.heyfy.transfer.docs.TransferDocs;
 import com.ssafy.ssashinsa.heyfy.transfer.dto.*;
 import com.ssafy.ssashinsa.heyfy.transfer.service.TransferService;
@@ -17,7 +18,6 @@ import java.time.ZoneId;
 @Tag(name = "Transfer", description = "이체 관련 API")
 @RequestMapping("/transfers")
 @RequiredArgsConstructor
-@ErrorsCommonDocs
 public class TransferController {
 
     private final TransferService transferService;
@@ -26,7 +26,7 @@ public class TransferController {
     @TransferDocs
     public TransferHistoryResponse transfer(@RequestBody CreateTransferRequest req) {
         EntireTransferResponseDto transferResponse = transferService.callTransfer(
-                req.getDepositAccountNo(), req.getAmount()
+                req.getDepositAccountNo(), req.getAmount(), req.getTransactionSummary()
         );
 
         String withdrawalAccountNo = transferResponse.getREC().get(0).getAccountNo();
@@ -39,6 +39,7 @@ public class TransferController {
                 req.getDepositAccountNo(),
                 req.getAmount(),
                 "KRW",
+                req.getTransactionSummary(),
                 OffsetDateTime.now(ZoneId.of("Asia/Seoul"))
         );
 
@@ -46,10 +47,10 @@ public class TransferController {
     }
 
     @PostMapping("/foreign")
-    @TransferDocs
+    @ForeignTransferDocs
     public TransferHistoryResponse foreignTransfer(@RequestBody CreateTransferRequest req) {
         EntireTransferResponseDto transferResponse = transferService.callForeignTransfer(
-                req.getDepositAccountNo(), req.getAmount()
+                req.getDepositAccountNo(), req.getAmount(), req.getTransactionSummary()
         );
 
         String withdrawalAccountNo = transferResponse.getREC().get(0).getAccountNo();
@@ -62,6 +63,7 @@ public class TransferController {
                 req.getDepositAccountNo(),
                 req.getAmount(),
                 "USD",
+                req.getTransactionSummary(),
                 OffsetDateTime.now(ZoneId.of("Asia/Seoul"))
         );
 

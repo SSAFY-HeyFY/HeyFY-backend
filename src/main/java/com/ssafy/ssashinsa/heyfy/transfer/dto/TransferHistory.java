@@ -5,7 +5,8 @@ import java.time.OffsetDateTime;
 public record TransferHistory(
         String fromAccountMasked,
         String toAccountMasked,
-        Long amount,
+        String amount,
         String currency,
+        String transactionSummary,
         OffsetDateTime completedAt
 ) {}
