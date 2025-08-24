@@ -18,7 +18,7 @@ class RateGraphResponse(BaseModel):
 
 # --- 라우터 생성 ---
 router = APIRouter()
-PREDICTION_CACHE_FILE = "prediction_cache.json"
+PREDICTION_CACHE_FILE = "logs/prediction_cache.json"
 
 @router.get(
     "/rate-graph",

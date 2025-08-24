@@ -26,7 +26,7 @@ class RealtimeRatesResponse(BaseModel):
 
 # --- 라우터 생성 ---
 router = APIRouter()
-REALTIME_CACHE_FILE = "realtime_cache.json"
+REALTIME_CACHE_FILE = "logs/realtime_cache.json"
 
 @router.get(
     "/realtime-rates",

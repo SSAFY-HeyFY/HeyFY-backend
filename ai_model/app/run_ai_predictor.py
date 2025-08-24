@@ -22,7 +22,10 @@ from app.services.exchange_rate_crawler import get_detailed_exchange_rates, Exch
 
 # --- 설정 ---
 MODEL_DIRECTORY = "models/seq_120-pred_1-hidden_128-layers_2-batch_16-lr_0.001-scaler_standard-tag_final_1day"
-PREDICTION_CACHE_FILE = "prediction_cache.json"
+LOGS_DIRECTORY = "logs"
+if not os.path.exists(LOGS_DIRECTORY):
+    os.makedirs(LOGS_DIRECTORY)
+PREDICTION_CACHE_FILE = os.path.join(LOGS_DIRECTORY, "prediction_cache.json")
 
 # --- 스크립트 시작 시 모델 로딩 ---
 if not os.path.exists(MODEL_DIRECTORY):

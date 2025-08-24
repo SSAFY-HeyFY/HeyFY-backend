@@ -30,7 +30,10 @@ except ModuleNotFoundError:
     sys.exit(1) # 오류 발생 시 스크립트 종료
 
 # --- 설정 ---
-REALTIME_CACHE_FILE = "realtime_cache.json"
+LOGS_DIRECTORY = "logs"
+if not os.path.exists(LOGS_DIRECTORY):
+    os.makedirs(LOGS_DIRECTORY)
+REALTIME_CACHE_FILE = os.path.join(LOGS_DIRECTORY, "realtime_cache.json")
 
 def format_rate_data_for_api(raw_data_list, job_timestamp):
     """크롤링된 원본 데이터를 API가 요구하는 최종 Pydantic 모델 형식으로 변환합니다."""
