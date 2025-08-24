@@ -244,5 +244,6 @@ ai_model/data/
 ai_model/models/
 ai_model/outputs/
 ai_model/.vscode/
+ai_model/logs/
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij,eclipse,java,gradle
