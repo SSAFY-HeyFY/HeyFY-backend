@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AccountBalanceResponseDto {
     private String  accountNo;
-    private int accountBalance;
+    private Double accountBalance;
     private String currency;
     private boolean isForeign;
 }

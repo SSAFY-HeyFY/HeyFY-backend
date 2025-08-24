@@ -1,12 +1,13 @@
 spring:
   jwt:
     secret: c6f1a8e2b7d4c90e5f3b2a8d7e6c1a5b9d3f8e0c4b6a7d8e9f2a4c1b5d3a7e9c  # 테스트용. 운영은 외부 주입
-    access-expiration: 3600000   # 1시간
+    access-expiration: 36000000   # 1시간
     refresh-expiration: 604800000 # 7일
 
-  redis:
-    host: localhost
-    port: 6379
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -32,10 +33,12 @@ spring:
       hibernate:
         format_sql: true
     hibernate:
-      ddl-auto: create   # 개발용. 운영은 validate 또는 none 권장
+      ddl-auto: update   # 개발용. 운영은 validate 또는 none 권장
 
 shinhan:
-  manger-key:  #개인용 키. 각자 바꿔서 사용
+  manager-key:  5ac39367772c40fbb6ddf55b310b6b2c #개인용 키. 각자 바꿔서 사용
+  #  temp-user-key : d044a266-31e2-4718-9c56-d6dea65289ff
+  account-type-unique-no : 001-1-0b4c3eb2c5f84c  # <----- 넣을 녀석
 
 springdoc:
   default-produces-media-type: application/json
@@ -48,7 +51,7 @@ springdoc:
 ssafy:
   fin-api:
     base-url: "https://finopenapi.ssafy.io"
-    api-key: "654a1e9f8242492f8d75f5782d93381c"
+    api-key: "5ac39367772c40fbb6ddf55b310b6b2c"
 
 logging:
   # 콘솔 로그에 traceId(MDC) 노출
@@ -66,10 +69,14 @@ logbook:
   filter:
     exclude:
       - /actuator/**
+      - /swagger-ui
       - /swagger-ui/**
+      - /api-docs
       - /api-docs/**
       - /error
       - /favicon.ico
+      - /exchange-rates
+      - /exchange-rates/**
   # 헤더/쿼리 파라미터 마스킹(***로 치환)
   obfuscate:
     headers:
@@ -86,7 +93,9 @@ logbook:
 external:
   apis:
     common:
-      manager-key:
+      manager-key: 5ac39367772c40fbb6ddf55b310b6b2c
+      account-type-unique-no : 001-1-0b4c3eb2c5f84c
+      foreign-account-type-unique-no : 001-1-1668576217274c
     domains:
       edu:
         base-url: https://finopenapi.ssafy.io/ssafy/api/v1/edu  # 교육 관련 API 기본 URL

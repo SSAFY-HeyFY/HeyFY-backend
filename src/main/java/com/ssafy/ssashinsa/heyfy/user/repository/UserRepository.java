@@ -22,4 +22,12 @@ public interface UserRepository extends JpaRepository<Users, Ulid> {
             WHERE LOWER(u.email) = LOWER(:email)
             """)
     Optional<AccountPairDto> findAccountsByUserEmail(@Param("email") String email);
+
+    @Query("""
+            SELECT u FROM Users u
+            JOIN FETCH u.account a
+            JOIN FETCH u.foreignAccount fa
+            WHERE LOWER(u.studentId) = LOWER(:studentId)
+            """)
+    Optional<Users> findUserWithAccountsByStudentId(@Param("studentId") String studentId);
 }
