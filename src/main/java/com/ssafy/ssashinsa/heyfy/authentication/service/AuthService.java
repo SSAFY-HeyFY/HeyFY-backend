@@ -128,11 +128,7 @@ public class AuthService {
     }
 
     public String createTxnAuthToken() {
-        String studentId = SecurityUtil.getCurrentStudentId();
-        if (studentId == null) {
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
-        return txnAuthTokenUtil.createTxnAuthToken(studentId);
+        return txnAuthTokenUtil.createTxnAuthToken();
     }
 
     public void verifySecondaryAuth(String pinNumber, String txnAuthToken) {
@@ -141,12 +137,9 @@ public class AuthService {
             throw new CustomException(AuthErrorCode.UNAUTHORIZED);
         }
 
-        Users currentUser = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new CustomException(AuthErrorCode.UNAUTHORIZED));
+        txnAuthTokenUtil.verifySecondaryAuth(pinNumber, txnAuthToken);
 
-        txnAuthTokenUtil.verifySecondaryAuth(studentId, pinNumber, currentUser, txnAuthToken);
 
-        redisUtil.deleteTxnAuthToken("txnAuth:" + studentId);
     }
 
     private void validateRefreshToken(String refreshToken) {

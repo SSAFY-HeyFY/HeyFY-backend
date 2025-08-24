@@ -26,7 +26,7 @@ public enum AuthErrorCode implements ErrorCode {
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."), 
     MISSING_TXN_AUTH_TOKEN(HttpStatus.BAD_REQUEST, "거래 인증 토큰이 포함되지 않았습니다."),
     EXPIRED_TXN_AUTH_TOKEN(HttpStatus.BAD_REQUEST, "거래 인증이 만료되었습니다."),
-    INVALID_TXN_AUTH_TOKEN(HttpStatus.BAD_REQUEST, "거래 인증 유효하지 않습니다."),
+    INVALID_TXN_AUTH_TOKEN(HttpStatus.BAD_REQUEST, "거래 인증이 유효하지 않습니다."),
     INVALID_PIN_NUMBER(HttpStatus.BAD_REQUEST, "2차 비밀번호가 일치하지 않습니다."),;
 
     private final HttpStatus httpStatus;
