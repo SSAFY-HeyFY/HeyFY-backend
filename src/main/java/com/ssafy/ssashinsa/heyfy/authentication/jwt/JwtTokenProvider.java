@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
@@ -87,6 +88,18 @@ public class JwtTokenProvider {
         } catch (JWTVerificationException e) {
             throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
         }
+    }
+
+    public String createTxnAuthToken(String studentId, String jti, long expiration, TimeUnit timeUnit) {
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + timeUnit.toMillis(expiration));
+
+        return JWT.create()
+                .withSubject(studentId)
+                .withClaim("jti", jti)
+                .withIssuedAt(now)
+                .withExpiresAt(validity)
+                .sign(Algorithm.HMAC256(secretKey));
     }
 
 

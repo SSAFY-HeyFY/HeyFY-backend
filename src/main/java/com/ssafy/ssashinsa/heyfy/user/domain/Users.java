@@ -44,6 +44,9 @@ public class Users {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "pin_number")
+    private String pinNumber;
+
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
@@ -52,6 +55,7 @@ public class Users {
 
     @Column(name = "univ_name")
     private String univName;
+
 
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)

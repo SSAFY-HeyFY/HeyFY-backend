@@ -3,6 +3,7 @@ package com.ssafy.ssashinsa.heyfy.authentication.service;
 import com.ssafy.ssashinsa.heyfy.authentication.controller.AuthController;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
+import com.ssafy.ssashinsa.heyfy.common.util.TxnAuthTokenUtil;
 import com.ssafy.ssashinsa.heyfy.register.service.RegisterService;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
@@ -36,6 +37,7 @@ public class AuthService {
     private final RedisUtil redisUtil;
     private final ShinhanApiService shinhanApiService;
     private final RegisterService registerService;
+    private final TxnAuthTokenUtil txnAuthTokenUtil;
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     public SignInSuccessDto signIn(SignInDto signInDto) {
@@ -73,6 +75,8 @@ public class AuthService {
         });
 
         String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
+        String encodedPinNumber = passwordEncoder.encode(signUpDto.getPinNumber());
+
 
         String userKey;
         try {
@@ -86,6 +90,7 @@ public class AuthService {
                 .studentId(signUpDto.getStudentId())
                 .password(encodedPassword)
                 .name(signUpDto.getName())
+                .pinNumber(encodedPinNumber)
                 .email(signUpDto.getEmail())
                 .language(signUpDto.getLanguage())
                 .univName(signUpDto.getUnivName())
@@ -121,7 +126,29 @@ public class AuthService {
 
         return new TokenDto(newAccessToken, newRefreshToken);
     }
-    // RefreshToken 유효성 검증
+
+    public String createTxnAuthToken() {
+        String studentId = SecurityUtil.getCurrentStudentId();
+        if (studentId == null) {
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+        return txnAuthTokenUtil.createTxnAuthToken(studentId);
+    }
+
+    public void verifySecondaryAuth(String pinNumber, String txnAuthToken) {
+        String studentId = SecurityUtil.getCurrentStudentId();
+        if (studentId == null) {
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+
+        Users currentUser = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.UNAUTHORIZED));
+
+        txnAuthTokenUtil.verifySecondaryAuth(studentId, pinNumber, currentUser, txnAuthToken);
+
+        redisUtil.deleteTxnAuthToken("txnAuth:" + studentId);
+    }
+
     private void validateRefreshToken(String refreshToken) {
         if (refreshToken == null || refreshToken.isEmpty()) {
             throw new CustomException(AuthErrorCode.MISSING_REFRESH_TOKEN);
@@ -133,7 +160,6 @@ public class AuthService {
         }
     }
 
-    // RefreshToken이 redis에 저장되어 있는지 검증
     private void validateRefreshTokenInRedis(String refreshTokenUsername, String refreshToken) {
         String redisRefreshToken = redisUtil.getRefreshToken(refreshTokenUsername);
         if (redisRefreshToken == null || !redisRefreshToken.equals(refreshToken)) {
@@ -141,7 +167,6 @@ public class AuthService {
         }
     }
 
-    // AccessToken 유효성 검증, AccessToken 만료여부 확인, AccessToken과 refreshToken 비교
     private void validateAccessTokenAndUserMatch(String authorizationHeader, String refreshToken) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             throw new CustomException(AuthErrorCode.MISSING_ACCESS_TOKEN);
