@@ -1,7 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.user.repository;
 
 
-import com.github.f4b6a3.ulid.Ulid;
 import com.ssafy.ssashinsa.heyfy.account.dto.AccountPairDto;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import feign.Param;
@@ -10,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<Users, Ulid> {
+public interface UserRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByStudentId(String username);
     Optional<Users> findByEmail(String email);
 
