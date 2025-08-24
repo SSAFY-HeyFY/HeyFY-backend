@@ -11,7 +11,7 @@ import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanExchangeRe
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanInquireDemandDepositAccountBalanceResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanUpdateAccountResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.exception.ExchangeErrorCode;
-import com.ssafy.ssashinsa.heyfy.exchange.util.ShinhanExchangeApiClient;
+import com.ssafy.ssashinsa.heyfy.exchange.util.ShinhanExchangeClient;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ExchangeService {
 
-    private final ShinhanExchangeApiClient apiClient;
+    private final ShinhanExchangeClient apiClient;
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final ForeignAccountRepository foreignAccountRepository;
