@@ -1,24 +1,28 @@
 import os
 import json
+from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 
 # --- Pydantic 모델 정의 ---
-# [수정됨] exchange_rate_crawler.py의 출력과 UI에 필요한 정보를 바탕으로 모델을 재정의합니다.
-# 이 모델은 스케줄러가 생성하고 API가 반환할 최종 데이터 형식을 정의합니다.
 class ExchangeRateDetail(BaseModel):
-    updated_at: str         # 데이터 업데이트 시각 (ISO 8601 형식)
-    currency: str      # 통화 코드 (예: "USD")
-    rate: str             # 현재 환율 (매매기준율)
+    updated_at: str         # 데이터 업데이트 시각 (API 호출 시점으로 덮어쓰기 됨)
+    currency: str           # 통화 코드 (예: "USD")
+    rate: str               # 현재 환율 (매매기준율)
     change_direction: str
-    change_abs: str       # 전일 대비 변동액 (예: 10.50)
-    change_pct: str       # 전일 대비 등락률 (예: 2.3)
+    change_abs: str         # 전일 대비 변동액 (예: "10.50")
+    change_pct: str         # 전일 대비 등락률 (예: "2.30")
     cash_buy: Optional[str] = None
     cash_sell: Optional[str] = None
     wire_send: Optional[str] = None
     wire_receive: Optional[str] = None
     provider: str           # 정보 제공처 (예: "Naver-Shinhan")
+
+# [추가됨] API 최종 응답을 위한 Wrapper 모델
+class RealtimeRatesResponse(BaseModel):
+    api_called_at: str      # API가 호출된 시각
+    data: List[ExchangeRateDetail]
 
 # --- 라우터 생성 ---
 router = APIRouter()
@@ -26,15 +30,17 @@ REALTIME_CACHE_FILE = "realtime_cache.json"
 
 @router.get(
     "/realtime-rates",
-    response_model=List[ExchangeRateDetail],
+    # [수정됨] 응답 모델을 새로운 Wrapper 모델로 변경
+    response_model=RealtimeRatesResponse,
     summary="주요 통화 실시간 시세 조회 (캐시 기반)",
     description="스케줄러가 주기적으로 크롤링하여 저장한 JSON 캐시 파일에서 환율 정보를 신속하게 조회합니다."
 )
 def get_current_detailed_rates_from_cache():
     """
     [수정된 로직]
-    실시간으로 크롤링하는 대신, 미리 생성된 'realtime_cache.json' 파일을 읽어 반환합니다.
-    이를 통해 API 응답 속도를 크게 향상시킵니다.
+    1. 미리 생성된 'realtime_cache.json' 파일을 읽습니다.
+    2. API가 호출된 현재 시각을 기록합니다.
+    3. 캐시 데이터의 updated_at을 현재 시각으로 덮어쓴 후, 전체를 Wrapper 모델에 담아 반환합니다.
     """
     if not os.path.exists(REALTIME_CACHE_FILE):
         raise HTTPException(
@@ -44,13 +50,25 @@ def get_current_detailed_rates_from_cache():
 
     try:
         with open(REALTIME_CACHE_FILE, 'r', encoding='utf-8') as f:
-            # 캐시 파일의 최상위 키가 'data'일 것을 가정합니다.
-            cache_data = json.load(f).get('data', [])
+            cache_data_list = json.load(f).get('data', [])
         
-        # Pydantic 모델을 사용하여 데이터 유효성 검증 후 반환
-        return [ExchangeRateDetail(**item) for item in cache_data]
+        # [추가됨] API 호출 시점의 타임스탬프 생성
+        api_call_time = datetime.now()
+        api_call_time_iso = api_call_time.isoformat()
+
+        processed_data = []
+        for item in cache_data_list:
+            # 캐시의 타임스탬프 대신 API 호출 시점으로 덮어쓰기
+            item['updated_at'] = api_call_time_iso
+            processed_data.append(ExchangeRateDetail(**item))
+        
+        # 최종 응답 모델에 담아 반환
+        return RealtimeRatesResponse(
+            api_called_at=api_call_time_iso,
+            data=processed_data
+        )
+
     except json.JSONDecodeError:
         raise HTTPException(status_code=500, detail="캐시 파일을 파싱하는 데 실패했습니다.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"데이터 처리 중 오류 발생: {e}")
-
