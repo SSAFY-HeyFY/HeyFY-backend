@@ -137,6 +137,7 @@ def parse_google_finance_vnd() -> Optional[ExchangeRateDetail]:
                 aria = (pct_span.get("aria-label") or "").lower()
                 if "상승" in aria or "up" in aria: change_dir = "▲"
                 elif "하락" in aria or "down" in aria: change_dir = "▼"
+                else: change_dir = "-"
                 change_pct = _extract_number(pct_span.get_text(strip=True))
             
             abs_span = change_container.select_one('span.P2Luy')

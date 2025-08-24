@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 # app/routers 폴더에서 각 기능별로 만든 라우터 파일을 가져옵니다.
-from app.routers import realtime_rates, rate_graph
+from app.routers import realtime_rates, rate_graph, rate_graph2
 
 # --- 1. FastAPI 앱 생성 ---
 # API의 이름, 설명, 버전 등 기본 정보를 설정합니다.
@@ -17,15 +17,22 @@ app = FastAPI(
 # (A) 실시간 환율 API 라우터 포함
 app.include_router(
     realtime_rates.router,
-    prefix="/api/v1",  # 이 라우터의 모든 API는 /api/v1/ 로 시작됩니다. (예: /api/v1/realtime-rates)
+    prefix="/fastapi",  # 이 라우터의 모든 API는 /fastapi/v1/ 로 시작됩니다. (예: /fastapi/v1/realtime-rates)
     tags=["실시간 환율 (Real-time Rates)"] # API 문서에서 보여줄 그룹 이름입니다.
 )
 
 # (B) 그래프용 데이터 API 라우터 포함
 app.include_router(
     rate_graph.router,
-    prefix="/api/v1", # 이 라우터의 모든 API도 /api/v1/ 로 시작됩니다. (예: /api/v1/rate-graph)
+    prefix="/fastapi", # 이 라우터의 모든 API도 /fastapi/v1/ 로 시작됩니다. (예: /fastapi/v1/rate-graph)
     tags=["환율 그래프 (Rate Graph with AI Prediction)"]
+)
+
+# (C 그래프용 데이터 + AI 예측 문구 API 라우터 포함
+app.include_router(
+    rate_graph2.router,
+    prefix="/fastapi", # 이 라우터의 모든 API도 /fastapi/v1/ 로 시작됩니다. (예: /fastapi/v1/rate-graph2)
+    tags=["환율 그래프 및 AI 예측 문구 (Rate Graph with AI Prediction)"]
 )
 
 # --- 3. 루트 엔드포인트 ---

@@ -2,9 +2,11 @@ import os
 import sys
 import json
 import asyncio
-from datetime import datetime, timedelta
+import yfinance as yf
 import pandas as pd
 import FinanceDataReader as fdr
+
+from datetime import datetime, timedelta
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -34,13 +36,20 @@ async def run_and_cache_prediction_async():
     # 1. AI 모델 입력 데이터 준비 (과거 + 현재)
     seq_len = predictor.config['sequence_length'] # 모델이 필요로 하는 데이터 길이 (예: 90)
     yesterday = datetime.now() - timedelta(days=1)
-    start_date_fetch = yesterday - timedelta(days=seq_len + 100) # 넉넉하게 조회
+    start_date_fetch = yesterday - timedelta(days=seq_len * 2) # 넉넉하게 조회
 
     try:
         # ⭐️ 데이터 전처리 로직 수정 ⭐️
-        # 1.1. FinanceDataReader로 USD/KRW 데이터 로드
-        df_inv = fdr.DataReader("USD/KRW", start_date_fetch, yesterday)
+        # 1.1. yfinance에서 KRW=X 데이터 로드
+        df_inv = yf.download("KRW=X", start=start_date_fetch, end=yesterday)
+        df_inv.columns = df_inv.columns.droplevel('Ticker')
+        df_inv = df_inv[['Close']]
         df_inv.rename(columns={'Close': 'Inv_Close'}, inplace=True)
+        df_inv.columns.name = None
+        print(df_inv.tail())
+        quit()
+        ##df_inv = fdr.DataReader("USD/KRW", start_date_fetch, yesterday)
+        ##df_inv.rename(columns={'Close': 'Inv_Close'}, inplace=True)
 
         # 1.2. ECOS 한국은행 기준환율 데이터 로드
         df_ecos = fdr.DataReader('ECOS-KEYSTAT:K152', start_date_fetch, yesterday)
