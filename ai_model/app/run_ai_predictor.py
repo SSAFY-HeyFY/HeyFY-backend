@@ -18,7 +18,7 @@ from predict_rate_model import Predictor
 from app.services.exchange_rate_crawler import get_detailed_exchange_rates
 
 # --- 설정 ---
-MODEL_DIRECTORY = "models/seq_90-pred_3-hidden_128-layers_2-batch_16-lr_0.0005-scaler_standard-tag_supersimpleAdamWRates2layer"
+MODEL_DIRECTORY = "models/seq_120-pred_1-hidden_196-layers_2-batch_16-lr_0.0005-scaler_standard-tag_realGapSuperSimple_15years120days"
 PREDICTION_CACHE_FILE = "prediction_cache.json"
 
 # --- 스크립트 시작 시 모델 로딩 (메모리에 한 번만) ---
@@ -46,8 +46,8 @@ async def run_and_cache_prediction_async():
         df_inv = df_inv[['Close']]
         df_inv.rename(columns={'Close': 'Inv_Close'}, inplace=True)
         df_inv.columns.name = None
-        print(df_inv.tail())
-        quit()
+        #print(df_inv.tail())
+        #quit()
         ##df_inv = fdr.DataReader("USD/KRW", start_date_fetch, yesterday)
         ##df_inv.rename(columns={'Close': 'Inv_Close'}, inplace=True)
 
@@ -71,8 +71,8 @@ async def run_and_cache_prediction_async():
 
         ####✍️ 시간대별로 오늘자 'Inv_Close', 'ECOS_Close' 데이터 어떻게 채워넣어야 할지 로직 고민 필요
         # 오늘 데이터에 Inv_Close만 존재, ECOS_Close는 NaN
-        df_today = pd.DataFrame({'Inv_Close': [today_rate_detail.rate]}, index=[today_index])
-        
+        df_today = pd.DataFrame({'Inv_Close': [today_rate_detail.rate], 'ECOS_Close': [today_rate_detail.rate]}, index=[today_index])
+        print(df_today)
         # 1.5. 과거 데이터와 오늘 데이터 합치기
         df_combined = pd.concat([df_merged, df_today])
         # 다시 한번 Forward Fill을 통해 오늘의 ECOS_Close 값을 어제 값으로 채움
@@ -93,33 +93,55 @@ async def run_and_cache_prediction_async():
         return
 
     # 2. 예측 수행
+    print("📈 모델 예측을 수행합니다...")
     predicted_prices = predictor.predict(input_df)
+    print(f"📊 예측 결과 (raw): {predicted_prices}")
 
-    # 3. 예측 결과 가공 및 저장
+    # 3. 예측 결과 가공 및 JSON 파일로 저장
     last_date = input_df.index[-1]
-    last_rate = input_df['ECOS_Close'][-1]
-    
-    predictions_for_api = []
-    # 그래프 연결을 위해 마지막 실제 데이터를 첫 예측값으로 추가
-    predictions_for_api.append({
-        "date": last_date.strftime('%Y-%m-%d'),
-        "currency": "USDKRW",
-        "rate": round(last_rate, 2),
-        "is_prediction": True
-    })
 
-    for i, price in enumerate(predicted_prices):
-        pred_date = last_date + timedelta(days=i + 1)
+    # 3.1. API 응답을 위해 과거 30일치 ECOS 매매기준율 데이터 준비
+    df_historical_30d = df_combined[['ECOS_Close']].tail(30)
+    
+    historical_points = []
+    for date, row in df_historical_30d.iterrows():
+        historical_points.append({
+            "date": date.strftime('%Y-%m-%d'),
+            "rate": round(row['ECOS_Close'], 2),
+            "is_prediction": False
+        })
+    
+    # [수정됨] 3.2. Inv_Close로 값을 덮어쓰는 로직을 제거했습니다.
+    # 이제 historical_points의 마지막 값은 항상 ECOS_Close의 마지막 값이 됩니다.
+    print(f"✅ 과거 데이터의 마지막 지점은 ECOS_Close 값({historical_points[-1]['rate']:.2f})을 유지합니다.")
+
+    # 3.3. 예측 결과를 historical_points 리스트에 추가
+    predictions_for_api = historical_points
+
+    # [수정됨] 3.3.1. 그래프 연결을 위한 '브릿지' 포인트 추가
+    # historical_points에 데이터가 있는 경우, 마지막 포인트를 복사하여 is_prediction=true로 설정한 후 추가합니다.
+    if historical_points:
+        bridge_point = historical_points[-1].copy()
+        bridge_point['is_prediction'] = True
+        predictions_for_api.append(bridge_point)
+        print(f"✅ 그래프 연결을 위해 브릿지 포인트({bridge_point['date']})를 추가했습니다.")
+    
+    if predicted_prices.size > 0:
+        price = predicted_prices[0]
+        pred_date = last_date + timedelta(days=1)
         predictions_for_api.append({
             "date": pred_date.strftime('%Y-%m-%d'),
-            "currency": "USDKRW",
             "rate": round(float(price), 2),
             "is_prediction": True
         })
-        
+        print(f"✅ 예측 결과({pred_date.strftime('%Y-%m-%d')})를 과거 데이터에 추가했습니다.")
+    else:
+        print("❌ 예측 결과가 비어있어 추가하지 못했습니다.")
+            
+    # 3.4. 최종 데이터를 JSON 파일로 저장
     cache_data = {
         "updated_at": datetime.now().isoformat(),
-        "predictions": predictions_for_api
+        "predictions": predictions_for_api # 이제 이 변수는 과거 데이터 + 예측 데이터를 모두 포함
     }
 
     with open(PREDICTION_CACHE_FILE, 'w', encoding='utf-8') as f:
