@@ -1,24 +1,56 @@
-from fastapi import APIRouter
-from typing import List
-# 1단계에서 리팩토링한 크롤링 서비스와 데이터 모델을 가져옵니다.
-from app.services.exchange_rate_crawler import get_detailed_exchange_rates, ExchangeRateDetail
+import os
+import json
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import List, Optional
+
+# --- Pydantic 모델 정의 ---
+# [수정됨] exchange_rate_crawler.py의 출력과 UI에 필요한 정보를 바탕으로 모델을 재정의합니다.
+# 이 모델은 스케줄러가 생성하고 API가 반환할 최종 데이터 형식을 정의합니다.
+class ExchangeRateDetail(BaseModel):
+    updated_at: str         # 데이터 업데이트 시각 (ISO 8601 형식)
+    currency: str      # 통화 코드 (예: "USD")
+    rate: str             # 현재 환율 (매매기준율)
+    change_direction: str
+    change_abs: str       # 전일 대비 변동액 (예: 10.50)
+    change_pct: str       # 전일 대비 등락률 (예: 2.3)
+    cash_buy: Optional[str] = None
+    cash_sell: Optional[str] = None
+    wire_send: Optional[str] = None
+    wire_receive: Optional[str] = None
+    provider: str           # 정보 제공처 (예: "Naver-Shinhan")
 
 # --- 라우터 생성 ---
-# 이 파일의 API 엔드포인트들을 그룹화합니다.
 router = APIRouter()
+REALTIME_CACHE_FILE = "realtime_cache.json"
 
-# --- API 엔드포인트 정의 ---
 @router.get(
     "/realtime-rates",
     response_model=List[ExchangeRateDetail],
-    summary="실시간 상세 환율 조회",
-    description="네이버 금융과 구글 금융에서 USD, CNY, VND의 현재 원화 환율 및 상세 고시 정보를 실시간으로 크롤링하여 제공합니다."
+    summary="주요 통화 실시간 시세 조회 (캐시 기반)",
+    description="스케줄러가 주기적으로 크롤링하여 저장한 JSON 캐시 파일에서 환율 정보를 신속하게 조회합니다."
 )
-async def get_current_detailed_rates():
+def get_current_detailed_rates_from_cache():
     """
-    정의된 모든 통화(USD, CNY, VND)의 상세 환율 정보를 비동기적으로 가져옵니다.
-    - USD, CNY: 네이버 금융 (신한은행 고시 기준)
-    - VND: 구글 금융
+    [수정된 로직]
+    실시간으로 크롤링하는 대신, 미리 생성된 'realtime_cache.json' 파일을 읽어 반환합니다.
+    이를 통해 API 응답 속도를 크게 향상시킵니다.
     """
-    detailed_rates = await get_detailed_exchange_rates()
-    return detailed_rates
+    if not os.path.exists(REALTIME_CACHE_FILE):
+        raise HTTPException(
+            status_code=404, 
+            detail=f"'{REALTIME_CACHE_FILE}'을 찾을 수 없습니다. 실시간 환율 스케줄러가 아직 실행되지 않았을 수 있습니다."
+        )
+
+    try:
+        with open(REALTIME_CACHE_FILE, 'r', encoding='utf-8') as f:
+            # 캐시 파일의 최상위 키가 'data'일 것을 가정합니다.
+            cache_data = json.load(f).get('data', [])
+        
+        # Pydantic 모델을 사용하여 데이터 유효성 검증 후 반환
+        return [ExchangeRateDetail(**item) for item in cache_data]
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="캐시 파일을 파싱하는 데 실패했습니다.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"데이터 처리 중 오류 발생: {e}")
+
