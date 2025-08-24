@@ -19,7 +19,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 # 크롤링 결과의 데이터 구조를 명확하게 정의합니다.
 class ExchangeRateDetail(BaseModel):
     updated_at: datetime
-    currency_code: str
+    currency: str
     provider: str
     source_url: str    
     rate: float  # 매매 기준율 또는 현재가
@@ -103,7 +103,7 @@ async def parse_naver_finance(client: httpx.AsyncClient, code: str) -> Optional[
             if len(ems) >= 2: change_pct = _to_float(_icon_text_to_str(ems[1]))
 
         return ExchangeRateDetail(
-            updated_at=datetime.now(), currency_code=code, provider="Naver-Shinhan", source_url=url,
+            updated_at=datetime.now(), currency=code, provider="Naver-Shinhan", source_url=url,
             rate=f"{rate:.2f}", cash_buy=f"{cash_buy:.2f}", cash_sell=f"{cash_sell:.2f}",
             wire_send=f"{wire_send:.2f}", wire_receive=f"{wire_receive:.2f}",
             change_direction=change_dir, change_abs=f"{change_abs:.2f}", change_pct=f"{change_pct:.2f}"
@@ -117,6 +117,8 @@ def parse_google_finance_vnd() -> Optional[ExchangeRateDetail]:
     url = GOOGLE_URLS["VNDKRW"]
     service = Service(ChromeDriverManager().install())
     options = webdriver.ChromeOptions()
+    options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    options.add_argument("--log-level=3")
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
@@ -149,7 +151,7 @@ def parse_google_finance_vnd() -> Optional[ExchangeRateDetail]:
                 if change_abs > 0: change_abs *= -1
 
         return ExchangeRateDetail(
-            updated_at=datetime.now(), currency_code="VNDKRW", provider="Google Finance", source_url=url, 
+            updated_at=datetime.now(), currency="VNDKRW", provider="Google Finance", source_url=url, 
             rate=f"{rate:g}", change_direction=change_dir, change_abs=f"{change_abs:.6f}", change_pct=f"{change_pct:g}"
         )
     except Exception as e:
@@ -180,6 +182,6 @@ if __name__ == "__main__":
     async def main():
         rates = await get_detailed_exchange_rates()
         for rate_info in rates:
-            print(f"통화: {rate_info.currency_code}, 기준가: {rate_info.rate:,.4f}원, 전일대비: {rate_info.change_direction}{rate_info.change_abs} 등락률: {rate_info.change_pct}")
+            print(f"통화: {rate_info.currency}, 기준가: {rate_info.rate:,.4f}원, 전일대비: {rate_info.change_direction}{rate_info.change_abs} 등락률: {rate_info.change_pct}")
 
     asyncio.run(main())
