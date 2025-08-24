@@ -17,21 +17,21 @@ app = FastAPI(
 # (A) 실시간 환율 API 라우터 포함
 app.include_router(
     realtime_rates.router,
-    prefix="/fastapi",  # 이 라우터의 모든 API는 /fastapi/v1/ 로 시작됩니다. (예: /fastapi/v1/realtime-rates)
+    prefix="/fastapi",  # 이 라우터의 모든 API는 /fastapi 로 시작됩니다. (예: /fastapi/realtime-rates)
     tags=["실시간 환율 (Real-time Rates)"] # API 문서에서 보여줄 그룹 이름입니다.
 )
 
 # (B) 그래프용 데이터 API 라우터 포함
 app.include_router(
     rate_graph.router,
-    prefix="/fastapi", # 이 라우터의 모든 API도 /fastapi/v1/ 로 시작됩니다. (예: /fastapi/v1/rate-graph)
+    prefix="/fastapi", # 이 라우터의 모든 API도 /fastapi 로 시작됩니다. (예: /fastapi/rate-graph)
     tags=["환율 그래프 (Rate Graph with AI Prediction)"]
 )
 
 # (C 그래프용 데이터 + AI 예측 문구 API 라우터 포함
 app.include_router(
     rate_graph2.router,
-    prefix="/fastapi", # 이 라우터의 모든 API도 /fastapi/v1/ 로 시작됩니다. (예: /fastapi/v1/rate-graph2)
+    prefix="/fastapi", # 이 라우터의 모든 API도 /fastapi 로 시작됩니다. (예: /fastapi/rate-graph-ai)
     tags=["환율 그래프 및 AI 예측 문구 (Rate Graph with AI Prediction)"]
 )
 
