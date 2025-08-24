@@ -3,7 +3,7 @@ package com.ssafy.ssashinsa.heyfy.register.controller;
 import com.ssafy.ssashinsa.heyfy.register.docs.CreateDepositAccountDocs;
 import com.ssafy.ssashinsa.heyfy.register.docs.CreateForeignDepositAccountDocs;
 import com.ssafy.ssashinsa.heyfy.register.dto.AccountCreationResponseDto;
-import com.ssafy.ssashinsa.heyfy.register.dto.ShinhanCreateDepositResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.create.ShinhanCreateDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.register.service.RegisterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

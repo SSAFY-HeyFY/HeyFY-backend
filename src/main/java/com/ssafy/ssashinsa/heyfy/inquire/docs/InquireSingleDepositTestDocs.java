@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.inquire.docs;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
-import com.ssafy.ssashinsa.heyfy.inquire.dto.ShinhanInquireSingleDepositResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireSingleDepositResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

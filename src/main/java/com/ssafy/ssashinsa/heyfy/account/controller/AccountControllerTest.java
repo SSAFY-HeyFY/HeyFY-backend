@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.account.controller;
 
-import com.ssafy.ssashinsa.heyfy.account.dto.AccountAuthResponseDto;
-import com.ssafy.ssashinsa.heyfy.account.dto.InquireTransactionHistoryResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.auth.AccountAuthResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.InquireTransactionHistoryResponseDto;
 import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

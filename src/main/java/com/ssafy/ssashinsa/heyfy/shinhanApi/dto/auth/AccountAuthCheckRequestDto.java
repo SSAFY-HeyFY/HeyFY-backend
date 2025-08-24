@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan;
+package com.ssafy.ssashinsa.heyfy.shinhanApi.dto.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.common.ShinhanCommonRequestHeaderDto;
@@ -7,11 +7,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExchangeRateRequestDto {
+public class AccountAuthCheckRequestDto {
     @JsonProperty("Header")
     private ShinhanCommonRequestHeaderDto Header;
+    private String accountNo;
+    private String authText;
+    private String authCode;
 }

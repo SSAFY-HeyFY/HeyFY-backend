@@ -10,7 +10,7 @@ import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
 import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanUserResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.member.ShinhanUserResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.service.ShinhanApiService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan;
+package com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.common.ShinhanCommonResponseHeaderDto;
@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShinhanInquireDemandDepositAccountBalanceResponseDto {
+public class ShinhanInquireSingleDepositResponseDto {
     @JsonProperty("Header")
     ShinhanCommonResponseHeaderDto Header;
     @JsonProperty("REC")
-    private ShinhanInquireDemandDepositAccountBalanceResponseRecDto REC;
+    private ShinhanInquireDepositResponseRecDto REC;
 }

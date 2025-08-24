@@ -1,21 +1,20 @@
-package com.ssafy.ssashinsa.heyfy.transfer.dto;
+package com.ssafy.ssashinsa.heyfy.shinhanApi.dto.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.common.ShinhanCommonResponseHeaderDto;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.transfer.TransferResponseDto;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EntireTransferResponseDto {
+public class AccountAuthCheckResponseDto {
     @JsonProperty("Header")
     private ShinhanCommonResponseHeaderDto Header;
     @JsonProperty("REC")
-    private List<TransferResponseDto> REC = new ArrayList<>();
+    private AccountAuthCheckResponseRecDto REC;
 }
