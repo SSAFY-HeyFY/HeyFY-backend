@@ -237,3 +237,5 @@ gradle-app.setting
 **/application-secret.yml
 **/application.yml
 **/application-local.yml
+
+*.p12
