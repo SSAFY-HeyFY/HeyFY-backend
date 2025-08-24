@@ -14,4 +14,5 @@ public class ExchangeRateDto {
     private String currency;
     private String date;
     private double exchangeRate;
+    private double fluctuationRate;
 }

@@ -36,7 +36,7 @@ public class ShinhanExchangeApiClient {
         }
     }
 
-    public ShinhanExchangeResponseDto exchange(String accountNo, String exchangeCurrency, Long exchangeAmount, String userKey) {
+    public ShinhanExchangeResponseDto exchange(String accountNo, String exchangeCurrency, Double exchangeAmount, String userKey) {
         ShinhanExchangeRequestDto requestDto = createExchangeRequestDto(accountNo, exchangeCurrency, exchangeAmount, userKey);
         logRequest(requestDto);
         ShinhanExchangeResponseDto response = apiClient.getClient("edu")
@@ -76,13 +76,13 @@ public class ShinhanExchangeApiClient {
         return response;
     }
 
-    private ShinhanExchangeRequestDto createExchangeRequestDto(String accountNo, String exchangeCurrency, Long exchangeAmount, String userKey) {
+    private ShinhanExchangeRequestDto createExchangeRequestDto(String accountNo, String exchangeCurrency, Double exchangeAmount, String userKey) {
         String apiKey = apiClient.getManagerKey();
         return ShinhanExchangeRequestDto.builder()
                 .Header(shinhanApiUtil.createHeaderDto("exchange", "exchange", apiKey, userKey))
                 .accountNo(accountNo)
                 .exchangeCurrency(exchangeCurrency)
-                .exchangeAmount(exchangeAmount)
+                .exchangeAmount(String.valueOf(exchangeAmount.intValue()))
                 .build();
     }
 
@@ -102,7 +102,7 @@ public class ShinhanExchangeApiClient {
                 .build();
     }
 
-    private ShinhanUpdateAccountRequestDto createUpdateAccountRequestDto(String accountNo, Long transactionBalance, String userKey) {
+    private ShinhanUpdateAccountRequestDto createUpdateAccountRequestDto(String accountNo, Double transactionBalance, String userKey) {
         String apiKey = apiClient.getManagerKey();
         return ShinhanUpdateAccountRequestDto.builder()
                 .Header(shinhanApiUtil.createHeaderDto("updateDemandDepositAccountDeposit", "updateDemandDepositAccountDeposit", apiKey, userKey))
@@ -111,7 +111,7 @@ public class ShinhanExchangeApiClient {
                 .build();
     }
 
-    private ShinhanUpdateAccountRequestDto createUpdateForeignAccountRequestDto(String accountNo, Long transactionBalance, String userKey) {
+    private ShinhanUpdateAccountRequestDto createUpdateForeignAccountRequestDto(String accountNo, Double transactionBalance, String userKey) {
         String apiKey = apiClient.getManagerKey();
         return ShinhanUpdateAccountRequestDto.builder()
                 .Header(shinhanApiUtil.createHeaderDto("updateForeignCurrencyDemandDepositAccountDeposit", "updateForeignCurrencyDemandDepositAccountDeposit", apiKey, userKey))
@@ -120,7 +120,7 @@ public class ShinhanExchangeApiClient {
                 .build();
     }
 
-    public ShinhanUpdateAccountResponseDto updateForeignAccount(String accountNo, Long transactionBalance, String userKey) {
+    public ShinhanUpdateAccountResponseDto updateForeignAccount(String accountNo, Double transactionBalance, String userKey) {
         ShinhanUpdateAccountRequestDto requestDto = createUpdateForeignAccountRequestDto(accountNo, transactionBalance, userKey);
         logRequest(requestDto);
         ShinhanUpdateAccountResponseDto response = apiClient.getClient("edu")
@@ -160,7 +160,7 @@ public class ShinhanExchangeApiClient {
         return response;
     }
 
-    public ShinhanUpdateAccountResponseDto updateAccount(String accountNo, Long transactionBalance, String userKey) {
+    public ShinhanUpdateAccountResponseDto updateAccount(String accountNo, Double transactionBalance, String userKey) {
         ShinhanUpdateAccountRequestDto requestDto = createUpdateAccountRequestDto(accountNo, transactionBalance, userKey);
         logRequest(requestDto);
         ShinhanUpdateAccountResponseDto response = apiClient.getClient("edu")

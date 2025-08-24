@@ -15,5 +15,5 @@ public class ShinhanExchangeRequestDto {
     @Schema(description = "환전할 통화 코드, 예: USD, EUR 등")
     private String exchangeCurrency;
     @Schema(description = "환전할 금액(환전할 통화 기준)")
-    private Long exchangeAmount;
+    private String exchangeAmount;
 }

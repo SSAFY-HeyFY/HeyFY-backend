@@ -8,7 +8,6 @@ import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.exchange.*;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanExchangeResponseDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanExchangeResponseRecDto;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanInquireDemandDepositAccountBalanceResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanUpdateAccountResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.exception.ExchangeErrorCode;
@@ -33,34 +32,74 @@ public class ExchangeService {
     private final ForeignAccountRepository foreignAccountRepository;
 
     @Transactional
-    public ShinhanExchangeResponseRecDto exchangeToForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
-        Users user = userRepository.findByStudentId(studentId)
+    public ExchangeResponseDto exchangeToForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
+        Users user = userRepository.findUserWithAccountsByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
-        Account account = accountRepository.findAccountByUserEmail(user.getEmail())
-                .orElseThrow(() -> new CustomException(ExchangeErrorCode.ACCOUNT_NOT_FOUND));
+        Account account = user.getAccount();
+        ForeignAccount foreignAccount = user.getForeignAccount();
+        // account, foreignAccount 둘 다 존재해야 함
+        if (account == null || foreignAccount == null) {
+            throw new CustomException(ExchangeErrorCode.ACCOUNT_NOT_FOUND);
+        }
 
+        // 환전 api 호출
         ShinhanExchangeResponseDto exchangeResponse = apiClient.exchange(
-                account.getAccountNo(), exchangeRequestDto.getWithdrawalAccountCurrency(), exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+                account.getAccountNo(), "USD", exchangeRequestDto.getTransactionBalance(), user.getUserKey());
 
-        ShinhanUpdateAccountResponseDto updateAccountResponse = apiClient.updateForeignAccount(
-                exchangeRequestDto.getWithdrawalAccountNo(),exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+        // 환전 금액만큼 계좌에 입금
+        ShinhanUpdateAccountResponseDto updateAccountResponse
+                = apiClient.updateForeignAccount(
+                foreignAccount.getAccountNo(), exchangeRequestDto.getTransactionBalance(), user.getUserKey());
 
-        return exchangeResponse.getREC();
+        // 입금된 계좌 잔액 조회
+        ShinhanInquireDemandDepositAccountBalanceResponseDto foreignAccountBalanceResponse
+                = apiClient.getForeignAccountBalanceFromExternalApi(foreignAccount.getAccountNo(), user.getUserKey());
+
+        // 출금 계좌 잔액
+        Double depositAccountBalance = exchangeResponse.getREC().getAccountInfo().getBalance();
+        // 입금 계좌 잔액
+        Double withdrawalAccountBalance = foreignAccountBalanceResponse.getREC().getAccountBalance();
+
+        return ExchangeResponseDto.builder()
+                .depositAccountBalance(depositAccountBalance)
+                .withdrawalAccountBalance(withdrawalAccountBalance)
+                .transactionBalance(exchangeRequestDto.getTransactionBalance())
+                .build();
     }
+
     @Transactional
-    public ShinhanExchangeResponseRecDto exchangeFromForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
-        Users user = userRepository.findByStudentId(studentId)
+    public ExchangeResponseDto exchangeFromForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
+        Users user = userRepository.findUserWithAccountsByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
-        ForeignAccount account = foreignAccountRepository.findForeignAccountByUserEmail(user.getEmail())
-                .orElseThrow(() -> new CustomException(ExchangeErrorCode.ACCOUNT_NOT_FOUND));
+        Account account = user.getAccount();
+        ForeignAccount foreignAccount = user.getForeignAccount();
+        // account, foreignAccount 둘 다 존재해야 함
+        if (account == null || foreignAccount == null) {
+            throw new CustomException(ExchangeErrorCode.ACCOUNT_NOT_FOUND);
+        }
 
+        // 환전 api 호출
         ShinhanExchangeResponseDto exchangeResponse = apiClient.exchange(
-                account.getAccountNo(), exchangeRequestDto.getWithdrawalAccountCurrency(), exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+                account.getAccountNo(), "KRW", exchangeRequestDto.getTransactionBalance(), user.getUserKey());
 
+        // 환전 금액만큼 계좌에 입금
         ShinhanUpdateAccountResponseDto updateAccountResponse = apiClient.updateAccount(
-                exchangeRequestDto.getWithdrawalAccountNo(),exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+                account.getAccountNo(),exchangeRequestDto.getTransactionBalance(), user.getUserKey());
 
-        return exchangeResponse.getREC();
+        // 입금된 계좌 잔액 조회
+        ShinhanInquireDemandDepositAccountBalanceResponseDto accountBalanceResponse
+                = apiClient.getAccountBalanceFromExternalApi(account.getAccountNo(), user.getUserKey());
+
+        // 출금 계좌 잔액
+        Double depositAccountBalance = exchangeResponse.getREC().getAccountInfo().getBalance();
+        // 입금 계좌 잔액
+        Double withdrawalAccountBalance = accountBalanceResponse.getREC().getAccountBalance();
+
+        return ExchangeResponseDto.builder()
+                .depositAccountBalance(depositAccountBalance)
+                .withdrawalAccountBalance(withdrawalAccountBalance)
+                .transactionBalance(exchangeRequestDto.getTransactionBalance())
+                .build();
     }
 
     @Transactional
@@ -75,10 +114,11 @@ public class ExchangeService {
 
         return AccountBalanceResponseDto.builder()
                 .accountNo(response.getREC().getAccountNo())
-                .accountBalance(Integer.parseInt(response.getREC().getAccountBalance()))
+                .accountBalance(response.getREC().getAccountBalance())
                 .currency(response.getREC().getCurrency())
                 .build();
     }
+
     @Transactional
     public AccountBalanceResponseDto getForeignAccountBalance(String studentId) {
         Users user = userRepository.findByStudentId(studentId)
@@ -91,21 +131,21 @@ public class ExchangeService {
 
         return AccountBalanceResponseDto.builder()
                 .accountNo(foreignAccount.getAccountNo())
-                .accountBalance(Integer.parseInt(response.getREC().getAccountBalance()))
+                .accountBalance(response.getREC().getAccountBalance())
                 .currency(response.getREC().getCurrency())
                 .isForeign(true)
                 .build();
     }
 
     @Transactional
-    public HistoricalAnalysisResponseDto getHistoricalAnalysis(){
+    public HistoricalAnalysisResponseDto getHistoricalAnalysis() {
         return HistoricalAnalysisResponseDto.builder()
                 .message("Over the past 30 days, today shows the highest exchange rate")
                 .build();
     }
 
     @Transactional
-    public AIPredictionResponseDto getExchangeRateAIPrediction(){
+    public AIPredictionResponseDto getExchangeRateAIPrediction() {
         return AIPredictionResponseDto.builder()
                 .message("The rate may increase by $0.54 more in the near future")
                 .build();
@@ -125,7 +165,7 @@ public class ExchangeService {
                 = apiClient.getAccountBalanceFromExternalApi(account.getAccountNo(), user.getUserKey());
         AccountBalanceResponseDto accountBalanceResponseDto = AccountBalanceResponseDto.builder()
                 .accountNo(accountBalance.getREC().getAccountNo())
-                .accountBalance(Integer.parseInt(accountBalance.getREC().getAccountBalance()))
+                .accountBalance(accountBalance.getREC().getAccountBalance())
                 .currency(accountBalance.getREC().getCurrency())
                 .isForeign(false)
                 .build();
@@ -135,7 +175,7 @@ public class ExchangeService {
                 = apiClient.getForeignAccountBalanceFromExternalApi(foreignAccount.getAccountNo(), user.getUserKey());
         AccountBalanceResponseDto foreignAccountBalanceResponseDto = AccountBalanceResponseDto.builder()
                 .accountNo(foreignAccountBalance.getREC().getAccountNo())
-                .accountBalance(Integer.parseInt(foreignAccountBalance.getREC().getAccountBalance()))
+                .accountBalance(foreignAccountBalance.getREC().getAccountBalance())
                 .currency(foreignAccountBalance.getREC().getCurrency())
                 .isForeign(true)
                 .build();
@@ -155,9 +195,6 @@ public class ExchangeService {
                 .foreignAccountBalance(foreignAccountBalanceResponseDto)
                 .build();
     }
-
-
-
 
 
 }

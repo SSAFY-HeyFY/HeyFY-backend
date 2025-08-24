@@ -7,7 +7,7 @@ public class ShinhanInquireDemandDepositAccountBalanceResponseRecDto {
     private String bankCode;
     private String userName;
     private String accountNo;
-    private String accountBalance;
+    private Double accountBalance;
     private String accountCreatedDate;
     private String accountExpiryDate;
     private String lastTransactionDate;

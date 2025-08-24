@@ -12,6 +12,6 @@ public class ShinhanUpdateAccountRequestDto {
     private ShinhanCommonRequestHeaderDto Header;
     private String accountNo;
 
-    private Long transactionBalance;
-    private double transactionSummary;
+    private Double transactionBalance;
+    private Double transactionSummary;
 }
