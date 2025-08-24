@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class GapWeightedHuber(nn.Module):
-    def __init__(self, delta=1.0, gamma=1.0, eps=1e-6):
+    def __init__(self, delta=1.0, gamma=1.0, eps=1e-6, shrink=1e-3):
         """
         delta: Huber 임계값
         gamma: 가중치 지수 (|gap|^gamma)
@@ -13,6 +13,7 @@ class GapWeightedHuber(nn.Module):
         self.delta = delta
         self.gamma = gamma
         self.eps = eps
+        self.shrink = shrink
 
     def forward(self, pred_scaled_residual, true_scaled_residual, gap_unscaled):
         # pred/true: (B, 1)  (표준화된 residual)
@@ -27,5 +28,9 @@ class GapWeightedHuber(nn.Module):
 
         # gap-weight
         weight = torch.pow(torch.abs(gap_unscaled) + self.eps, self.gamma)  # (B,1)
-        loss = (weight * huber).mean()
-        return loss
+        loss_main = (weight * huber).mean()
+
+         # ★ 잔차 수축(= 베이스라인(gap) 쪽으로 당김)
+        loss_shrink = (pred_scaled_residual ** 2).mean()
+
+        return loss_main + self.shrink * loss_shrink
