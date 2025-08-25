@@ -1,18 +1,14 @@
 package com.ssafy.ssashinsa.heyfy.account.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.account.dto.AccountPairDto;
 import com.ssafy.ssashinsa.heyfy.account.repository.AccountRepository;
-import com.ssafy.ssashinsa.heyfy.account.repository.ForeignAccountRepository;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
 import com.ssafy.ssashinsa.heyfy.register.exception.ShinhanRegisterApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.client.ShinhanAccountAuthApiClient;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.auth.AccountAuthCheckResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.auth.AccountAuthResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanApiErrorCode;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +24,6 @@ public class AccountService {
 
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
-    private final ForeignAccountRepository foreignAccountRepository;
-    private final ShinhanApiClient shinhanApiClient;
-    private final ShinhanApiUtil shinhanApiUtil;
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final ShinhanAccountAuthApiClient shinhanAccountAuthApiClient;
 
     public Optional<AccountPairDto> getAccounts() {

@@ -133,8 +133,8 @@ public class InquireService {
                     userKey
             );
 
-            Account account = accountRepository.findByUserAndAccountNo(user, accountNo)
-                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND));
+//            Account account = accountRepository.findByUserAndAccountNo(user, accountNo)
+//                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND));
 
             ShinhanInquireSingleDepositRequestDto requestDto = ShinhanInquireSingleDepositRequestDto.builder()
                     .Header(commonHeaderDto)
