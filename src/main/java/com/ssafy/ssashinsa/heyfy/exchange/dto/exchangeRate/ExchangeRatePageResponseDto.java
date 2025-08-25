@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ExchangeRatePageResponseDto {
     // 3개 통화의 30일간 환율정보 리스트
-    private ExchangeRateHistoriesDto exchangeRateHistories;
+    private ExchangeRateHistoriesResponseDto exchangeRateHistories;
     // usd, cny, vnd에 대한 단일 환율정보를 묶은 그룹
-    private RealTimeRateGroupDto realTimeRates;
-    private PredictionDto prediction;
-    private TuitionDto tuition;
+    private RealTimeRateGroupResponseDto realTimeRates;
+    private PredictionResponseDto prediction;
+    private TuitionResponseDto tuition;
 }

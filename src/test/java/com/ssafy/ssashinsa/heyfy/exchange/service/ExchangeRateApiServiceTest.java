@@ -3,8 +3,8 @@ package com.ssafy.ssashinsa.heyfy.exchange.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ssafy.ssashinsa.heyfy.exchange.domain.ExchangeRate;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.ExchangeRateHistoriesDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.RealTimeRateGroupDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.ExchangeRateHistoriesResponseDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.RealTimeRateGroupResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.EntireExchangeRateResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.repository.ExchangeRateRepository;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
@@ -59,7 +59,7 @@ class ExchangeRateApiServiceTest {
         when(responseSpec.bodyToMono(EntireExchangeRateResponseDto.class)).thenReturn(reactor.core.publisher.Mono.just(new EntireExchangeRateResponseDto()));
 
         // when
-        RealTimeRateGroupDto response = exchangeRateService.getRealTimeRate();
+        RealTimeRateGroupResponseDto response = exchangeRateService.getRealTimeRate();
         // then
         assertNotNull(response, "API response should not be null");
         System.out.println("API Response: " + response);
@@ -86,7 +86,7 @@ class ExchangeRateApiServiceTest {
         )).thenReturn(mockRates);
 
         // when
-        ExchangeRateHistoriesDto result = exchangeRateService.getExchangeRateHistories();
+        ExchangeRateHistoriesResponseDto result = exchangeRateService.getExchangeRateHistories();
 
         // then
         assertNotNull(result);

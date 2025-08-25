@@ -30,12 +30,12 @@ public class ExchangeRateService {
      * 특정 통화의 최근 30일 환율 조회
      */
     @Transactional
-    public ExchangeRateHistoriesDto getExchangeRateHistories() {
+    public ExchangeRateHistoriesResponseDto getExchangeRateHistories() {
 
         FastApiRateGraphDto apiResponse = fastApiClient.getRateGraph();
 
-        List<ExchangeRateHistoryDto> rateDtos = apiResponse.getData().stream()
-                .map(rate -> ExchangeRateHistoryDto.builder()
+        List<ExchangeRateHistoryResponseDto> rateDtos = apiResponse.getData().stream()
+                .map(rate -> ExchangeRateHistoryResponseDto.builder()
                         .currency("USD")
                         .date(rate.getDate())
                         .rate(rate.getRate())
@@ -43,7 +43,7 @@ public class ExchangeRateService {
                         .modelName(rate.isPrediction() ? rate.getModelName() : "")
                         .build())
                 .toList();
-        return ExchangeRateHistoriesDto.builder()
+        return ExchangeRateHistoriesResponseDto.builder()
                 .currency("USD")
                 .rates(rateDtos)
                 .build();
@@ -54,8 +54,8 @@ public class ExchangeRateService {
         // 1. ExchangeRateHistories API 호출
         FastApiRateGraphDto rateGraphResponse = fastApiClient.getRateGraph();
 
-        List<ExchangeRateHistoryDto> rateDtos = rateGraphResponse.getData().stream()
-                .map(rate -> ExchangeRateHistoryDto.builder()
+        List<ExchangeRateHistoryResponseDto> rateDtos = rateGraphResponse.getData().stream()
+                .map(rate -> ExchangeRateHistoryResponseDto.builder()
                         .currency("USD")
                         .date(rate.getDate())
                         .rate(rate.getRate())
@@ -63,52 +63,52 @@ public class ExchangeRateService {
                         .modelName(rate.isPrediction() ? rate.getModelName() : "")
                         .build())
                 .toList();
-        ExchangeRateHistoriesDto exchangeRateHistories = ExchangeRateHistoriesDto.builder()
+        ExchangeRateHistoriesResponseDto exchangeRateHistories = ExchangeRateHistoriesResponseDto.builder()
                 .currency("USD")
                 .rates(rateDtos)
                 .build();
         // 2. RealTimeRates API 호출
         FastApiRealTimeRatesDto realTimeRatesResponse = fastApiClient.getRealTimeRates();
-        RealTimeRateDto usdDto = null;
-        RealTimeRateDto cnyDto = null;
-        RealTimeRateDto vndDto = null;
+        RealTimeRateResponseDto usdDto = null;
+        RealTimeRateResponseDto cnyDto = null;
+        RealTimeRateResponseDto vndDto = null;
         for (FastApiRealTimeRateDto data : realTimeRatesResponse.getData()) {
             if ("USD".equalsIgnoreCase(data.getCurrency())) {
-                usdDto = RealTimeRateDto.builder()
+                usdDto = RealTimeRateResponseDto.builder()
                         .currency("USD")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .build();
             } else if ("CNY".equalsIgnoreCase(data.getCurrency())) {
-                cnyDto = RealTimeRateDto.builder()
+                cnyDto = RealTimeRateResponseDto.builder()
                         .currency("CNY")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .build();
             } else if ("VND".equalsIgnoreCase(data.getCurrency())) {
-                vndDto = RealTimeRateDto.builder()
+                vndDto = RealTimeRateResponseDto.builder()
                         .currency("VND")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .build();
             }
         }
-        RealTimeRateGroupDto realTimeRateGroup = RealTimeRateGroupDto.builder()
+        RealTimeRateGroupResponseDto realTimeRateGroup = RealTimeRateGroupResponseDto.builder()
                 .usd(usdDto)
                 .cny(cnyDto)
                 .vnd(vndDto)
                 .build();
 
         // 3. Prediction, Tuition 더미 데이터 생성
-        PredictionDto prediction = PredictionDto.builder()
+        PredictionResponseDto prediction = PredictionResponseDto.builder()
                 .trend("bearish")
                 .description("The rate might decline over the next 3 days")
                 .changePercent(-1.24)
                 .periodDays(3)
                 .actionLabel("Exchange")
                 .build();
-        TuitionDto tuition = TuitionDto.builder()
-                .period(PeriodDto.builder()
+        TuitionResponseDto tuition = TuitionResponseDto.builder()
+                .period(PeriodResponseDto.builder()
                         .start(java.time.LocalDate.of(2024, 3, 1))
                         .end(java.time.LocalDate.of(2024, 3, 31))
                         .build())
@@ -129,33 +129,33 @@ public class ExchangeRateService {
      * 외부 API에서 USD, CNY, VND 환율을 추출하여 반환
      */
     @Transactional
-    public RealTimeRateGroupDto getRealTimeRate() {
+    public RealTimeRateGroupResponseDto getRealTimeRate() {
         FastApiRealTimeRatesDto apiResponse = fastApiClient.getRealTimeRates();
-        RealTimeRateDto usdDto = null;
-        RealTimeRateDto cnyDto = null;
-        RealTimeRateDto vndDto = null;
+        RealTimeRateResponseDto usdDto = null;
+        RealTimeRateResponseDto cnyDto = null;
+        RealTimeRateResponseDto vndDto = null;
         for (FastApiRealTimeRateDto data : apiResponse.getData()) {
             if ("USD".equalsIgnoreCase(data.getCurrency())) {
-                usdDto = RealTimeRateDto.builder()
+                usdDto = RealTimeRateResponseDto.builder()
                         .currency("USD")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .build();
             } else if ("CNY".equalsIgnoreCase(data.getCurrency())) {
-                cnyDto = RealTimeRateDto.builder()
+                cnyDto = RealTimeRateResponseDto.builder()
                         .currency("CNY")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .build();
             } else if ("VND".equalsIgnoreCase(data.getCurrency())) {
-                vndDto = RealTimeRateDto.builder()
+                vndDto = RealTimeRateResponseDto.builder()
                         .currency("VND")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .build();
             }
         }
-        return RealTimeRateGroupDto.builder()
+        return RealTimeRateGroupResponseDto.builder()
                 .usd(usdDto)
                 .cny(cnyDto)
                 .vnd(vndDto)
@@ -166,8 +166,8 @@ public class ExchangeRateService {
      * 환율 예측 정보 반환 (더미 데이터)
      */
     @Transactional
-    public PredictionDto getPrediction() {
-        return PredictionDto.builder()
+    public PredictionResponseDto getPrediction() {
+        return PredictionResponseDto.builder()
                 .trend("bearish")
                 .description("The rate might decline over the next 3 days")
                 .changePercent(-1.24)
@@ -180,9 +180,9 @@ public class ExchangeRateService {
      * 학비 환율 추천 정보 반환 (더미 데이터)
      */
     @Transactional
-    public TuitionDto getTuition() {
-        return TuitionDto.builder()
-                .period(PeriodDto.builder()
+    public TuitionResponseDto getTuition() {
+        return TuitionResponseDto.builder()
+                .period(PeriodResponseDto.builder()
                         .start(java.time.LocalDate.of(2024, 3, 1))
                         .end(java.time.LocalDate.of(2024, 3, 31))
                         .build())

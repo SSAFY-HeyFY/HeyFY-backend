@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PeriodDto {
+public class PeriodResponseDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
     private LocalDate start;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")

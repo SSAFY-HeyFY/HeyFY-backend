@@ -5,16 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExchangeRateHistoryDto {
-    private String currency;
-    private LocalDate date;
-    private double rate;
-    private boolean isPrediction;
-    private String modelName;
+public class PredictionResponseDto {
+    private String trend; // "bearish" | "bullish"
+    private String description;
+    private double changePercent;
+    private int periodDays;
+    private String actionLabel;
 }
+

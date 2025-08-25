@@ -12,8 +12,8 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TuitionDto {
-    private PeriodDto period;
+public class TuitionResponseDto {
+    private PeriodResponseDto period;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyyMMdd")
     private LocalDate recommendedDate;
     private String recommendationNote;

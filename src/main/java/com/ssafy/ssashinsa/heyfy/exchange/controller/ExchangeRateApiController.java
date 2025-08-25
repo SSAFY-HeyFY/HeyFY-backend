@@ -28,26 +28,26 @@ public class ExchangeRateApiController {
 
     @ExchangeRateHistoriesDocs
     @GetMapping("/histories")
-    public ResponseEntity<ExchangeRateHistoriesDto> getExchangeRateHistories() {
+    public ResponseEntity<ExchangeRateHistoriesResponseDto> getExchangeRateHistories() {
         // 기본값: USD, 29일
         return ResponseEntity.ok(exchangeRateService.getExchangeRateHistories());
     }
 
     @ExchangeRateCurrentDocs
     @GetMapping("/current")
-    public ResponseEntity<RealTimeRateGroupDto> getCurrentExchangeRates() {
+    public ResponseEntity<RealTimeRateGroupResponseDto> getCurrentExchangeRates() {
         return ResponseEntity.ok(exchangeRateService.getRealTimeRate());
     }
 
     @ExchangeRatePredictionDocs
     @GetMapping("/prediction")
-    public ResponseEntity<PredictionDto> getPrediction() {
+    public ResponseEntity<PredictionResponseDto> getPrediction() {
         return ResponseEntity.ok(exchangeRateService.getPrediction());
     }
 
     @ExchangeRateTuitionDocs
     @GetMapping("/tuition")
-    public ResponseEntity<TuitionDto> getTuition() {
+    public ResponseEntity<TuitionResponseDto> getTuition() {
         return ResponseEntity.ok(exchangeRateService.getTuition());
     }
 }

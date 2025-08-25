@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RealTimeRateDto {
+public class RealTimeRateResponseDto {
 
     private String currency;
     private LocalDateTime updatedAt;
