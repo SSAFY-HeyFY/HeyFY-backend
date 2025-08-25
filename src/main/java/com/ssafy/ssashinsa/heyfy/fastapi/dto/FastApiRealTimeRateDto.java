@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class FastApiRealTimeRateDto {
-    private String updatedAt;
+    private LocalDateTime updatedAt;
     private String currency;
     private Double rate;
     private String changeDirection;

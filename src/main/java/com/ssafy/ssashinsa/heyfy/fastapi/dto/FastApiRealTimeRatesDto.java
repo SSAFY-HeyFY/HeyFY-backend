@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -13,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class FastApiRealTimeRatesDto {
-    private String apiCalledAt;
+    private LocalDateTime apiCalledAt;
     private List<FastApiRealTimeRateDto> data;
 }
 
