@@ -159,6 +159,8 @@ public class InquireService {
         }
     }
 
+
+
     public ShinhanInquireSingleDepositResponseDto inquireSingleForeignDeposit() {
         try {
             String apiKey = shinhanApiClient.getManagerKey();

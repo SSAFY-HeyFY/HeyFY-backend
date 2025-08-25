@@ -7,8 +7,11 @@ import com.ssafy.ssashinsa.heyfy.account.repository.AccountRepository;
 import com.ssafy.ssashinsa.heyfy.account.repository.ForeignAccountRepository;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
+import com.ssafy.ssashinsa.heyfy.inquire.exception.ShinhanInquireApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.create.ShinhanCreateDepositRequestDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.create.ShinhanCreateDepositResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireSingleDepositRequestDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireSingleDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.foreign.ShinhanCreateforeignDepositRequestDto;
 import com.ssafy.ssashinsa.heyfy.register.exception.ShinhanRegisterApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
@@ -199,6 +202,108 @@ public class RegisterService {
         }
     }
 
+
+    @Transactional
+    public String registerAccountFromShinhan(String accountNo) {
+        String studentId = SecurityUtil.getCurrentStudentId();
+        log.info("학생 ID [{}]의 계좌 등록을 시작합니다.", studentId);
+
+        Users user = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
+
+        String apiKey = shinhanApiClient.getManagerKey();
+        String userKey = user.getUserKey();
+
+        ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
+                "inquireDemandDepositAccount",
+                "inquireDemandDepositAccount",
+                apiKey,
+                userKey
+        );
+
+        ShinhanInquireSingleDepositRequestDto requestDto = ShinhanInquireSingleDepositRequestDto.builder()
+                .Header(commonHeaderDto)
+                .accountNo(accountNo)
+                .build();
+
+        try {
+            ShinhanInquireSingleDepositResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/demandDeposit/inquireDemandDepositAccount")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanInquireApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(ShinhanInquireSingleDepositResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
+
+            registerAccount(accountNo);
+
+        }  catch (Exception e) {
+            log.error("계좌 등록 API 호출 실패 : {}", e.getMessage(), e);
+            throw e;
+        }
+
+        return accountNo;
+    }
+
+    @Transactional
+    public String registerForeignAccountFromShinhan(String accountNo) {
+        String studentId = SecurityUtil.getCurrentStudentId();
+        log.info("학생 ID [{}]의 외화 계좌 등록을 시작합니다.", studentId);
+
+        Users user = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
+
+        String apiKey = shinhanApiClient.getManagerKey();
+        String userKey = user.getUserKey();
+
+        ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
+                "inquireForeignCurrencyDemandDepositAccount",
+                "inquireForeignCurrencyDemandDepositAccount",
+                apiKey,
+                userKey
+        );
+
+        ShinhanInquireSingleDepositRequestDto requestDto = ShinhanInquireSingleDepositRequestDto.builder()
+                .Header(commonHeaderDto)
+                .accountNo(accountNo)
+                .build();
+
+        try {
+            ShinhanInquireSingleDepositResponseDto response = shinhanApiClient.getClient("edu")
+                    .post()
+                    .uri("/demandDeposit/foreignCurrency/inquireForeignCurrencyDemandDepositAccount")
+                    .header("Content-Type", "application/json")
+                    .bodyValue(requestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, r ->
+                            r.bodyToMono(String.class).flatMap(body -> {
+                                log.error("API Error Body: {}", body);
+                                return Mono.error(new CustomException(ShinhanInquireApiErrorCode.API_CALL_FAILED));
+                            }))
+                    .bodyToMono(ShinhanInquireSingleDepositResponseDto.class)
+                    .doOnNext(this::logResponse)
+                    .block();
+
+            registerForeignAccount(accountNo, response.getREC().getCurrency());
+
+        }  catch (Exception e) {
+            log.error("계좌 등록 API 호출 실패 : {}", e.getMessage(), e);
+            throw e;
+        }
+
+        return accountNo;
+    }
+
+
+
+
     @Transactional
     public void registerAccount(String accountNo) {
         String studentId = SecurityUtil.getCurrentStudentId();
@@ -209,14 +314,11 @@ public class RegisterService {
                     .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
 
         try {
-            // 2) 있는 경우에만 삭제 (API 성공 후)
             if (accountRepository.existsByUser(user)) {
-                // 양방향 참조라면 잠깐 끊어주는 거 권장 (mappedBy로 잔상 방지)
                 user.setAccount(null);
 
-                accountRepository.deleteByUser(user); // 벌크 삭제 + auto flush & clear
+                accountRepository.deleteByUser(user);
 
-                // clear 때문에 user가 detach 되었을 수 있으니 다시 attach
                 user = userRepository.getReferenceById(user.getId());
             }
 
@@ -226,7 +328,7 @@ public class RegisterService {
                     .accountNo(accountNo)
                     .build();
 
-            accountRepository.save(newAccount); // 커밋 시 flush
+            accountRepository.save(newAccount);
 
 
             log.info("학생 ID [{}]의 일반 계좌가 성공적으로 개설되었습니다. 계좌번호: {}", user.getStudentId(), accountNo);
@@ -235,6 +337,42 @@ public class RegisterService {
             log.error("학생 ID [{}]의 일반 계좌 개설 중 커스텀 예외 발생: {}", user.getStudentId(), ce.getMessage());
         } catch (Exception e) {
             log.error("학생 ID [{}]의 일반 계좌 개설 API 호출 실패: {}", user.getStudentId(), e.getMessage(), e);
+        }
+    }
+
+    @Transactional
+    public void registerForeignAccount(String accountNo, String currency) {
+        String studentId = SecurityUtil.getCurrentStudentId();
+        log.info("학생 ID [{}]의 외화 계좌 등록을 시작합니다.", studentId);
+
+
+        Users user = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
+
+        try {
+            if (foreignAccountRepository.existsByUser(user)) {
+                user.setAccount(null);
+
+                foreignAccountRepository.deleteByUser(user);
+
+                user = userRepository.getReferenceById(user.getId());
+            }
+
+            ForeignAccount newAccount = ForeignAccount.builder()
+                    .user(user)
+                    .accountNo(accountNo)
+                    .currency(currency)
+                    .build();
+
+            foreignAccountRepository.save(newAccount);
+
+
+            log.info("학생 ID [{}]의 외환 계좌가 성공적으로 개설되었습니다. 계좌번호: {}", user.getStudentId(), accountNo);
+
+        } catch (CustomException ce) {
+            log.error("학생 ID [{}]의 외환 계좌 개설 중 커스텀 예외 발생: {}", user.getStudentId(), ce.getMessage());
+        } catch (Exception e) {
+            log.error("학생 ID [{}]의 외환 계좌 개설 API 호출 실패: {}", user.getStudentId(), e.getMessage(), e);
         }
     }
 
