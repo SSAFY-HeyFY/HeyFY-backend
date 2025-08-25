@@ -23,4 +23,15 @@ class FastApiClientTest {
             System.out.println("getRealTimeRates error: " + e.getMessage());
         }
     }
+
+    @Test
+    @DisplayName("FastApiClient 환율 그래프 API 실행 테스트")
+    void getRateGraphTest() {
+        try {
+            var result = fastApiClient.getRateGraph();
+            System.out.println("getRateGraph result: " + result);
+        } catch (Exception e) {
+            System.out.println("getRateGraph error: " + e.getMessage());
+        }
+    }
 }
