@@ -1,6 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.fastapi.client;
 
 import com.ssafy.ssashinsa.heyfy.fastapi.config.FastApiProperties;
+import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRateAnalysisDto;
 import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRateGraphDto;
 import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRealTimeRatesDto;
 import lombok.RequiredArgsConstructor;
@@ -46,10 +47,28 @@ public class FastApiClient {
                 .bodyToMono(FastApiRateGraphDto.class)
                 .block();
         if(response==null){
-            throw new IllegalStateException("Failed to fetch real-time rates from FastAPI.");
+            throw new IllegalStateException("Failed to fetch rate-graph from FastAPI.");
         }
         return response;
     }
+    public FastApiRateAnalysisDto getRateAnalysis(){
+        FastApiRateAnalysisDto response = getClient()
+                .get()
+                .uri("/rate-analysis")
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(String.class).flatMap(body -> {
+                            log.error("API Error Body: {}", body);
+                            throw new IllegalStateException("Failed to fetch rate-analysis from FastAPI.");
+                        }))
+                .bodyToMono(FastApiRateAnalysisDto.class)
+                .block();
+        if(response==null){
+            throw new IllegalStateException("Failed to fetch rate-analysis from FastAPI.");
+        }
+        return response;
+    }
+
     private WebClient getClient() {
         String baseUrl = fastApiProperties.getFullBaseUrl() + "/api";
 
