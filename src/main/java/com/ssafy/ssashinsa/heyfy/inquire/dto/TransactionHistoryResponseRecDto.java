@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.account.dto;
+package com.ssafy.ssashinsa.heyfy.inquire.dto;
 
 import lombok.Builder;
 import lombok.Getter;
