@@ -4,8 +4,8 @@ import com.ssafy.ssashinsa.heyfy.account.dto.AccountNoDto;
 import com.ssafy.ssashinsa.heyfy.register.docs.CreateDepositAccountDocs;
 import com.ssafy.ssashinsa.heyfy.register.docs.CreateForeignDepositAccountDocs;
 import com.ssafy.ssashinsa.heyfy.register.dto.AccountCreationResponseDto;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.create.ShinhanCreateDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.register.service.RegisterService;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.create.ShinhanCreateDepositResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class RegisterController {
 
     private final RegisterService registerService;
-
 
     @CreateDepositAccountDocs
     @PostMapping("/createdeposit")
@@ -51,7 +50,7 @@ public class RegisterController {
         return ResponseEntity.ok(simplifiedResponse);
     }
 
-    @PostMapping("/registeraccount" )
+    @PostMapping("/registeraccount")
     public ResponseEntity<AccountNoDto> registerAccount(@RequestBody AccountNoDto accountNoDto) {
 
         String accountNo = accountNoDto.getAccountNo();
@@ -61,7 +60,7 @@ public class RegisterController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @PostMapping("/registerforeignaccount" )
+    @PostMapping("/registerforeignaccount")
     public ResponseEntity<AccountNoDto> registerForeignAccount(@RequestBody AccountNoDto accountNoDto) {
 
         String accountNo = accountNoDto.getAccountNo();
@@ -70,7 +69,5 @@ public class RegisterController {
 
         return ResponseEntity.ok(responseDto);
     }
-
-
 
 }
