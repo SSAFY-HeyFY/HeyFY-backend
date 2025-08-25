@@ -1,0 +1,26 @@
+package com.ssafy.ssashinsa.heyfy.fastapi;
+
+import com.ssafy.ssashinsa.heyfy.fastapi.client.FastApiClient;
+import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRealTimeRatesDto;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class FastApiClientTest {
+
+    @Autowired
+    FastApiClient fastApiClient;
+
+    @Test
+    @DisplayName("FastApiClient 실시간 환율 API 실행 테스트")
+    void getRealTimeRatesTest() {
+        try {
+            FastApiRealTimeRatesDto result = fastApiClient.getRealTimeRates();
+            System.out.println("getRealTimeRates result: " + result);
+        } catch (Exception e) {
+            System.out.println("getRealTimeRates error: " + e.getMessage());
+        }
+    }
+}
