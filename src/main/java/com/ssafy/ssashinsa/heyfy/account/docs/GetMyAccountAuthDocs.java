@@ -43,7 +43,18 @@ import java.lang.annotation.Target;
                                 )
                         }
                 )
+        ),@ApiResponse(
+        responseCode = "400",
+        description = "잘못된 요청 (예: 계좌 번호 유효성 실패)",
+        content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponse.class),
+                examples = @ExampleObject(
+                        name = "계좌 번호 유효성 실패 응답",
+                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"A1003\",\"message\":\"계좌번호가 유효하지 않습니다.\"}"
+                )
         )
+)
 })
 public @interface GetMyAccountAuthDocs {
 }

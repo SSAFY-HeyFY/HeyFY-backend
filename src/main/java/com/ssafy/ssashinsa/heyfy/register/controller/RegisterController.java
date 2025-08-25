@@ -3,6 +3,8 @@ package com.ssafy.ssashinsa.heyfy.register.controller;
 import com.ssafy.ssashinsa.heyfy.account.dto.AccountNoDto;
 import com.ssafy.ssashinsa.heyfy.register.docs.CreateDepositAccountDocs;
 import com.ssafy.ssashinsa.heyfy.register.docs.CreateForeignDepositAccountDocs;
+import com.ssafy.ssashinsa.heyfy.register.docs.RegisterAccountDocs;
+import com.ssafy.ssashinsa.heyfy.register.docs.RegisterForeignAccountDocs;
 import com.ssafy.ssashinsa.heyfy.register.dto.AccountCreationResponseDto;
 import com.ssafy.ssashinsa.heyfy.register.service.RegisterService;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.create.ShinhanCreateDepositResponseDto;
@@ -50,6 +52,7 @@ public class RegisterController {
         return ResponseEntity.ok(simplifiedResponse);
     }
 
+    @RegisterAccountDocs
     @PostMapping("/registeraccount")
     public ResponseEntity<AccountNoDto> registerAccount(@RequestBody AccountNoDto accountNoDto) {
 
@@ -60,6 +63,7 @@ public class RegisterController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @RegisterForeignAccountDocs
     @PostMapping("/registerforeignaccount")
     public ResponseEntity<AccountNoDto> registerForeignAccount(@RequestBody AccountNoDto accountNoDto) {
 
