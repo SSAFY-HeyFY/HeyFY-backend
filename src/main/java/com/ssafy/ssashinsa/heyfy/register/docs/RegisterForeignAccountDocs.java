@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,7 +15,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Tag(name = "Register", description = "계좌 등록 API")
 @Operation(summary = "외화 계좌 등록", description = "신한은행 API를 통해 기존의 외화 계좌를 확인하고 서비스에 등록합니다.")
 @ApiResponses({
         @ApiResponse(

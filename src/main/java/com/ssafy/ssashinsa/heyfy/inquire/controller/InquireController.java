@@ -25,7 +25,7 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Tag(name = "계좌/거래내역 조회", description = "신한은행 계좌 정보 조회 관련 API")
+@Tag(name = "계좌&거래내역 조회", description = "신한은행 계좌 정보 조회 관련 API")
 @RestController
 @RequestMapping("/inquire")
 @RequiredArgsConstructor

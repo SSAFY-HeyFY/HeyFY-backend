@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "계좌/거래내역 관리(백엔드 테스트용)", description = "계좌/거래내역 관리 API(백엔드 테스트용)")
+@Tag(name = "계좌&거래내역 관리(백엔드 테스트용)", description = "계좌/거래내역 관리 API(백엔드 테스트용)")
 public class AccountControllerTest { // 테스트용 컨트롤러
 
     private final AccountService accountService;
