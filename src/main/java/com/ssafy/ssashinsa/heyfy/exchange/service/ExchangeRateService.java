@@ -78,18 +78,21 @@ public class ExchangeRateService {
                         .currency("USD")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
+                        .fluctuation(data.getChangePct())
                         .build();
             } else if ("CNY".equalsIgnoreCase(data.getCurrency())) {
                 cnyDto = RealTimeRateResponseDto.builder()
                         .currency("CNY")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
+                        .fluctuation(data.getChangePct())
                         .build();
             } else if ("VND".equalsIgnoreCase(data.getCurrency())) {
                 vndDto = RealTimeRateResponseDto.builder()
                         .currency("VND")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
+                        .fluctuation(data.getChangePct())
                         .build();
             }
         }
@@ -140,18 +143,21 @@ public class ExchangeRateService {
                         .currency("USD")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
+                        .fluctuation(data.getChangePct())
                         .build();
             } else if ("CNY".equalsIgnoreCase(data.getCurrency())) {
                 cnyDto = RealTimeRateResponseDto.builder()
                         .currency("CNY")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
+                        .fluctuation(data.getChangePct())
                         .build();
             } else if ("VND".equalsIgnoreCase(data.getCurrency())) {
                 vndDto = RealTimeRateResponseDto.builder()
                         .currency("VND")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
+                        .fluctuation(data.getChangePct())
                         .build();
             }
         }
