@@ -9,10 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExchangeRateDto {
-
-    private String currency;
-    private String date;
-    private double exchangeRate;
-    private double fluctuationRate;
+public class PredictionResponseDto {
+    private String trend; // "bearish" | "bullish"
+    private String description;
+    private double changePercent;
+    private int periodDays;
+    private String actionLabel;
 }
+

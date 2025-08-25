@@ -4,14 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExchangeRateHistoriesDto {
-    private String currency; // USD, CNY, VND 등
-    private List<ExchangeRateDto> rates; // 30일간 환율정보
+public class RealTimeRateGroupResponseDto {
+    private RealTimeRateResponseDto usd;
+    private RealTimeRateResponseDto cny;
+    private RealTimeRateResponseDto vnd;
 }
-

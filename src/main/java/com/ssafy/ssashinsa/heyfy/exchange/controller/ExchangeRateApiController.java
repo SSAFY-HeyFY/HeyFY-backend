@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -29,26 +28,26 @@ public class ExchangeRateApiController {
 
     @ExchangeRateHistoriesDocs
     @GetMapping("/histories")
-    public ResponseEntity<ExchangeRateHistoriesDto> getExchangeRateHistories(@RequestParam(defaultValue="USD")String currency, @RequestParam(defaultValue = "29") Integer day) {
+    public ResponseEntity<ExchangeRateHistoriesResponseDto> getExchangeRateHistories() {
         // 기본값: USD, 29일
-        return ResponseEntity.ok(exchangeRateService.getExchangeRateHistories(currency, day));
+        return ResponseEntity.ok(exchangeRateService.getExchangeRateHistories());
     }
 
     @ExchangeRateCurrentDocs
     @GetMapping("/current")
-    public ResponseEntity<ExchangeRateGroupDto> getCurrentExchangeRates() {
-        return ResponseEntity.ok(exchangeRateService.getCurrentExchangeRates());
+    public ResponseEntity<RealTimeRateGroupResponseDto> getCurrentExchangeRates() {
+        return ResponseEntity.ok(exchangeRateService.getRealTimeRate());
     }
 
     @ExchangeRatePredictionDocs
     @GetMapping("/prediction")
-    public ResponseEntity<PredictionDto> getPrediction() {
+    public ResponseEntity<PredictionResponseDto> getPrediction() {
         return ResponseEntity.ok(exchangeRateService.getPrediction());
     }
 
     @ExchangeRateTuitionDocs
     @GetMapping("/tuition")
-    public ResponseEntity<TuitionDto> getTuition() {
+    public ResponseEntity<TuitionResponseDto> getTuition() {
         return ResponseEntity.ok(exchangeRateService.getTuition());
     }
 }

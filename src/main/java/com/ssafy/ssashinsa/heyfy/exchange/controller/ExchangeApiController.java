@@ -37,7 +37,7 @@ public class ExchangeApiController {
 
     @AIPredictionDocs
     @GetMapping("/ai-prediction")
-    public ResponseEntity<AIPredictionResponseDto> getAIPrediction(){
+    public ResponseEntity<AIPredictionResponseDto> getAIPrediction() {
         return ResponseEntity.ok(
                 exchangeService.getExchangeRateAIPrediction()
         );
@@ -46,16 +46,23 @@ public class ExchangeApiController {
 
     @HistoricalAnalysisDocs
     @GetMapping("/historical-analysis")
-    public ResponseEntity<HistoricalAnalysisResponseDto> getHistoricalAnalysis(){
+    public ResponseEntity<HistoricalAnalysisResponseDto> getHistoricalAnalysis() {
         return ResponseEntity.ok(
                 exchangeService.getHistoricalAnalysis()
         );
     }
 
+    @RateAnalysisDocs
+    @GetMapping("/analysis")
+    public ResponseEntity<RateAnalysisResponseDto> getRateAnalysis() {
+        return ResponseEntity.ok(
+                exchangeService.getRateAnalysis()
+        );
+    }
 
     @ExchangePageDocs
     @GetMapping("/page")
-    public ResponseEntity<ExchangePageResponseDto> getExchangePage(@AuthUser UserDetails userDetails){
+    public ResponseEntity<ExchangePageResponseDto> getExchangePage(@AuthUser UserDetails userDetails) {
         return ResponseEntity.ok(
                 exchangeService.getExchangePage(userDetails.getUsername())
         );
