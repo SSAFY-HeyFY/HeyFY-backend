@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ssafy.ssashinsa.heyfy.exchange.domain.ExchangeRate;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.ExchangeRateHistoriesDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.RealTimeRateGroupDto;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.EntireExchangeRateResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.repository.ExchangeRateRepository;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
@@ -58,7 +59,7 @@ class ExchangeRateApiServiceTest {
         when(responseSpec.bodyToMono(EntireExchangeRateResponseDto.class)).thenReturn(reactor.core.publisher.Mono.just(new EntireExchangeRateResponseDto()));
 
         // when
-        EntireExchangeRateResponseDto response = exchangeRateService.getExchangeRateFromExternalApi();
+        RealTimeRateGroupDto response = exchangeRateService.getRealTimeRate();
         // then
         assertNotNull(response, "API response should not be null");
         System.out.println("API Response: " + response);
@@ -85,14 +86,14 @@ class ExchangeRateApiServiceTest {
         )).thenReturn(mockRates);
 
         // when
-        ExchangeRateHistoriesDto result = exchangeRateService.getExchangeRateHistories(currencyCode, 30);
+        ExchangeRateHistoriesDto result = exchangeRateService.getExchangeRateHistories();
 
         // then
         assertNotNull(result);
         assertNotNull(result.getRates());
         assertThat(result.getRates()).hasSize(30);
         assertThat(result.getRates()).allMatch(java.util.Objects::nonNull);
-        assertThat(result.getRates()).allMatch(r -> r.getExchangeRate() != 0.0);
+        assertThat(result.getRates()).allMatch(r -> r.getRate() != 0.0);
 
         // Print as JSON
         ObjectMapper mapper = new ObjectMapper();
@@ -112,17 +113,17 @@ class ExchangeRateApiServiceTest {
             var result = exchangeRateService.getExchangeRatePage();
             assertNotNull(result, "ExchangeRatePageResponseDto should not be null");
             assertNotNull(result.getExchangeRateHistories(), "exchangeRateHistories should not be null");
-            assertNotNull(result.getLatestExchangeRate(), "latestExchangeRate should not be null");
+            assertNotNull(result.getRealTimeRates(), "latestExchangeRate should not be null");
             assertNotNull(result.getPrediction(), "prediction should not be null");
             assertNotNull(result.getTuition(), "tuition should not be null");
             assertNotNull(result.getExchangeRateHistories().getRates());
             assertThat(result.getExchangeRateHistories().getRates()).allMatch(java.util.Objects::nonNull);
-            assertThat(result.getExchangeRateHistories().getRates()).allMatch(r -> r.getExchangeRate() != 0.0);
-            assertNotNull(result.getLatestExchangeRate().getUsd());
-            assertNotNull(result.getLatestExchangeRate().getCny());
-            assertNotNull(result.getLatestExchangeRate().getVnd());
-            assertThat(result.getLatestExchangeRate().getUsd().getExchangeRate()).isNotEqualTo(0.0);
-            assertThat(result.getLatestExchangeRate().getCny().getExchangeRate()).isNotEqualTo(0.0);
+            assertThat(result.getExchangeRateHistories().getRates()).allMatch(r -> r.getRate() != 0.0);
+            assertNotNull(result.getRealTimeRates().getUsd());
+            assertNotNull(result.getRealTimeRates().getCny());
+            assertNotNull(result.getRealTimeRates().getVnd());
+            assertThat(result.getRealTimeRates().getUsd().getRate()).isNotEqualTo(0.0);
+            assertThat(result.getRealTimeRates().getCny().getRate()).isNotEqualTo(0.0);
             // assertThat(result.getLatestExchangeRate().getVnd().getExchangeRate()).isNotEqualTo(0.0);
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());

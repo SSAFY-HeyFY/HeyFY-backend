@@ -5,12 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExchangeRateGroupDto {
-    private ExchangeRateDto usd;
-    private ExchangeRateDto cny;
-    private ExchangeRateDto vnd;
+public class RealTimeRateDto {
+
+    private String currency;
+    private LocalDateTime updatedAt;
+    private double rate;
+    private double fluctuation;
 }
