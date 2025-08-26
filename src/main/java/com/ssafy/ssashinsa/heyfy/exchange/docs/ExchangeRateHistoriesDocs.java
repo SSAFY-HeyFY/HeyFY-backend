@@ -1,10 +1,8 @@
 package com.ssafy.ssashinsa.heyfy.exchange.docs;
 
-import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.ExchangeRateHistoriesResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,14 +15,7 @@ import java.lang.annotation.*;
 @Documented
 @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공",
-                content = @Content(schema = @Schema(implementation = ExchangeRateHistoriesResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                content = @Content(mediaType = "application/json",
-                        schema = @Schema(implementation = ErrorResponse.class),
-                        examples = {
-                                @ExampleObject(name = "필수 정보 누락",
-                                        ref = "#/components/examples/MissingRequired")
-                        }))
+                content = @Content(schema = @Schema(implementation = ExchangeRateHistoriesResponseDto.class)))
 })
 public @interface ExchangeRateHistoriesDocs {
     // 이 어노테이션은 환전 페이지 API의 Swagger 문서화에 사용됩니다.
