@@ -49,7 +49,7 @@ def format_rate_data_for_api(raw_data_list, job_timestamp):
         processed_item = {
             # [수정됨] 개별 크롤링 시간이 아닌, 스케줄러 작업 시작 시간으로 통일합니다.
             "updated_at": job_timestamp.isoformat(),
-            "currency": item.currency.replace("KRW", ""), # "USDKRW" -> "USD"
+            "currency": item.currency,
             "rate": str(item.rate) if is_vnd else f"{item.rate:.2f}",
             "change_direction": item.change_direction if item.change_direction is not None else "",
             "change_abs": str(item.change_abs) if is_vnd else f"{item.change_abs:.2f}",
