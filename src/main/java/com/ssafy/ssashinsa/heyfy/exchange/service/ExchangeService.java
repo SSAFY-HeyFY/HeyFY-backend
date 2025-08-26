@@ -7,21 +7,22 @@ import com.ssafy.ssashinsa.heyfy.account.repository.ForeignAccountRepository;
 import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.exchange.*;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.exchange.ShinhanExchangeResponseDto;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDemandDepositAccountBalanceResponseDto;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanUpdateAccountResponseDto;
 import com.ssafy.ssashinsa.heyfy.exchange.exception.ExchangeErrorCode;
 import com.ssafy.ssashinsa.heyfy.fastapi.client.FastApiClient;
 import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRateAnalysisDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.client.ShinhanDemandDepositApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.client.ShinhanExchangeApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.client.ShinhanForeignDemandDepositApiClient;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.exchange.ShinhanExchangeResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDemandDepositAccountBalanceResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanUpdateAccountResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanException;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,11 +40,19 @@ public class ExchangeService {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final ForeignAccountRepository foreignAccountRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public ExchangeResponseDto exchangeToForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
         Users user = userRepository.findUserWithAccountsByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+
+        String pinNumber = exchangeRequestDto.getPinNumber();
+
+        if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
+            throw new CustomException(ExchangeErrorCode.INVALID_PIN_NUMBER);
+        }
+
         Account account = user.getAccount();
         ForeignAccount foreignAccount = user.getForeignAccount();
         // account, foreignAccount 둘 다 존재해야 함
@@ -103,6 +112,12 @@ public class ExchangeService {
     public ExchangeResponseDto exchangeFromForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
         Users user = userRepository.findUserWithAccountsByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+
+        String pinNumber = exchangeRequestDto.getPinNumber();
+        if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
+            throw new CustomException(ExchangeErrorCode.INVALID_PIN_NUMBER);
+        }
+
         Account account = user.getAccount();
         ForeignAccount foreignAccount = user.getForeignAccount();
         // account, foreignAccount 둘 다 존재해야 함

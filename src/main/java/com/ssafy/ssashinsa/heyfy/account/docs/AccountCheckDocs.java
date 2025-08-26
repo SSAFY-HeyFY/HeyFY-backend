@@ -35,28 +35,34 @@ import java.lang.annotation.Target;
         ),
         @ApiResponse(
                 responseCode = "400",
-                description = "잘못된 요청 (예: 인증 번호 불일치)",
+                description = "잘못된 요청",
                 content = @Content(
                         mediaType = "application/json",
-                        // 여기서는 ErrorResponse 같은 별도의 DTO를 사용하거나 직접 예시를 명시할 수 있습니다.
-                        examples = @ExampleObject(
-                                name = "실패 응답 예시",
-                                value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"FAIL_CHECK_AUTH\",\"message\":\"인증 번호 확인에 실패했습니다.\"}"
-                        )
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = {
+                                @ExampleObject(
+                                        name = "인증 번호 불일치",
+                                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"FAIL_CHECK_AUTH\",\"message\":\"Authentication failed.\"}"
+                                ),
+                                @ExampleObject(
+                                        name = "계좌 번호 유효성 실패",
+                                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"A1003\",\"message\":\"Account number is not valid.\"}"
+                                )
+                        }
                 )
         ),
         @ApiResponse(
-        responseCode = "400",
-        description = "잘못된 요청 (예: 계좌 번호 유효성 실패)",
-        content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class),
-                examples = @ExampleObject(
-                        name = "계좌 번호 유효성 실패 응답",
-                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"A1003\",\"message\":\"계좌번호가 유효하지 않습니다.\"}"
+                responseCode = "500",
+                description = "서버 내부 오류",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "서버 내부 오류",
+                                value = "{\"status\":500,\"httpError\":\"INTERNAL_SERVER_ERROR\",\"errorCode\":\"INTERNAL_SERVER_ERROR\",\"message\":\"An error has occurred.\"}"
+                        )
                 )
         )
-)
 })
 public @interface AccountCheckDocs {
 }

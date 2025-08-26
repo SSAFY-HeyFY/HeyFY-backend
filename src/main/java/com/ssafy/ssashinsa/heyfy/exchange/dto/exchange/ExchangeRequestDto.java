@@ -11,5 +11,6 @@ public class ExchangeRequestDto {
 //    private String withdrawalAccountNo;
 //    private String withdrawalAccountCurrency;
     private Double transactionBalance;
+    private String pinNumber;
 }
 

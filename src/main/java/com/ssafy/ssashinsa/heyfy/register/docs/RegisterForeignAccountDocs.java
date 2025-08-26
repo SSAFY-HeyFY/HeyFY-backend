@@ -15,41 +15,67 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Operation(summary = "외화 계좌 등록", description = "신한은행 API를 통해 기존의 외화 계좌를 확인하고 서비스에 등록합니다.")
+@Operation(summary = "Register Existing Foreign Account", description = "Verifies an existing foreign currency account via Shinhan Bank API and registers it to the service.")
 @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
-                description = "성공적으로 외화 계좌를 등록했습니다.",
+                description = "Foreign account successfully registered.",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = AccountNoDto.class),
                         examples = @ExampleObject(
-                                name = "성공 응답 예시",
+                                name = "Success Response Example",
                                 value = "{\"accountNo\": \"0010756851096126\"}"
                         )
                 )
         ),
         @ApiResponse(
                 responseCode = "400",
-                description = "잘못된 요청 또는 계좌 유효성 오류",
+                description = "Bad request or account validation error.",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = ErrorResponse.class),
                         examples = {
                                 @ExampleObject(
-                                        name = "계좌 유효성 실패",
-                                        summary = "신한 API에서 계좌 번호가 유효하지 않다고 응답한 경우",
-                                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"A1003\",\"message\":\"계좌번호가 유효하지 않습니다.\"}"
+                                        name = "Account Validation Failed",
+                                        summary = "Shinhan API responded that the account number is not valid.",
+                                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"A1003\",\"message\":\"Account number is not valid.\"}"
+                                ),
+                                @ExampleObject(
+                                        name = "Account Already Exists",
+                                        summary = "The provided account is already associated with this user.",
+                                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"ACCOUNT_ALREADY_EXISTS\",\"message\":\"User already has an account.\"}"
+                                ),
+                                @ExampleObject(
+                                        name = "Account Not Matched to User",
+                                        summary = "The provided account does not belong to the authenticated user.",
+                                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"ACCOUNT_NOT_MATCH\",\"message\":\"Account number does not match.\"}"
                                 )
                         }
                 )
         ),
         @ApiResponse(
-                responseCode = "500",
-                description = "서버 내부 오류 또는 신한 API 호출 오류",
+                responseCode = "404",
+                description = "User not found.",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = ErrorResponse.class)
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "User Not Found",
+                                value = "{\"status\": 404, \"httpError\": \"NOT_FOUND\", \"errorCode\": \"USER_NOT_FOUND\", \"message\": \"User not found.\"}"
+                        )
+                )
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Internal Server Error or Shinhan API call failed.",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "API Call Failed",
+                                value = "{\"status\": 500, \"httpError\": \"INTERNAL_SERVER_ERROR\", \"errorCode\": \"API_CALL_FAILED\", \"message\": \"Shinhan API call failed.\"}"
+                        )
                 )
         )
 })
