@@ -617,7 +617,7 @@ if __name__ == '__main__':
     
     if len(X_test) > 0:
         # [변경] evaluate_model에 test_base_prices를 전달
-        predictions, actuals = evaluate_model(model, test_loader, target_scaler, device, test_base_prices, test_gap)
+        predictions, actuals = evaluate_model(model, test_loader, target_scaler, device, test_base_prices, test_gap, args.mode)
         plot_test_results(args, test_dates, predictions, actuals)
     else:
         print("테스트 데이터가 없어 평가 및 시각화를 건너뜁니다.")
