@@ -3,21 +3,20 @@ import json
 from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional  # Optional을 임포트합니다.
 from dotenv import load_dotenv
 
-# .env 파일에서 환경 변수를 로드합니다.
 load_dotenv()
 
 # --- Pydantic 모델 정의 ---
 class ChartDataPoint(BaseModel):
     date: str
     rate: float
-    is_prediction: bool
+    is_prediction: bool    
+    model_name: Optional[str] = None # model_name 추가: 예측 데이터가 아닐 수도 있으므로 Optional로 설정
 
-# [추가됨] API 최종 응답을 위한 Wrapper 모델
 class RateGraphResponse(BaseModel):
-    api_called_at: str      # API가 호출된 시각
+    api_called_at: str
     data: List[ChartDataPoint]
 
 # --- 라우터 생성 ---
@@ -27,17 +26,14 @@ PREDICTION_CACHE_FILE = os.path.join(CACHE_BASE_PATH, 'prediction_cache.json')
 
 @router.get(
     "/rate-graph",
-    # [수정됨] 응답 모델을 새로운 Wrapper 모델로 변경
     response_model=RateGraphResponse,
-    summary="환율 그래프 데이터 조회 (캐시 기반)",
-    description="스케줄러가 생성한 캐시 파일에서 과거 및 예측 데이터를 읽어 그래프용으로 제공합니다."
+    summary="환율 그래프 데이터 조회 (캐시 기반, 모델 정보 포함)",
+    description="스케줄러가 생성한 캐시 파일에서 과거 및 모델별 예측 데이터를 읽어 그래프용으로 제공합니다."
 )
 def get_rate_graph_data_from_cache():
     """
-    [수정된 로직]
-    1. 미리 생성된 'prediction_cache.json' 파일을 읽습니다.
-    2. API가 호출된 현재 시각을 기록합니다.
-    3. 전체 데이터를 Wrapper 모델에 담아 반환합니다.
+    캐시 파일('prediction_cache.json')을 읽어, 모델 정보가 포함된
+    환율 그래프 데이터를 반환합니다.
     """
     if not os.path.exists(PREDICTION_CACHE_FILE):
         raise HTTPException(
@@ -49,13 +45,11 @@ def get_rate_graph_data_from_cache():
         with open(PREDICTION_CACHE_FILE, 'r', encoding='utf-8') as f:
             cache_data_list = json.load(f).get('predictions', [])
         
-        # API 호출 시점의 타임스탬프 생성
         api_call_time_iso = datetime.now().isoformat()
 
-        # Pydantic 모델로 데이터 유효성 검증
+        # Pydantic 모델이 `model_name`을 포함하여 데이터 유효성을 검증합니다.
         validated_data = [ChartDataPoint(**item) for item in cache_data_list]
         
-        # 최종 응답 모델에 담아 반환
         return RateGraphResponse(
             api_called_at=api_call_time_iso,
             data=validated_data
