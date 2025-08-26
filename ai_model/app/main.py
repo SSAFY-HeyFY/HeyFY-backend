@@ -62,4 +62,4 @@ def read_api_root():
 
 # --- 4. 서버 실행 방법 ---
 # 프로젝트 최상위 폴더의 터미널에서 아래 명령어로 서버를 실행합니다.
-# uvicorn app.main:app --reload --port 8000
+# uvicorn app.main:app --reload --port 8888
