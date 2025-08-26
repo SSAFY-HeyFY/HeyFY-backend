@@ -66,8 +66,8 @@ public class SidValidationFilter extends OncePerRequestFilter {
     }
 
     private boolean isValidSid(String sid, String userId) {
-        String storedUserId = redisUtil.getSid(sid);
-        return storedUserId != null && storedUserId.equals(userId);
+        String storedSid = redisUtil.getSidByUserId(userId);
+        return storedSid != null && storedSid.equals(sid);
     }
 
     // 💡 ErrorCode를 매개변수로 받도록 변경

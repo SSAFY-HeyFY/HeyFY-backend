@@ -38,6 +38,12 @@ public class AuthController {
         return ResponseEntity.ok(authService.refreshAccessToken(authorizationHeader, refreshToken));
     }
 
+    @PostMapping("/sid/refresh")
+    public ResponseEntity<SidDto> issueSid(@RequestBody SecondaryAuthRequestDto requestDto) {
+        String newSid = authService.issueSid(requestDto.getPinNumber());
+        return ResponseEntity.ok(new SidDto(newSid));
+    }
+
     @PostMapping("/txntoken")
     public ResponseEntity<TxnAuthTokenDto> issueTxnAuthToken() {
         String token = authService.createTxnAuthToken();

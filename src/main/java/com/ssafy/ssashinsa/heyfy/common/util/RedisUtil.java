@@ -46,17 +46,18 @@ public class RedisUtil {
     }
 
     public void setSid(String sid, String userId) {
-        redisTemplate.opsForValue().set(SID_PREFIX + sid, userId, sidExpirationSeconds, java.util.concurrent.TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(SID_PREFIX + userId, sid, sidExpirationSeconds, java.util.concurrent.TimeUnit.SECONDS);
     }
 
-    public String getSid(String sid) {
-        return redisTemplate.opsForValue().get(SID_PREFIX + sid);
+    // SID를 가져올 때 userId를 사용
+    public String getSidByUserId(String userId) {
+        return redisTemplate.opsForValue().get(SID_PREFIX + userId);
     }
 
-    public void updateSidExpiration(String sid) {
-        // Redis에 sid가 존재할 경우에만 만료 시간 갱신
-        if (getSid(sid) != null) {
-            redisTemplate.expire(SID_PREFIX + sid, sidExpirationSeconds, java.util.concurrent.TimeUnit.SECONDS);
+    public void updateSidExpiration(String userId) {
+        // Redis에 해당 사용자 ID로 SID가 존재할 경우에만 만료 시간 갱신
+        if (redisTemplate.hasKey(SID_PREFIX + userId)) {
+            redisTemplate.expire(SID_PREFIX + userId, sidExpirationSeconds, java.util.concurrent.TimeUnit.SECONDS);
         }
     }
 }
