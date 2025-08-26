@@ -9,7 +9,6 @@ public class PermitAllPaths {
             "/auth/refresh/**",
             "/auth/token/access",
             "/api/test/public",
-            "/transfers",
             "/css/**",
             "/js/**",
             "/images/**",

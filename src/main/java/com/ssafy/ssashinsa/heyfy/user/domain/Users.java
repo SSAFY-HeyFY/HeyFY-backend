@@ -1,14 +1,10 @@
 package com.ssafy.ssashinsa.heyfy.user.domain;
 
-import com.github.f4b6a3.ulid.Ulid;
-import com.github.f4b6a3.ulid.UlidCreator;
 import com.ssafy.ssashinsa.heyfy.account.domain.Account;
 import com.ssafy.ssashinsa.heyfy.account.domain.ForeignAccount;
-import com.ssafy.ssashinsa.heyfy.user.ulid.UlidUserType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
@@ -24,9 +20,9 @@ import java.util.UUID;
 public class Users {
 
     @Id
-    @Type(UlidUserType.class)
-    @Column(name = "user_id", length = 16)
-    private Ulid id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+    private Long id;
 
     @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "external_id", unique = true, length = 36)
@@ -44,6 +40,9 @@ public class Users {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "pin_number")
+    private String pinNumber;
+
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
@@ -54,6 +53,7 @@ public class Users {
     private String univName;
 
 
+
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Account account;
 
@@ -62,9 +62,6 @@ public class Users {
 
     @PrePersist
     public void generateIds() {
-        if (this.id == null) {
-            this.id = UlidCreator.getMonotonicUlid();
-        }
         if (this.externalId == null) {
             this.externalId = UUID.randomUUID();
         }

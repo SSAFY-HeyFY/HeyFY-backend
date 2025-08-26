@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.exchange.docs;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.TuitionDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.TuitionResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -17,7 +17,7 @@ import java.lang.annotation.*;
 @Documented
 @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공",
-                content = @Content(schema = @Schema(implementation = TuitionDto.class))),
+                content = @Content(schema = @Schema(implementation = TuitionResponseDto.class))),
         @ApiResponse(responseCode = "400", description = "잘못된 요청",
                 content = @Content(mediaType = "application/json",
                         schema = @Schema(implementation = ErrorResponse.class),

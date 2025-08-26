@@ -16,6 +16,11 @@ public class SignUpDto {
     private String password;
     @NotBlank
     private String name;
+
+    @NotBlank
+    @Pattern(regexp = "^[0-9]{6}$", message = "PIN은 숫자 6자리여야 합니다.")
+    private String pinNumber;
+
     private String email;
     private String language;
     private String univName;

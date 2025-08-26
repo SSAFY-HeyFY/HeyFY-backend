@@ -6,4 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class ExchangeResponseDto {
+    private Double depositAccountBalance;
+    private Double withdrawalAccountBalance;
+    private Double transactionBalance;
 }

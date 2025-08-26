@@ -1,15 +1,15 @@
 package com.ssafy.ssashinsa.heyfy.transfer.docs;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
+import com.ssafy.ssashinsa.heyfy.transfer.dto.CreateTransferRequest;
 import com.ssafy.ssashinsa.heyfy.transfer.dto.TransferHistoryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -17,48 +17,44 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Operation(summary = "계좌 이체", description = "출금 계좌에서 입금 계좌로 금액을 이체합니다.")
+@Operation(summary = "국내 계좌 이체", description = "출금 계좌에서 입금 계좌로 금액을 이체합니다.")
 @ApiResponses({
-        // 🔹 1. 성공 응답 (200 OK)
         @ApiResponse(
                 responseCode = "200",
-                description = "이체 성공",
+                description = "성공적으로 이체를 완료했습니다.",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = TransferHistoryResponse.class)
+                        schema = @Schema(implementation = TransferHistoryResponse.class),
+                        examples = @ExampleObject(
+                                name = "계좌 이체 성공 예시",
+                                value = "{\n  \"success\": true,\n  \"history\": {\n    \"fromAccountMasked\": \"string\",\n    \"toAccountMasked\": \"string\",\n    \"amount\": \"string\",\n    \"currency\": \"KRW\",\n    \"transactionSummary\": \"string\",\n    \"completedAt\": \"2025-08-23T23:13:49.593964+09:00\"\n  },\n  \"error\": null\n}"
+                        )
                 )
         ),
-
-        // 🔹 2. 실패 응답 - 잘못된 요청 (400 Bad Request)
         @ApiResponse(
                 responseCode = "400",
-                description = "잘못된 요청 (Bad Request)",
+                description = "잘못된 요청: 출금 계좌를 찾을 수 없음",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = ErrorResponse.class),
-                        examples = {
-                                @ExampleObject(
-                                        name = "잘못된 계좌번호",
-                                        summary = "A1003: 계좌번호 형식 오류",
-                                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"INVALID_ACCOUNT_NO\",\"message\":\"입력하신 계좌 번호를 다시 확인해주세요.\"}"
-                                ),
-                                @ExampleObject(
-                                        name = "잘못된 거래금액",
-                                        summary = "A1011: 거래금액 형식 오류",
-                                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"INVALID_TRANSACTION_AMOUNT\",\"message\":\"거래금액이 유효하지 않습니다.\"}"
-                                ),
-                                @ExampleObject(
-                                        name = "계좌 잔액 부족",
-                                        summary = "A1014: 잔액 부족",
-                                        value = "{\"status\":422,\"httpError\":\"UNPROCESSABLE_ENTITY\",\"errorCode\":\"INSUFFICIENT_BALANCE\",\"message\":\"계좌잔액이 부족하여 거래가 실패했습니다.\"}"
-                                ),
-                                @ExampleObject(
-                                        name = "1회 이체 한도 초과",
-                                        summary = "A1016: 1회 이체 한도 초과",
-                                        value = "{\"status\":422,\"httpError\":\"UNPROCESSABLE_ENTITY\",\"errorCode\":\"TRANSFER_LIMIT_EXCEEDED_ONCE\",\"message\":\"1회 이체가능한도를 초과했습니다.\"}"
-                                )
-                        }
+                        examples = @ExampleObject(
+                                name = "출금 계좌 없음",
+                                summary = "현재 유저에게 연결된 출금 가능한 계좌가 없는 경우",
+                                value = "{\"status\": 400, \"httpError\": \"BAD_REQUEST\", \"errorCode\": \"WITHDRAWAL_ACCOUNT_NOT_FOUND\", \"message\": \"[A1003] 계좌번호가 유효하지 않습니다.\"}"
+                        )
+                )
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "서버 내부 오류 또는 API 호출 실패",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "API 호출 실패",
+                                summary = "신한은행 이체 API 통신 중 오류가 발생한 경우",
+                                value = "{\n  \"status\": 500,\n  \"httpError\": \"INTERNAL_SERVER_ERROR\",\n  \"errorCode\": \"API_CALL_FAILED\",\n  \"message\": \"신한 API 호출에 실패했습니다.\"\n}"
+                        )
                 )
         )
 })

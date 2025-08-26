@@ -1,7 +1,8 @@
 package com.ssafy.ssashinsa.heyfy.transfer.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanCommonResponseHeaderDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.common.ShinhanCommonResponseHeaderDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.transfer.TransferResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

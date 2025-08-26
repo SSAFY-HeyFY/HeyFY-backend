@@ -1,9 +1,11 @@
 package com.ssafy.ssashinsa.heyfy.shinhanApi.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ShinhanApiClient {
@@ -20,6 +22,7 @@ public class ShinhanApiClient {
     public String getForeignAccountTypeUniqueNo() {
         return apiProperties.getCommon().getForeignAccountTypeUniqueNo();
     }
+
     public WebClient getClient(String domain) {
         ShinhanApiProperties.Domain domainConfig = apiProperties.getDomains().get(domain);
 
@@ -32,4 +35,7 @@ public class ShinhanApiClient {
 //                .defaultHeader("apiKey", apiProperties.getCommon().getManagerKey())
                 .build();
     }
+
+
+
 }

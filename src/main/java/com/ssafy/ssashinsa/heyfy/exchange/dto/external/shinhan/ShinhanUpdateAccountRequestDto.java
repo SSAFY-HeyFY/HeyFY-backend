@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.ShinhanCommonRequestHeaderDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.common.ShinhanCommonRequestHeaderDto;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,6 +12,6 @@ public class ShinhanUpdateAccountRequestDto {
     private ShinhanCommonRequestHeaderDto Header;
     private String accountNo;
 
-    private Long transactionBalance;
-    private double transactionSummary;
+    private Double transactionBalance;
+    private Double transactionSummary;
 }
