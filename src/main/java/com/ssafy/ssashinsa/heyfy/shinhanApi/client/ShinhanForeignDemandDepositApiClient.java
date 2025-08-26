@@ -157,7 +157,8 @@ public class ShinhanForeignDemandDepositApiClient {
 
     public ShinhanInquireDemandDepositAccountBalanceResponseDto inquireForeignCurrencyDemandDepositAccountBalance(String accountNo, String userKey) {
         ShinhanCommonRequestHeaderDto header = shinhanApiUtil.createHeaderDto("inquireForeignCurrencyDemandDepositAccountBalance", "inquireForeignCurrencyDemandDepositAccountBalance", userKey);
-        AccountBalanceRequestDto requestDto = AccountBalanceRequestDto.builder()
+        ShinhanInquireDemandDepositAccountBalanceRequestDto requestDto = ShinhanInquireDemandDepositAccountBalanceRequestDto.builder()
+                .Header(header)
                 .accountNo(accountNo)
                 .build();
         shinhanApiUtil.logRequest(requestDto);
