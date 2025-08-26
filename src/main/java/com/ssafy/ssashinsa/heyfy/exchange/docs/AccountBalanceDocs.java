@@ -13,7 +13,7 @@ import java.lang.annotation.*;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Operation(summary = "한국 계좌 잔액 조회")
+@Operation(summary = "한국 계좌 잔액 조회(미사용)")
 @Documented
 @ApiResponses({
         @ApiResponse(responseCode = "200", description = "조회 성공",
