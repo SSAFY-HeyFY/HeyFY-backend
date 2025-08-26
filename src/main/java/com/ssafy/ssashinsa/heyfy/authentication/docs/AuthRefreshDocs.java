@@ -34,6 +34,10 @@ import java.lang.annotation.Target;
                                         name = "토큰 쌍 불일치",
                                         value = "{\"status\":400, \"httpError\":\"BAD_REQUEST\", \"errorCode\":\"TOKEN_PAIR_MISMATCH\", \"message\":\"액세스 토큰과 리프레시 토큰의 쌍이 올바르지 않습니다.\"}"
                                 ),
+                                @ExampleObject(
+                                        name = "만료된 리프레시 토큰",
+                                        value = "{\"status\":400, \"httpError\":\"BAD_REQUEST\", \"errorCode\":\"EXPIRED_REFRESH_TOKEN\", \"message\":\"리프레쉬 토큰이 만료되었습니다.\"}"
+                                )
                         })),
         @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 누락)",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class),
