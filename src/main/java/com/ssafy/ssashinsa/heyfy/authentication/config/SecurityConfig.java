@@ -1,6 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.authentication.config;
 
-import com.ssafy.ssashinsa.heyfy.authentication.filter.JwtAndSidFilter;
+import com.ssafy.ssashinsa.heyfy.authentication.filter.JwtAuthenticationFilter;
+import com.ssafy.ssashinsa.heyfy.authentication.filter.SidValidationFilter;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.CustomAuthenticationEntryPoint;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
 import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
@@ -23,12 +24,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    public JwtAndSidFilter jwtAndSidFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService, RedisUtil redisUtil) {
-        return new JwtAndSidFilter(jwtTokenProvider, userDetailsService, redisUtil);
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
+        return new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAndSidFilter jwtAndSidFilter, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
+    public SidValidationFilter sidValidationFilter(RedisUtil redisUtil) {
+        return new SidValidationFilter(redisUtil);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            SidValidationFilter sidValidationFilter,
+            CustomAuthenticationEntryPoint customAuthenticationEntryPoint
+    ) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
@@ -36,13 +47,14 @@ public class SecurityConfig {
                 )
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PermitAllPaths.PATHS.toArray(new String[0])).permitAll()
+                        .requestMatchers(ApiPaths.PUBLIC_PATHS.toArray(new String[0])).permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(authenticationManager -> authenticationManager
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
-                .addFilterBefore(jwtAndSidFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(sidValidationFilter, JwtAuthenticationFilter.class)
                 .build();
     }
 

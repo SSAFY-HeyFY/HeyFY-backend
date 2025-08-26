@@ -2,10 +2,12 @@ package com.ssafy.ssashinsa.heyfy.authentication.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.authentication.config.ApiPaths;
-import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
-import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode; // ✨ ErrorCode를 임포트
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
+import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
+import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,68 +15,67 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-// JWT 토큰의 유효성을 검증하고, 유효한 경우 해당 사용자의 인증 정보를 SecurityContext에 설정하는 필터(현재 사용하지 않음)
+// SID 유효성만 검사하는 필터
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class SidValidationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final UserDetailsService userDetailsService;
+    private final RedisUtil redisUtil;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String requestURI = request.getRequestURI();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        return ApiPaths.PUBLIC_PATHS.stream()
+        boolean isPublicPath = ApiPaths.PUBLIC_PATHS.stream()
                 .anyMatch(pattern -> pathMatcher.match(pattern, requestURI));
+
+        boolean isNonSensitivePath = ApiPaths.NON_SENSITIVE_PATHS.stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, requestURI));
+
+        return authentication == null || isPublicPath || isNonSensitivePath;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = resolveToken(request);
+        try {
+            String sid = request.getHeader("sid");
+            String userId = SecurityUtil.getCurrentStudentId();
 
-        if (token != null) {
-            try {
-                jwtTokenProvider.validateToken(token);
-                String username = jwtTokenProvider.getUsernameFromToken(token);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (CustomException e) {
-                handleException(response, e.getErrorCode());
-                return;
+            if (userId == null) {
+                throw new CustomException(AuthErrorCode.UNAUTHORIZED);
             }
+
+            if (sid == null || !isValidSid(sid, userId)) {
+                throw new CustomException(AuthErrorCode.SID_INVALID_OR_EXPIRED);
+            }
+            redisUtil.updateSidExpiration(sid);
+        } catch (CustomException e) {
+            handleException(response, e.getErrorCode());
+            return;
         }
 
         filterChain.doFilter(request, response);
     }
 
-    // ExceptionController는 MVC에서 발생하는 예외만 처리하기 때문에 예외적으로 직접 처리
-    private void handleException(HttpServletResponse response, ErrorCode errorCode) throws IOException {
-        ResponseEntity<ErrorResponse> responseEntity = ErrorResponse.responseEntity(errorCode);
-
-        response.setStatus(responseEntity.getStatusCode().value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.writeValue(response.getOutputStream(), responseEntity.getBody());
+    private boolean isValidSid(String sid, String userId) {
+        String storedUserId = redisUtil.getSid(sid);
+        return storedUserId != null && storedUserId.equals(userId);
     }
 
-    private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-
-        return null;
+    // 💡 ErrorCode를 매개변수로 받도록 변경
+    private void handleException(HttpServletResponse response, ErrorCode errorCode) throws IOException {
+        ResponseEntity<ErrorResponse> responseEntity = ErrorResponse.responseEntity(errorCode);
+        response.setStatus(responseEntity.getStatusCode().value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.writeValue(response.getOutputStream(), responseEntity.getBody());
     }
 }
