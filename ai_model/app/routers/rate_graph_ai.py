@@ -4,6 +4,10 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
+from dotenv import load_dotenv
+
+# .env 파일에서 환경 변수를 로드합니다.
+load_dotenv()
 
 # --- Pydantic 모델 정의 ---
 class ChartDataPoint(BaseModel):
@@ -18,7 +22,8 @@ class RateGraphResponse(BaseModel):
 
 # --- 라우터 생성 ---
 router = APIRouter()
-PREDICTION_CACHE_FILE = "logs/prediction_cache.json"
+CACHE_BASE_PATH = os.getenv('CACHE_DIR', './logs')
+PREDICTION_CACHE_FILE = os.path.join(CACHE_BASE_PATH, 'prediction_cache.json')
 
 @router.get(
     "/rate-graph",

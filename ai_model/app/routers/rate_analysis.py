@@ -5,21 +5,59 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 import pandas as pd
+from dotenv import load_dotenv
+
+# .env 파일에서 환경 변수를 로드합니다.
+load_dotenv()
 
 # --- Pydantic 모델 정의 ---
 # API가 최종적으로 반환할 데이터 구조를 정의합니다.
 class AnalysisResponse(BaseModel):
-    api_called_at: str          # API가 호출된 시각
-    today_rate: float           # 분석 기준이 되는 '오늘'의 환율
-    ai_predicted_rate: float    # AI가 예측한 실제 환율 값
+    api_called_at: str            # API가 호출된 시각
+    today_rate: float             # 분석 기준이 되는 '오늘'의 환율
+    ai_predicted_rate: float      # AI가 예측한 실제 환율 값
     historical_analysis: Optional[str] # 과거 데이터 기반 분석 문구
-    ai_prediction: Optional[str]    # AI 예측 기반 문구
+    ai_prediction: Optional[str]       # AI 예측 기반 문구
 
 # --- 라우터 생성 ---
 router = APIRouter()
 CACHE_BASE_PATH = os.getenv('CACHE_DIR', './logs')
 PREDICTION_CACHE_FILE = os.path.join(CACHE_BASE_PATH, 'prediction_cache.json')
 
+# --- 헬퍼 함수 ---
+# 금융 스타일의 분석 문구를 생성하는 헬퍼 함수입니다.
+def describe_finance_style(current: float, past30: pd.Series) -> str:
+    """
+    현재 환율이 과거 30일 데이터 범위 내 어느 지점에 위치하는지 분석하여
+    금융 리포트 스타일의 문구를 반환합니다.
+    """
+    low = past30.min()
+    high = past30.max()
+    
+    # 최고점/최저점 특별 케이스를 먼저 처리합니다.
+    if current >= high:
+        return "Over the past 30 days, today shows the highest exchange rate."
+    if current <= low:
+        return "Today's rate is the lowest in the last 30 days. You might want to wait."
+        
+    # 변동 없는 경우를 방지합니다.
+    if high == low:
+        return "The exchange rate has shown no fluctuation over the past 30 days."
+        
+    pos = (current - low) / (high - low)
+
+    if pos <= 0.2:
+        return "The current exchange rate is positioned near the bottom of the 30-day range, reflecting a relatively weak dollar level."
+    elif pos <= 0.4:
+        return "The exchange rate is trading in the lower segment of the past 30 days, slightly below the monthly average."
+    elif pos <= 0.6:
+        return "The current rate is around the midpoint of the 30-day range, indicating a neutral positioning within recent trends."
+    elif pos <= 0.8:
+        return "The exchange rate is situated in the upper segment of the monthly range, showing moderate upward pressure."
+    else: # pos > 0.8
+        return "The current rate is close to the 30-day peak, signaling strong dollar momentum against the won."
+
+# --- API 엔드포인트 ---
 @router.get(
     "/rate-analysis",
     response_model=AnalysisResponse,
@@ -49,52 +87,39 @@ def get_rate_analysis_from_cache():
             raise HTTPException(status_code=404, detail="캐시 파일에 데이터가 없습니다.")
 
         # 1. 데이터 분리 및 기준 환율 설정
-        historical_points = [p for p in cache_data_list if not p['is_prediction']]
-        predicted_points = [p for p in cache_data_list if p['is_prediction']]
+        historical_points = [p for p in cache_data_list if not p.get('is_prediction')]
+        predicted_points = [p for p in cache_data_list if p.get('is_prediction')]
 
         if not historical_points:
             raise HTTPException(status_code=404, detail="캐시에서 과거 데이터를 찾을 수 없습니다.")
         
         today_rate = historical_points[-1]['rate']
 
-        # 2. 과거 데이터 기반 분석 (Historical Analysis)
+        # 2. 과거 데이터 기반 분석
         df_historical = pd.DataFrame(historical_points)
-        min_rate_hist = df_historical['rate'].min()
-        max_rate_hist = df_historical['rate'].max()
-        
-        historical_analysis_msg = None
-        if today_rate >= max_rate_hist:
-            historical_analysis_msg = "Over the past 30 days, today shows the highest exchange rate."
-        elif today_rate <= min_rate_hist:
-            historical_analysis_msg = "Today's rate is the lowest in the last 30 days. You might want to wait."
+        historical_analysis_msg = describe_finance_style(
+            current=today_rate,
+            past30=df_historical['rate']
+        )
 
-        # 3. AI 예측 기반 분석 (AI Prediction)
+        # 3. AI 예측 기반 분석
         ai_prediction_msg = None
-        # predicted_points 리스트에는 '브릿지' 포인트와 '실제 예측' 포인트가 포함됩니다.
-        # 실제 예측은 두 번째 요소이므로, 리스트 길이가 2 이상인지 확인합니다.
+        ai_predicted_rate_value = 0.0
         if len(predicted_points) > 1:
             actual_prediction = predicted_points[1] # 0번은 브릿지, 1번이 실제 예측
             pred_rate = actual_prediction['rate']
             ai_predicted_rate_value = pred_rate
-            diff = round(pred_rate - today_rate, 2)
+            diff = pred_rate - today_rate
             
-            # [수정됨] 예측 날짜를 파싱하여 요일 정보를 추출합니다.
             prediction_date = datetime.strptime(actual_prediction['date'], '%Y-%m-%d')
-            day_name = prediction_date.strftime('%A') # e.g., Monday
+            day_name = prediction_date.strftime('%A')
 
-            # [수정됨] AI 예측 문구에 요일 정보를 포함하여 더 구체적으로 변경합니다.
-            if diff > 0:
-                ai_prediction_msg = (
-                    f"Our AI model forecasts an increase of about {diff:.2f}₩ by this coming {day_name}, "
-                    f"suggesting a favorable time for exchange. "
-                    f"Consider exchanging your money then for better value."
-                )
+            if diff > 0.01:
+                ai_prediction_msg = f"Our AI model forecasts a potential increase to around {pred_rate:,.2f}₩ by this coming {day_name}, suggesting a more favorable time for selling dollars."
+            elif diff < -0.01:
+                ai_prediction_msg = f"Our AI model projects a potential decrease to around {pred_rate:,.2f}₩ by this coming {day_name}, indicating a better opportunity for buying dollars might be ahead."
             else:
-                ai_prediction_msg = (
-                    f"Our AI model projects a potential decrease of about {-diff:.2f}₩ by this coming {day_name}. "
-                    f"It might be better to wait for a more favorable rate. "
-                    f"You might get more value by waiting."
-                )
+                ai_prediction_msg = f"Our AI model suggests the rate will remain stable around {pred_rate:,.2f}₩ through this coming {day_name}, indicating no significant short-term fluctuation."
 
         # 4. 최종 응답 생성
         return AnalysisResponse(
