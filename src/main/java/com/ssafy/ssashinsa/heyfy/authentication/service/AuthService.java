@@ -56,9 +56,13 @@ public class AuthService {
             redisUtil.deleteRefreshToken(signInDto.getStudentId());
             redisUtil.setRefreshToken(signInDto.getStudentId(), refreshToken);
 
+
+            String sid = UUID.randomUUID().toString();
+            redisUtil.setSid(sid, signInDto.getStudentId());
+
             //registerService.createAccountsForUser(signInDto.getStudentId());
 
-            return new SignInSuccessDto(accessToken, refreshToken);
+            return new SignInSuccessDto(accessToken, refreshToken, sid);
         } catch (BadCredentialsException  | InternalAuthenticationServiceException e) {
             throw new CustomException(AuthErrorCode.LOGIN_FAILED);
         }

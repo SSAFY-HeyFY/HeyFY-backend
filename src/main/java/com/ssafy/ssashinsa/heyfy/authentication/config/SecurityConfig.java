@@ -1,8 +1,9 @@
 package com.ssafy.ssashinsa.heyfy.authentication.config;
 
+import com.ssafy.ssashinsa.heyfy.authentication.filter.JwtAndSidFilter;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.CustomAuthenticationEntryPoint;
-import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtAuthenticationFilter;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
+import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,15 +21,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Bean
-    public SecurityFilterChain filterChain(
-            HttpSecurity http,
-            JwtTokenProvider jwtTokenProvider,
-            UserDetailsService userDetailsService,
-            CustomAuthenticationEntryPoint customAuthenticationEntryPoint
-    ) throws Exception {
 
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
+    @Bean
+    public JwtAndSidFilter jwtAndSidFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService, RedisUtil redisUtil) {
+        return new JwtAndSidFilter(jwtTokenProvider, userDetailsService, redisUtil);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAndSidFilter jwtAndSidFilter, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .exceptionHandling(authenticationManager -> authenticationManager
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAndSidFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

@@ -1,7 +1,8 @@
-package com.ssafy.ssashinsa.heyfy.authentication.jwt;
+package com.ssafy.ssashinsa.heyfy.authentication.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.authentication.config.PermitAllPaths;
+import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
@@ -16,13 +17,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component
+// JWT 토큰의 유효성을 검증하고, 유효한 경우 해당 사용자의 인증 정보를 SecurityContext에 설정하는 필터(현재 사용하지 않음)
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 

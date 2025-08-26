@@ -10,4 +10,5 @@ import lombok.Getter;
 public class SignInSuccessDto {
     private String accessToken;
     private String refreshToken;
+    private String sid;
 }

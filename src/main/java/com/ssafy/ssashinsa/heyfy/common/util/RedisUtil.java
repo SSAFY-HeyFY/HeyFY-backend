@@ -13,8 +13,12 @@ public class RedisUtil {
     @Value("${spring.jwt.refresh-expiration}")
     private long refreshExpirationMs;
 
+    @Value("${spring.data.redis.sid-expiration}")
+    private long sidExpirationSeconds;
+
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
     private static final String TXN_AUTH_TOKEN_PREFIX = "txnAuth:";
+    private static final String SID_PREFIX = "sid:";
 
     public void setRefreshToken(String key, String value) {
         long timeoutSeconds = refreshExpirationMs / 1000;
@@ -39,5 +43,20 @@ public class RedisUtil {
 
     public void deleteTxnAuthToken(String key) {
         redisTemplate.delete(TXN_AUTH_TOKEN_PREFIX + key);
+    }
+
+    public void setSid(String sid, String userId) {
+        redisTemplate.opsForValue().set(SID_PREFIX + sid, userId, sidExpirationSeconds, java.util.concurrent.TimeUnit.SECONDS);
+    }
+
+    public String getSid(String sid) {
+        return redisTemplate.opsForValue().get(SID_PREFIX + sid);
+    }
+
+    public void updateSidExpiration(String sid) {
+        // Redis에 sid가 존재할 경우에만 만료 시간 갱신
+        if (getSid(sid) != null) {
+            redisTemplate.expire(SID_PREFIX + sid, sidExpirationSeconds, java.util.concurrent.TimeUnit.SECONDS);
+        }
     }
 }
