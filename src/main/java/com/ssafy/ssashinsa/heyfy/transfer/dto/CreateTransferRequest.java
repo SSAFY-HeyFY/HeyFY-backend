@@ -10,4 +10,5 @@ public class CreateTransferRequest {
     private String depositAccountNo;
     private String amount;
     private String transactionSummary;
+    private String pinNumber;
 }
