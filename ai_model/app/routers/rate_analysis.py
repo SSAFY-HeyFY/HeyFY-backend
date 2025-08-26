@@ -114,9 +114,9 @@ def get_rate_analysis_from_cache():
         date_formatted = prediction_date.strftime('%B %d (%A)')
 
         if diff > 1.0:
-            ai_prediction_msg = f"The rate may increase by ₩{diff:,.2f} by this coming {date_formatted}."
+            ai_prediction_msg = f"By this coming {date_formatted}, the rate may increase by ₩{diff:,.2f}."
         elif diff < -1.0:
-            ai_prediction_msg = f"The rate may decrease by ₩{abs(diff):,.2f} by this coming {date_formatted}."
+            ai_prediction_msg = f"By this coming {date_formatted}, the rate may decrease by ₩{abs(diff):,.2f}."
         else:
             ai_prediction_msg = f"The rate is expected to remain stable until this coming {date_formatted}."
 
