@@ -15,26 +15,54 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Operation(summary = "외화 예금 계좌 등록", description = "신한은행 API를 이용하여 새로운 외화 예금 계좌를 개설합니다.")
+@Operation(summary = "Create Foreign Currency Deposit Account", description = "Creates a new foreign currency deposit account using the Shinhan Bank API.")
 @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
-                description = "성공적으로 외화 계좌를 등록했습니다.",
+                description = "Foreign currency account successfully registered.",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = AccountCreationResponseDto.class),
-                        examples = @ExampleObject( // 💡 examples 추가
-                                name = "성공 응답 예시",
-                                value = "{\"message\": \"정상처리 되었습니다.\", \"accountNo\": \"0019290964871122\", \"currency\": \"USD\"}"
+                        examples = @ExampleObject(
+                                name = "Success Response Example",
+                                value = "{\"message\": \"Processed normally.\", \"accountNo\": \"0019290964871122\", \"currency\": \"USD\"}"
+                        )
+                )
+        ),
+        @ApiResponse(
+                responseCode = "400",
+                description = "Bad Request (e.g., user already has an account)",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "User Already Has Account",
+                                value = "{\"status\": 400, \"httpError\": \"BAD_REQUEST\", \"errorCode\": \"ACCOUNT_ALREADY_EXISTS\", \"message\": \"User already has an account.\"}"
+                        )
+                )
+        ),
+        @ApiResponse(
+                responseCode = "401",
+                description = "Authentication failed (e.g., missing user key)",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "Missing User Key",
+                                value = "{\"status\": 401, \"httpError\": \"UNAUTHORIZED\", \"errorCode\": \"MISSING_USER_KEY\", \"message\": \"User key is missing.\"}"
                         )
                 )
         ),
         @ApiResponse(
                 responseCode = "500",
-                description = "서버 내부 오류",
+                description = "Internal Server Error (e.g., Shinhan API call failed)",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = ErrorResponse.class)
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "API Call Failed",
+                                value = "{\"status\": 500, \"httpError\": \"INTERNAL_SERVER_ERROR\", \"errorCode\": \"API_CALL_FAILED\", \"message\": \"Shinhan API call failed.\"}"
+                        )
                 )
         )
 })
