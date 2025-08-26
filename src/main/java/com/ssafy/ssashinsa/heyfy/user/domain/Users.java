@@ -2,11 +2,14 @@ package com.ssafy.ssashinsa.heyfy.user.domain;
 
 import com.ssafy.ssashinsa.heyfy.account.domain.Account;
 import com.ssafy.ssashinsa.heyfy.account.domain.ForeignAccount;
+import com.ssafy.ssashinsa.heyfy.fcm.domain.FcmToken;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -59,6 +62,9 @@ public class Users {
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private ForeignAccount foreignAccount;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FcmToken> fcmTokens = new ArrayList<>();
 
     @PrePersist
     public void generateIds() {
