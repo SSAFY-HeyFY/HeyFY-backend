@@ -1,6 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.shinhanApi.client;
 
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanExchangeResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.exchange.ShinhanExchangeResponseDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

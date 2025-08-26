@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan;
+package com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.exchange;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,5 +7,5 @@ import lombok.Data;
 @Builder
 public class ShinhanExchangeResponseRecDto {
     private ShinhanExchangeCurrencyRecDto exchangeCurrency;
-    private AccountInfoRecDto accountInfo;
+    private ShinhanAccountInfoRecDto accountInfo;
 }

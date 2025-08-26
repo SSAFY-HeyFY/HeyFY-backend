@@ -1,9 +1,9 @@
 package com.ssafy.ssashinsa.heyfy.shinhanApi.client;
 
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.AccountBalanceRequestDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanInquireDemandDepositAccountBalanceResponseDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanUpdateAccountRequestDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanUpdateAccountResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDemandDepositAccountBalanceRequestDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDemandDepositAccountBalanceResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanUpdateAccountRequestDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanUpdateAccountResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.create.ShinhanCreateDepositRequestDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.create.ShinhanCreateDepositResponseDto;
@@ -263,7 +263,7 @@ public class ShinhanDemandDepositApiClient {
 
     public ShinhanInquireDemandDepositAccountBalanceResponseDto inquireDemandDepositAccountBalance(String accountNo, String userKey) {
         ShinhanCommonRequestHeaderDto header = shinhanApiUtil.createHeaderDto("inquireDemandDepositAccountBalance", "inquireDemandDepositAccountBalance", userKey);
-        AccountBalanceRequestDto requestDto = AccountBalanceRequestDto.builder()
+        ShinhanInquireDemandDepositAccountBalanceRequestDto requestDto = ShinhanInquireDemandDepositAccountBalanceRequestDto.builder()
                 .Header(header)
                 .accountNo(accountNo)
                 .build();
