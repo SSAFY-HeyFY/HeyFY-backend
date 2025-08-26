@@ -1,6 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.account.docs;
 
 import com.ssafy.ssashinsa.heyfy.account.dto.AccountNoDto;
+import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -43,7 +44,19 @@ import java.lang.annotation.Target;
                                 value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"FAIL_CHECK_AUTH\",\"message\":\"인증 번호 확인에 실패했습니다.\"}"
                         )
                 )
+        ),
+        @ApiResponse(
+        responseCode = "400",
+        description = "잘못된 요청 (예: 계좌 번호 유효성 실패)",
+        content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponse.class),
+                examples = @ExampleObject(
+                        name = "계좌 번호 유효성 실패 응답",
+                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"A1003\",\"message\":\"계좌번호가 유효하지 않습니다.\"}"
+                )
         )
+)
 })
 public @interface AccountCheckDocs {
 }

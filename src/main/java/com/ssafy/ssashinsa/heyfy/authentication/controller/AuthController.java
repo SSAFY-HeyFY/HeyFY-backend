@@ -6,11 +6,13 @@ import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignUpDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.test.MessageDto;
 import com.ssafy.ssashinsa.heyfy.authentication.service.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "계정 관리", description = "계정 관리 API")
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor

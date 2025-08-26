@@ -112,6 +112,32 @@ public class ShinhanDemandDepositApiClient {
         return response;
     }
 
+    public ShinhanInquireSingleDepositResponseDto inquireDemandForeignDepositAccount(String userKey, String accountNo) {
+        ShinhanCommonRequestHeaderDto header = shinhanApiUtil.createHeaderDto("inquireForeignCurrencyDemandDepositAccount", "inquireForeignCurrencyDemandDepositAccount", userKey);
+        ShinhanInquireSingleDepositRequestDto requestDto = ShinhanInquireSingleDepositRequestDto.builder()
+                .Header(header)
+                .accountNo(accountNo)
+                .build();
+        shinhanApiUtil.logRequest(requestDto);
+
+        ShinhanInquireSingleDepositResponseDto response = shinhanApiClient.getClient("demand-deposit")
+                .post()
+                .uri("/foreignCurrency/inquireForeignCurrencyDemandDepositAccount")
+                .header("Content-Type", "application/json")
+                .bodyValue(requestDto)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(String.class).flatMap(body -> {
+                            log.error("API Error Body: {}", body);
+                            String responseCode = shinhanApiUtil.getResponseCode(body);
+                            throw new ShinhanException(ShinhanErrorCode.valueOf(responseCode));
+                        }))
+                .bodyToMono(ShinhanInquireSingleDepositResponseDto.class)
+                .doOnNext(shinhanApiUtil::logResponse)
+                .block();
+        return response;
+    }
+
     public InquireTransactionHistoryResponseDto inquireTransactionHistoryList(String userKey, String accountNo) {
         ShinhanCommonRequestHeaderDto header = shinhanApiUtil.createHeaderDto("inquireTransactionHistoryList", "inquireTransactionHistoryList", userKey);
         LocalDateTime now = LocalDateTime.now();
@@ -128,6 +154,37 @@ public class ShinhanDemandDepositApiClient {
         InquireTransactionHistoryResponseDto response = shinhanApiClient.getClient("demand-deposit")
                 .post()
                 .uri("/inquireTransactionHistoryList")
+                .header("Content-Type", "application/json")
+                .bodyValue(requestDto)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(String.class).flatMap(body -> {
+                            log.error("API Error Body: {}", body);
+                            String responseCode = shinhanApiUtil.getResponseCode(body);
+                            throw new ShinhanException(ShinhanErrorCode.valueOf(responseCode));
+                        }))
+                .bodyToMono(InquireTransactionHistoryResponseDto.class)
+                .doOnNext(shinhanApiUtil::logResponse)
+                .block();
+        return response;
+    }
+
+    public InquireTransactionHistoryResponseDto inquireForeignTransactionHistoryList(String userKey, String accountNo) {
+        ShinhanCommonRequestHeaderDto header = shinhanApiUtil.createHeaderDto("inquireForeignCurrencyTransactionHistoryList", "inquireForeignCurrencyTransactionHistoryList", userKey);
+        LocalDateTime now = LocalDateTime.now();
+        InquireTransactionHistoryRequestDto requestDto = InquireTransactionHistoryRequestDto.builder()
+                .Header(header)
+                .accountNo(accountNo)
+                .startDate("20230101")
+                .endDate(now.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                .transactionType("A")
+                .orderByType("DESC")
+                .build();
+        shinhanApiUtil.logRequest(requestDto);
+
+        InquireTransactionHistoryResponseDto response = shinhanApiClient.getClient("demand-deposit")
+                .post()
+                .uri("/foreignCurrency/inquireForeignCurrencyTransactionHistoryList")
                 .header("Content-Type", "application/json")
                 .bodyValue(requestDto)
                 .retrieve()
