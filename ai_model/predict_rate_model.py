@@ -1,136 +1,116 @@
 import os
-import joblib
-import json
-import numpy as np
 import pandas as pd
-import torch
-import torch.nn as nn
+from prophet import Prophet
+from prophet.serialize import model_from_json
+import holidays
 
-from model import LSTMDirectMH
+# --- 설정 ---
+MODEL_A_PATH = 'models/prophet_1day_model/prophet_1day_model.json'
+MODEL_B_PATH = 'models/prophet_multi_day_model/prophet_multi_day_model.json'
 
-class Predictor:
+def get_hybrid_prophet_forecast(historical_df: pd.DataFrame, predict_days: int = 5) -> pd.DataFrame:
     """
-    새로운 'gap-residual' 학습 방식에 맞춰 수정된 Predictor 클래스입니다.
-    학습된 모델을 로드하고 새로운 데이터에 대한 예측을 수행합니다.
+    하이브리드 Prophet 모델을 사용해, 주어진 과거 데이터프레임을 기반으로 미래 N일(영업일 기준)의 환율을 예측합니다.
+    실시간 추론 상황에 맞게 마지막 행의 target(y) 값이 NaN이어도 정상 동작합니다.
+
+    Args:
+        historical_df (pd.DataFrame): 'Date', 'target', 'Inv_Close', 'ECOS_Close' 컬럼을 포함하는 과거 데이터.
+                                     마지막 행의 'target'은 비어있을 수 있습니다.
+        predict_days (int): 예측할 미래 일수 (영업일 기준).
+
+    Returns:
+        pd.DataFrame: 최종 예측 결과. 'ds', 'yhat', 'yhat_lower', 'yhat_upper' 컬럼 포함.
     """
-    def __init__(self, model_dir):
-        """
-        Args:
-            model_dir (str): 학습된 모델, 스케일러, 설정 파일이 저장된 디렉토리 경로
-        """
-        print(f"'{model_dir}' 경로에서 모델과 관련 파일을 로드합니다.")
-        
-        # 1. 설정 파일 로드
-        config_path = os.path.join(model_dir, 'config.json')
-        if not os.path.exists(config_path):
-            raise FileNotFoundError(f"설정 파일을 찾을 수 없습니다: {config_path}")
-        with open(config_path, 'r') as f:
-            self.config = json.load(f)
+    # 1. 모델 파일 존재 여부 확인
+    if not os.path.exists(MODEL_A_PATH) or not os.path.exists(MODEL_B_PATH):
+        raise FileNotFoundError("학습된 Prophet 모델 파일(.json)을 찾을 수 없습니다. 먼저 학습을 실행해주세요.")
 
-        # 2. 장치 설정
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # 2. 입력받은 데이터프레임 처리 (dropna 제거)
+    df = historical_df.copy()
+    df['ds'] = pd.to_datetime(df['Date'])
+    if 'target' in df.columns:
+        df = df.rename(columns={'target': 'y'})
 
-        # 3. 스케일러 로드
-        self.feature_scaler = joblib.load(os.path.join(model_dir, 'feature_scaler.pkl'))
-        self.target_scaler = joblib.load(os.path.join(model_dir, 'target_scaler.pkl'))
-
-        # 4. 모델 구조 초기화 및 가중치 로드
-        self.model = LSTMDirectMH(
-            input_size=self.config['input_size'],
-            hidden_size=self.config['hidden_size'],
-            num_layers=self.config['num_layers'],
-            output_size=self.config['output_size'],
-            dropout_prob=self.config['dropout_prob']
-        ).to(self.device)
-        
-        model_path = os.path.join(model_dir, 'best_model.pth')
-        self.model.load_state_dict(torch.load(model_path, map_location=self.device))
-        self.model.eval() # 모델을 추론 모드로 설정
-        print("✅ 모델 로딩 완료.")
-
-    def predict(self, input_df: pd.DataFrame) -> np.ndarray:
-        """
-        새로운 입력 데이터프레임에 대해 다음 날의 환율을 예측합니다.
-        학습 로직(gap-residual)에 맞춰 가격을 복원합니다.
-
-        Args:
-            input_df (pd.DataFrame): 최소 'sequence_length' 만큼의 최신 데이터를 포함하는 데이터프레임.
-                                     'Inv_Close', 'ECOS_Close' 및 학습에 사용된 모든 피처를 포함해야 합니다.
-
-        Returns:
-            np.ndarray: 예측된 1일 후의 환율 가격 배열 (e.g., array([1350.25]))
-        """
-        seq_len = self.config['sequence_length']
-        
-        if len(input_df) < seq_len:
-            raise ValueError(f"입력 데이터의 길이는 최소 {seq_len} 이상이어야 합니다. 현재 길이: {len(input_df)}")
-            
-        # 1. 전처리: 최신 시퀀스 데이터 추출 및 스케일링
-        last_sequence = input_df.tail(seq_len)
-        features = last_sequence[self.config['feature_columns']]
-        scaled_features = self.feature_scaler.transform(features)
-
-        # 2. 가격 복원을 위한 주요 값 추출
-        # 기준 가격: 시퀀스 마지막 날의 한국 매매기준율
-        base_price = last_sequence['ECOS_Close'].iloc[-1]
-        # 밤사이 갭(gap) 계산: 시퀀스 마지막 날의 미국 시장 종가와 한국 매매기준율의 차이
-        inv_close_last = last_sequence['Inv_Close'].iloc[-1]
-        gap_return = (inv_close_last / base_price) - 1.0 if base_price != 0 else 0.0
-
-        # 3. 텐서 변환 및 모델 추론 (결과는 스케일링된 '잔차 수익률')
-        input_tensor = torch.tensor(scaled_features, dtype=torch.float32).unsqueeze(0).to(self.device)
-        with torch.no_grad():
-            # 모델 출력: scaled residual return, shape: (1, 1)
-            scaled_pred_residual = self.model(input_tensor).cpu().numpy()
-
-        # 4. 후처리: 잔차 수익률 복원 -> 전체 수익률 복원 -> 가격 복원
-        # 4.1. 스케일링된 잔차 수익률 -> 실제 잔차 수익률
-        pred_residual = self.target_scaler.inverse_transform(scaled_pred_residual)
-        
-        # 4.2. 전체 수익률 = 밤사이 갭 수익률 + 예측된 잔차 수익률
-        pred_next_day_return = gap_return + pred_residual
-        
-        # 4.3. 최종 가격 = 기준 가격 * (1 + 전체 수익률)
-        predicted_price = base_price * (1 + pred_next_day_return)
-        
-        return predicted_price.flatten()
-
-
-if __name__ == '__main__':
-    # --- Predictor 클래스 사용 예시 ---
+    # ✨ 핵심 수정: dropna()를 사용하지 않고 마지막 행의 데이터를 그대로 사용
+    last_day_data = df.tail(1)
+    if last_day_data.empty:
+        raise ValueError("입력 데이터가 비어있습니다.")
     
-    # 1. 예측을 수행할, 새로 학습된 모델의 경로 지정
-    # 예시 경로이며, 실제 학습 후 생성된 폴더 경로로 변경해야 합니다.
-    MODEL_DIRECTORY = "models/seq_120-pred_1-hidden_128-layers_2-batch_16-lr_0.001-scaler_standard-tag_return_predict"
+    last_date = last_day_data['ds'].iloc[0] # 예측 시작 기준 날짜
+    
+    # 3. Prophet 모델 로드
+    with open(MODEL_A_PATH, 'r') as fin:
+        model_A = model_from_json(fin.read())
+    with open(MODEL_B_PATH, 'r') as fin:
+        model_B = model_from_json(fin.read())
 
-    if not os.path.exists(MODEL_DIRECTORY):
-        print(f"오류: 모델 디렉토리 '{MODEL_DIRECTORY}'를 찾을 수 없습니다.")
-        print("먼저 새로운 train.py를 실행하여 모델을 학습시켜 주세요.")
+    # 4. 예측 대상 날짜 생성 (주말/공휴일 자동 제외)
+    future_business_days = pd.date_range(
+        start=last_date + pd.Timedelta(days=1),
+        periods=predict_days + 15,
+        freq='B'
+    )
+    sk_holidays = holidays.KR(years=future_business_days.year.unique())
+    final_future_dates = [date for date in future_business_days if date not in sk_holidays][:predict_days]
+            
+    if not final_future_dates:
+        raise ValueError("예측할 미래 영업일이 없습니다. 날짜를 확인해주세요.")
+
+    # 5. 하이브리드 추론 및 보정 (y값 없이 외부 변수만 사용)
+    # 5-1. Offset 계산
+    next_business_day = final_future_dates[0]
+    future_1day_A = pd.DataFrame({
+        'ds': [next_business_day],
+        'Inv_Close': [last_day_data['Inv_Close'].iloc[0]], # 마지막 날의 외부 변수 사용
+        'ECOS_Close': [last_day_data['ECOS_Close'].iloc[0]] # 마지막 날의 외부 변수 사용
+    })
+    forecast_1day_A = model_A.predict(future_1day_A)
+    
+    future_1day_B = pd.DataFrame({'ds': [next_business_day]})
+    forecast_1day_B = model_B.predict(future_1day_B)
+    
+    offset = forecast_1day_A['yhat'].iloc[0] - forecast_1day_B['yhat'].iloc[0]
+
+    # 5-2. 장기 예측 및 결과 조합
+    final_forecast_1day = forecast_1day_A[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
+    
+    if len(final_future_dates) > 1:
+        multi_day_dates = final_future_dates[1:]
+        future_df_B = pd.DataFrame({'ds': multi_day_dates})
+        forecast_multi_day_B = model_B.predict(future_df_B)
+        
+        forecast_multi_day_B['yhat'] += offset
+        forecast_multi_day_B['yhat_lower'] += offset
+        forecast_multi_day_B['yhat_upper'] += offset
+        
+        final_forecast_multi_day = forecast_multi_day_B[['ds', 'yhat', 'yhat_lower', 'yhat_upper']]
+        final_forecast = pd.concat([final_forecast_1day, final_forecast_multi_day], ignore_index=True)
     else:
-        # 2. 추론기 인스턴스 생성
-        try:
-            predictor = Predictor(model_dir=MODEL_DIRECTORY)
+        final_forecast = final_forecast_1day
 
-            # 3. 예측에 사용할 최신 데이터 로드 (예시)
-            # 실제 스케줄러에서는 FinanceDataReader를 통해 이 데이터를 동적으로 생성합니다.
-            config = predictor.config
-            if config['data_path'].endswith('.csv'):
-                sample_df_full = pd.read_csv(config['data_path'])
-            else:
-                sample_df_full = pd.read_excel(config['data_path'])
-            
-            # 마지막 120일 데이터를 예측 입력으로 사용한다고 가정
-            input_data = sample_df_full.tail(config['sequence_length']).copy()
-            
-            # 4. 예측 수행
-            prediction = predictor.predict(input_data)
-            
-            print("\n--- 예측 결과 ---")
-            print(f"입력 데이터 마지막 날짜: {pd.to_datetime(input_data['Date'].iloc[-1]).strftime('%Y-%m-%d')}")
-            print(f"기준 가격 (ECOS_Close): {input_data['ECOS_Close'].iloc[-1]:,.2f} 원")
-            print(f"다음 1일 후 환율 예측: {prediction[0]:,.2f} 원")
+    return final_forecast
 
-        except Exception as e:
-            print(f"\n--- 예측 테스트 중 오류 발생 ---")
-            print(e)
+# --- 스크립트 직접 실행 시 테스트를 위한 부분 ---
+if __name__ == '__main__':
+    print("--- Prophet 하이브리드 모델 예측 테스트 (실시간 추론 상황 가정) ---")
+    try:
+        # 테스트를 위해 CSV 파일에서 데이터를 직접 로드
+        DATA_FILE_PATH = 'data/train/only_US_KOR_20100104_20250812_simple.csv'
+        historical_data = pd.read_csv(DATA_FILE_PATH)
+        
+        # 실시간 상황 시뮬레이션: 마지막 행의 'target' 값을 강제로 NaN으로 만듦
+        historical_data.loc[historical_data.index[-1], 'target'] = None
+        
+        print("\n테스트 데이터 마지막 행 (target=NaN):")
+        print(historical_data.tail(1))
+        
+        # 수정된 함수에 데이터 전달
+        prediction_df = get_hybrid_prophet_forecast(
+            historical_df=historical_data, 
+            predict_days=5
+        )
+        print("\n✅ 예측 성공!")
+        print(prediction_df)
 
+    except Exception as e:
+        print(f"\n❌ 예측 중 오류 발생: {e}")
