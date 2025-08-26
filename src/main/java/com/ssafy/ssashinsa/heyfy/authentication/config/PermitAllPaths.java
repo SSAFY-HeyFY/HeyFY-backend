@@ -15,6 +15,7 @@ public class PermitAllPaths {
             "/webjars/**",
             "/swagger-ui/**",
             "/api-docs/**",
-            "/api/users/tokens/public"
+            "/api/users/tokens/public",
+            "/actuator/**"
     );
 }
