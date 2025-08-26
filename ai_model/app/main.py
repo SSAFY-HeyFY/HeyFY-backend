@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from app.routers import rate_graph_ai, realtime_rates, rate_analysis
+from app.routers import realtime_rates, rate_graph_ai, rate_analysis
 
 # --- 1. FastAPI 앱 생성 ---
 # API의 이름, 설명, 버전 등 기본 정보를 설정합니다.
