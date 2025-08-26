@@ -2,9 +2,10 @@ package com.ssafy.ssashinsa.heyfy.exchange.util;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.CommonErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.*;
 import com.ssafy.ssashinsa.heyfy.exchange.exception.ExchangeErrorCode;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDemandDepositResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.exchange.ShinhanExchangeRequestDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.exchange.ShinhanExchangeResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.*;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
 import lombok.RequiredArgsConstructor;
@@ -57,7 +58,7 @@ public class ShinhanExchangeClient {
     }
 
     public ShinhanInquireDemandDepositResponseDto getAccountInfoFromExternalApi(String accountNo, String userKey) {
-        AccountBalanceRequestDto requestDto = createAccountBalanceRequestDto(accountNo, userKey);
+        ShinhanInquireDemandDepositAccountBalanceRequestDto requestDto = createAccountBalanceRequestDto(accountNo, userKey);
         logRequest(requestDto);
         ShinhanInquireDemandDepositResponseDto response = apiClient.getClient("edu")
                 .post()
@@ -86,17 +87,17 @@ public class ShinhanExchangeClient {
                 .build();
     }
 
-    private AccountBalanceRequestDto createAccountBalanceRequestDto(String accountNo, String userKey) {
+    private ShinhanInquireDemandDepositAccountBalanceRequestDto createAccountBalanceRequestDto(String accountNo, String userKey) {
         String apiKey = apiClient.getManagerKey();
-        return AccountBalanceRequestDto.builder()
+        return ShinhanInquireDemandDepositAccountBalanceRequestDto.builder()
                 .Header(shinhanApiUtil.createHeaderDto("inquireDemandDepositAccountBalance", "inquireDemandDepositAccountBalance", apiKey, userKey))
                 .accountNo(accountNo)
                 .build();
     }
 
-    private AccountBalanceRequestDto createForeignAccountBalanceRequestDto(String accountNo, String userKey) {
+    private ShinhanInquireDemandDepositAccountBalanceRequestDto createForeignAccountBalanceRequestDto(String accountNo, String userKey) {
         String apiKey = apiClient.getManagerKey();
-        return AccountBalanceRequestDto.builder()
+        return ShinhanInquireDemandDepositAccountBalanceRequestDto.builder()
                 .Header(shinhanApiUtil.createHeaderDto("inquireForeignCurrencyDemandDepositAccountBalance", "inquireForeignCurrencyDemandDepositAccountBalance", apiKey, userKey))
                 .accountNo(accountNo)
                 .build();
@@ -141,7 +142,7 @@ public class ShinhanExchangeClient {
     }
 
     public ShinhanInquireDemandDepositAccountBalanceResponseDto getAccountBalanceFromExternalApi(String accountNo, String userKey) {
-        AccountBalanceRequestDto requestDto = createAccountBalanceRequestDto(accountNo, userKey);
+        ShinhanInquireDemandDepositAccountBalanceRequestDto requestDto = createAccountBalanceRequestDto(accountNo, userKey);
         logRequest(requestDto);
         ShinhanInquireDemandDepositAccountBalanceResponseDto response = apiClient.getClient("edu")
                 .post()
@@ -183,7 +184,7 @@ public class ShinhanExchangeClient {
 
 
     public ShinhanInquireDemandDepositAccountBalanceResponseDto getForeignAccountBalanceFromExternalApi(String accountNo, String userKey) {
-        AccountBalanceRequestDto requestDto = createForeignAccountBalanceRequestDto(accountNo, userKey);
+        ShinhanInquireDemandDepositAccountBalanceRequestDto requestDto = createForeignAccountBalanceRequestDto(accountNo, userKey);
         logRequest(requestDto);
         ShinhanInquireDemandDepositAccountBalanceResponseDto response = apiClient.getClient("edu")
                 .post()

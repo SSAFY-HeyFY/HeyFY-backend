@@ -1,4 +1,4 @@
-package com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan;
+package com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

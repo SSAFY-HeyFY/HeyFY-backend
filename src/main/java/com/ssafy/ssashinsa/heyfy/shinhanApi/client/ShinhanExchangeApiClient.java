@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.shinhanApi.client;
 
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanExchangeRequestDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.external.shinhan.ShinhanExchangeResponseDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.exchange.ShinhanExchangeRequestDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.exchange.ShinhanExchangeResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.common.ShinhanCommonRequestHeaderDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanErrorCode;
