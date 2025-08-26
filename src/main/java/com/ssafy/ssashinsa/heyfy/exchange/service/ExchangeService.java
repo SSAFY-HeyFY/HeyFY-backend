@@ -14,6 +14,8 @@ import com.ssafy.ssashinsa.heyfy.exchange.exception.ExchangeErrorCode;
 import com.ssafy.ssashinsa.heyfy.exchange.util.ShinhanExchangeClient;
 import com.ssafy.ssashinsa.heyfy.fastapi.client.FastApiClient;
 import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRateAnalysisDto;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanErrorCode;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanException;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,14 +48,37 @@ public class ExchangeService {
         }
 
         // 환전 api 호출
-        ShinhanExchangeResponseDto exchangeResponse = shinhanExchangeiClient.exchange(
-                account.getAccountNo(), "USD", exchangeRequestDto.getTransactionBalance(), user.getUserKey());
-
-        // 환전 금액만큼 계좌에 입금
-        ShinhanUpdateAccountResponseDto updateAccountResponse
-                = shinhanExchangeiClient.updateForeignAccount(
-                foreignAccount.getAccountNo(), exchangeRequestDto.getTransactionBalance(), user.getUserKey());
-
+        ShinhanExchangeResponseDto exchangeResponse;
+        try {
+            exchangeResponse = shinhanExchangeiClient.exchange(
+                    account.getAccountNo(), "USD", exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+        } catch (ShinhanException e){
+            ShinhanErrorCode errorCode = e.getErrorCode();
+            if (errorCode == ShinhanErrorCode.A1014) {
+                throw new CustomException(ExchangeErrorCode.INSUFFICIENT_BALANCE);
+            } else if (errorCode == ShinhanErrorCode.A5007) {
+                throw new CustomException(ExchangeErrorCode.EXCHANGE_MIN_UNIT);
+            } else if (errorCode == ShinhanErrorCode.A5008) {
+                throw new CustomException(ExchangeErrorCode.EXCHANGE_MIN_AMOUNT);
+            } else {
+                throw e;
+            }
+        }
+        try {
+            // 환전 금액만큼 계좌에 입금
+            ShinhanUpdateAccountResponseDto updateAccountResponse
+                    = shinhanExchangeiClient.updateForeignAccount(
+                    foreignAccount.getAccountNo(), exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+        } catch(ShinhanException e){
+            ShinhanErrorCode errorCode = e.getErrorCode();
+            if (errorCode == ShinhanErrorCode.A1011) {
+                throw new CustomException(ExchangeErrorCode.INVALID_TRANSACTION_AMOUNT);
+            } else if (errorCode == ShinhanErrorCode.A5005) {
+                throw new CustomException(ExchangeErrorCode.FOREIGN_ACCOUNT_ONLY);
+            } else {
+                throw e;
+            }
+        }
         // 입금된 계좌 잔액 조회
         ShinhanInquireDemandDepositAccountBalanceResponseDto foreignAccountBalanceResponse
                 = shinhanExchangeiClient.getForeignAccountBalanceFromExternalApi(foreignAccount.getAccountNo(), user.getUserKey());
@@ -82,13 +107,38 @@ public class ExchangeService {
         }
 
         // 환전 api 호출
-        ShinhanExchangeResponseDto exchangeResponse = shinhanExchangeiClient.exchange(
-                account.getAccountNo(), "KRW", exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+        ShinhanExchangeResponseDto exchangeResponse;
+        try {
+            exchangeResponse = shinhanExchangeiClient.exchange(
+                    foreignAccount.getAccountNo(), "KRW", exchangeRequestDto.getTransactionBalance(), user.getUserKey());
 
+        } catch (ShinhanException e) {
+            ShinhanErrorCode errorCode = e.getErrorCode();
+            if (errorCode == ShinhanErrorCode.A1014) {
+                throw new CustomException(ExchangeErrorCode.INSUFFICIENT_BALANCE);
+            } else if (errorCode == ShinhanErrorCode.A5007) {
+                throw new CustomException(ExchangeErrorCode.EXCHANGE_MIN_UNIT);
+            } else if (errorCode == ShinhanErrorCode.A5008) {
+                throw new CustomException(ExchangeErrorCode.EXCHANGE_MIN_AMOUNT, "Minimum exchange amount is 1,000 KRW");
+            } else {
+                throw e;
+            }
+        }
         // 환전 금액만큼 계좌에 입금
-        ShinhanUpdateAccountResponseDto updateAccountResponse = shinhanExchangeiClient.updateAccount(
-                account.getAccountNo(),exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+        try {
+            ShinhanUpdateAccountResponseDto updateAccountResponse = shinhanExchangeiClient.updateAccount(
+                    account.getAccountNo(), exchangeRequestDto.getTransactionBalance(), user.getUserKey());
+        } catch (ShinhanException e) {
+            ShinhanErrorCode errorCode = e.getErrorCode();
+            if (errorCode == ShinhanErrorCode.A1011) {
+                throw new CustomException(ExchangeErrorCode.INVALID_TRANSACTION_AMOUNT);
+            } else if (errorCode == ShinhanErrorCode.A5004) {
+                throw new CustomException(ExchangeErrorCode.KRW_ACCOUNT_ONLY);
+            } else {
+                throw e;
 
+            }
+        }
         // 입금된 계좌 잔액 조회
         ShinhanInquireDemandDepositAccountBalanceResponseDto accountBalanceResponse
                 = shinhanExchangeiClient.getAccountBalanceFromExternalApi(account.getAccountNo(), user.getUserKey());
