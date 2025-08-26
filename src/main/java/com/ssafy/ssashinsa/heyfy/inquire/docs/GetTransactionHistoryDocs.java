@@ -63,6 +63,24 @@ import java.lang.annotation.Target;
                 )
         ),
         @ApiResponse(
+                responseCode = "401",
+                description = "인증 실패 (JWT 또는 SID 누락/만료)",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = {
+                                @ExampleObject(
+                                        name = "유효하지 않은 액세스 토큰",
+                                        value = "{\"status\":401, \"httpError\":\"UNAUTHORIZED\", \"errorCode\":\"INVALID_ACCESS_TOKEN\", \"message\":\"유효하지 않은 액세스 토큰입니다.\"}"
+                                ),
+                                @ExampleObject(
+                                        name = "세션 ID 만료 또는 유효하지 않음",
+                                        value = "{\"status\":401, \"httpError\":\"UNAUTHORIZED\", \"errorCode\":\"SID_INVALID_OR_EXPIRED\", \"message\":\"세션 ID가 유효하지 않거나 만료되었습니다.\"}"
+                                )
+                        }
+                )
+        ),
+        @ApiResponse(
                 responseCode = "500",
                 description = "서버 내부 오류 또는 API 호출 실패",
                 content = @Content(

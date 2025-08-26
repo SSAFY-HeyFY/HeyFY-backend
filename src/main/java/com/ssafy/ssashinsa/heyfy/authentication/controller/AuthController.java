@@ -3,6 +3,7 @@ package com.ssafy.ssashinsa.heyfy.authentication.controller;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthRefreshDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignInDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignUpDocs;
+import com.ssafy.ssashinsa.heyfy.authentication.docs.SidRefreshDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.test.MessageDto;
 import com.ssafy.ssashinsa.heyfy.authentication.service.AuthService;
@@ -38,6 +39,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.refreshAccessToken(authorizationHeader, refreshToken));
     }
 
+    @SidRefreshDocs
     @PostMapping("/sid/refresh")
     public ResponseEntity<SidDto> issueSid(@RequestBody SecondaryAuthRequestDto requestDto) {
         String newSid = authService.issueSid(requestDto.getPinNumber());
