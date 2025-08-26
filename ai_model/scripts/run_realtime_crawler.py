@@ -4,6 +4,10 @@ import json
 import asyncio
 from datetime import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
+from dotenv import load_dotenv
+
+# .env 파일에서 환경 변수를 로드합니다.
+load_dotenv()
 
 # --- 프로젝트 경로 설정 ---
 # 'app' 폴더를 찾기 위해 경로를 동적으로 설정합니다.
@@ -30,10 +34,10 @@ except ModuleNotFoundError:
     sys.exit(1) # 오류 발생 시 스크립트 종료
 
 # --- 설정 ---
-LOGS_DIRECTORY = "logs"
-if not os.path.exists(LOGS_DIRECTORY):
-    os.makedirs(LOGS_DIRECTORY)
-REALTIME_CACHE_FILE = os.path.join(LOGS_DIRECTORY, "realtime_cache.json")
+CACHE_BASE_PATH = os.getenv('CACHE_DIR', './logs')
+if not os.path.exists(CACHE_BASE_PATH):
+    os.makedirs(CACHE_BASE_PATH)
+REALTIME_CACHE_FILE = os.path.join(CACHE_BASE_PATH, "realtime_cache.json")
 
 def format_rate_data_for_api(raw_data_list, job_timestamp):
     """크롤링된 원본 데이터를 API가 요구하는 최종 Pydantic 모델 형식으로 변환합니다."""

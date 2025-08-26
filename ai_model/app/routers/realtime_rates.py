@@ -4,6 +4,10 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
+from dotenv import load_dotenv
+
+# .env 파일에서 환경 변수를 로드합니다.
+load_dotenv()
 
 # --- Pydantic 모델 정의 ---
 class ExchangeRateDetail(BaseModel):
@@ -26,7 +30,8 @@ class RealtimeRatesResponse(BaseModel):
 
 # --- 라우터 생성 ---
 router = APIRouter()
-REALTIME_CACHE_FILE = "logs/realtime_cache.json"
+CACHE_BASE_PATH = os.getenv('CACHE_DIR', './logs')
+REALTIME_CACHE_FILE = os.path.join(CACHE_BASE_PATH, 'realtime_cache.json')
 
 @router.get(
     "/realtime-rates",

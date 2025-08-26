@@ -17,7 +17,8 @@ class AnalysisResponse(BaseModel):
 
 # --- 라우터 생성 ---
 router = APIRouter()
-PREDICTION_CACHE_FILE = "logs/prediction_cache.json"
+CACHE_BASE_PATH = os.getenv('CACHE_DIR', './logs')
+PREDICTION_CACHE_FILE = os.path.join(CACHE_BASE_PATH, 'prediction_cache.json')
 
 @router.get(
     "/rate-analysis",
