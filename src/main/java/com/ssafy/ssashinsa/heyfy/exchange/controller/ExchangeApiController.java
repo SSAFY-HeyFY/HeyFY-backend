@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
-@Tag(name = "환전 페이지 api")
+@Tag(name = "환전 api")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/exchange")

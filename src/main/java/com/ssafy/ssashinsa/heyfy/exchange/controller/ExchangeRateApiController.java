@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@Tag(name = "환율 페이지 api")
+@Tag(name = "환율 api")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/exchange-rate")
