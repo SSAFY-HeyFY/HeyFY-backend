@@ -3,6 +3,8 @@ package com.ssafy.ssashinsa.heyfy.register.docs;
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import com.ssafy.ssashinsa.heyfy.register.dto.AccountCreationResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -69,5 +71,7 @@ import java.lang.annotation.Target;
                 )
         )
 })
+@Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER, required = true)
+@Parameter(name = "sid", description = "세션 ID", in = ParameterIn.HEADER, required = true)
 public @interface CreateDepositAccountDocs {
 }

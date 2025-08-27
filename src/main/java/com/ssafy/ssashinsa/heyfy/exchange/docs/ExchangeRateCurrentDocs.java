@@ -3,6 +3,8 @@ package com.ssafy.ssashinsa.heyfy.exchange.docs;
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.RealTimeRateGroupResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -26,6 +28,8 @@ import java.lang.annotation.*;
                                         ref = "#/components/examples/MissingRequired")
                         }))
 })
+@Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER, required = true)
+@Parameter(name = "sid", description = "세션 ID", in = ParameterIn.HEADER, required = true)
 public @interface ExchangeRateCurrentDocs {
     // 이 어노테이션은 환전 페이지 API의 Swagger 문서화에 사용됩니다.
     // 각 API 메소드에 적용하여 응답 코드와 예시를 정의합니다.
