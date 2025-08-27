@@ -1,5 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.authentication.controller;
 
+import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthCheckPinDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthRefreshDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignInDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignUpDocs;
@@ -54,6 +55,7 @@ public class AuthController {
     }
 
 
+    @AuthCheckPinDocs
     @PostMapping("/checkpin")
     public ResponseEntity<CheckPinResponseDto> checkPin(@RequestBody PinNumberDto pinNumberDto) {
         CheckPinResponseDto response = authService.checkPin(pinNumberDto.getPinNumber());
