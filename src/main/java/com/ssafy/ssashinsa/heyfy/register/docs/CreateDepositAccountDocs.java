@@ -15,54 +15,57 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Operation(summary = "예금 계좌 등록", description = "신한은행 API를 이용하여 새로운 예금 계좌를 개설합니다.")
+@Operation(summary = "Create Deposit Account", description = "Creates a new deposit account using the Shinhan Bank API.")
 @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
-                description = "성공적으로 계좌를 등록했습니다.",
+                description = "Account successfully registered.",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = AccountCreationResponseDto.class),
                         examples = @ExampleObject(
-                                name = "성공 응답 예시",
-                                value = "{\"message\": \"정상처리 되었습니다.\", \"accountNo\": \"0016956302770649\"}"
+                                name = "Success Response Example",
+                                value = "{\"message\": \"Processed normally.\", \"accountNo\": \"0016956302770649\"}"
                         )
                 )
         ),
         @ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청",
+                responseCode = "401",
+                description = "Authentication failed (e.g., missing user key).",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = ErrorResponse.class),
-                        examples = {
-                                @ExampleObject(
-                                        name = "유저키 누락",
-                                        summary = "유저키가 존재하지 않는 경우",
-                                        value = "{\"status\": 400, \"httpError\": \"BAD_REQUEST\", \"errorCode\": \"MISSING_USER_KEY\", \"message\": \"유저키가 누락되었습니다.\"}"
-                                )
-                        }
+                        examples = @ExampleObject(
+                                name = "Missing User Key",
+                                summary = "The user key is not present in the request.",
+                                value = "{\"status\": 401, \"httpError\": \"UNAUTHORIZED\", \"errorCode\": \"MISSING_USER_KEY\", \"message\": \"User key is missing.\"}"
+                        )
                 )
         ),
-        // 🔹 3. 실패 응답 (500 Internal Server Error)
         @ApiResponse(
-                responseCode = "500",
-                description = "서버 내부 오류",
+                responseCode = "404",
+                description = "Not Found (user not found).",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = ErrorResponse.class),
-                        examples = {
-                                @ExampleObject(
-                                        name = "유저를 찾을 수 없음",
-                                        summary = "JWT 토큰의 사용자 정보를 찾을 수 없는 경우",
-                                        value = "{\"status\": 500, \"httpError\": \"INTERNAL_SERVER_ERROR\", \"errorCode\": \"USER_NOT_FOUND\", \"message\": \"유저를 찾을 수 없습니다.\"}"
-                                ),
-                                @ExampleObject(
-                                        name = "외부 API 호출 실패",
-                                        summary = "신한은행 API 응답 오류 또는 서버 내부 오류",
-                                        value = "{\"status\": 500, \"httpError\": \"INTERNAL_SERVER_ERROR\", \"errorCode\": \"API_CALL_FAILED\", \"message\": \"신한API 호출 에러\"}"
-                                )
-                        }
+                        examples = @ExampleObject(
+                                name = "User Not Found",
+                                summary = "User information from the JWT token could not be found.",
+                                value = "{\"status\": 404, \"httpError\": \"NOT_FOUND\", \"errorCode\": \"USER_NOT_FOUND\", \"message\": \"User not found.\"}"
+                        )
+                )
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Internal Server Error (e.g., external API call failed).",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "External API Call Failed",
+                                summary = "Shinhan API response error or internal server error.",
+                                value = "{\"status\": 500, \"httpError\": \"INTERNAL_SERVER_ERROR\", \"errorCode\": \"API_CALL_FAILED\", \"message\": \"Shinhan API call failed.\"}"
+                        )
                 )
         )
 })

@@ -3,10 +3,7 @@ package com.ssafy.ssashinsa.heyfy.account.controller;
 import com.ssafy.ssashinsa.heyfy.account.docs.AccountCheckDocs;
 import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountAuthDocs;
 import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountsDocs;
-import com.ssafy.ssashinsa.heyfy.account.dto.AccountAuthHttpResponseDto;
-import com.ssafy.ssashinsa.heyfy.account.dto.AccountNoDto;
-import com.ssafy.ssashinsa.heyfy.account.dto.AccountPairDto;
-import com.ssafy.ssashinsa.heyfy.account.dto.AuthCheckDto;
+import com.ssafy.ssashinsa.heyfy.account.dto.*;
 import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.inquire.service.InquireService;
@@ -80,6 +77,8 @@ public class AccountController {
             throw e;
         }
     }
+
+
 
 
 }

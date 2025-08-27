@@ -4,12 +4,15 @@ package com.ssafy.ssashinsa.heyfy.user.repository;
 import com.ssafy.ssashinsa.heyfy.account.dto.AccountPairDto;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import feign.Param;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<Users, Long> {
+
+    @EntityGraph(attributePaths = {"account", "foreignAccount"})
     Optional<Users> findByStudentId(String username);
     Optional<Users> findByEmail(String email);
 

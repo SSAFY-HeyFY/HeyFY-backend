@@ -15,46 +15,51 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Operation(summary = "1원 계좌 인증", description = "1원 이체로 계좌를 인증합니다.")
+@Operation(summary = "1-won Account Authentication", description = "Authenticates an account by transferring 1 won.")
 @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
-                description = "1원 계좌 인증에 성공했습니다.",
+                description = "Account authentication successful.",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = AccountAuthHttpResponseDto.class), // 💡 변경된 부분
+                        schema = @Schema(implementation = AccountAuthHttpResponseDto.class),
                         examples = @ExampleObject(
-                                name = "성공 응답 예시",
+                                name = "Success Response Example",
                                 value = "{\"code\": \"1234\", \"accountNo\": \"110123456789\"}"
                         )
                 )
         ),
         @ApiResponse(
-                responseCode = "500",
-                description = "서버 내부 오류 또는 인증 실패",
+                responseCode = "400",
+                description = "Bad Request (e.g., invalid account number or authentication failed)",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = ErrorResponse.class),
                         examples = {
                                 @ExampleObject(
-                                        name = "인증 실패",
-                                        summary = "인증 번호 불일치 등 인증에 실패한 경우",
-                                        value = "{\"status\": 500, \"httpError\": \"INTERNAL_SERVER_ERROR\", \"errorCode\": \"AUTH_FAILED\", \"message\": \"인증 실패\"}"
+                                        name = "Authentication Failed",
+                                        summary = "Authentication number mismatch or similar failure.",
+                                        value = "{\"status\": 400, \"httpError\": \"BAD_REQUEST\", \"errorCode\": \"AUTH_FAILED\", \"message\": \"Authentication failed.\"}"
+                                ),
+                                @ExampleObject(
+                                        name = "Invalid Account Number",
+                                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"A1003\",\"message\":\"Account number is not valid.\"}"
                                 )
                         }
                 )
-        ),@ApiResponse(
-        responseCode = "400",
-        description = "잘못된 요청 (예: 계좌 번호 유효성 실패)",
-        content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class),
-                examples = @ExampleObject(
-                        name = "계좌 번호 유효성 실패 응답",
-                        value = "{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"A1003\",\"message\":\"계좌번호가 유효하지 않습니다.\"}"
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Internal Server Error (e.g., external API call failed)",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "Internal Server Error",
+                                value = "{\"status\": 500, \"httpError\": \"INTERNAL_SERVER_ERROR\", \"errorCode\": \"API_CALL_FAILED\", \"message\": \"An error has occurred.\"}"
+                        )
                 )
         )
-)
 })
 public @interface GetMyAccountAuthDocs {
 }

@@ -1,5 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.authentication.controller;
 
+import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthCheckPinDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthRefreshDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignInDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignUpDocs;
@@ -59,6 +60,15 @@ public class AuthController {
     ) {
         authService.verifySecondaryAuth(requestDto.getPinNumber(), txnAuthToken);
         return ResponseEntity.ok(new MessageDto("2차 인증이 성공적으로 완료되었습니다."));
+    }
+
+
+    @AuthCheckPinDocs
+    @PostMapping("/checkpin")
+    public ResponseEntity<CheckPinResponseDto> checkPin(@RequestBody PinNumberDto pinNumberDto) {
+        CheckPinResponseDto response = authService.checkPin(pinNumberDto.getPinNumber());
+
+        return ResponseEntity.ok(response);
     }
 
 }

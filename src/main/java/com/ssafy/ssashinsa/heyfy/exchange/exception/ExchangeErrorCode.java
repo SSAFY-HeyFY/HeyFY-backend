@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ExchangeErrorCode implements ErrorCode {
+    INVALID_PIN_NUMBER(HttpStatus.BAD_REQUEST, "Wrong pin number"),
     ACCOUNT_NOT_FOUND(HttpStatus.BAD_REQUEST, "Account not found"),
     INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "Insufficient account balance"),
     EXCHANGE_MIN_UNIT(HttpStatus.BAD_REQUEST, "Minimum exchange unit is 10"),
