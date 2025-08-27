@@ -20,7 +20,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # --- 서비스 및 로직 임포트 ---
-from predict_rate_model_fixing import get_hybrid_prophet_forecast
+from predict_rate_model import get_hybrid_prophet_forecast
 from app.services.exchange_rate_crawler import get_detailed_exchange_rates
 
 # --- 설정 ---
