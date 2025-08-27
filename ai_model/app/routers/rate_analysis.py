@@ -33,6 +33,11 @@ class PredictionSummaryResponse(BaseModel):
     today_rate: float
     prediction: PredictionHighlight
 
+# Endpoint 3: /push/rate-status 용 모델 (Push Notification)
+class PushNotificationResponse(BaseModel):
+    status: str
+    message: str
+
 # --- 라우터 생성 및 설정 ---
 router = APIRouter()
 CACHE_BASE_PATH = os.getenv('CACHE_DIR', './logs')
@@ -194,3 +199,57 @@ def get_rate_prediction_summary():
         today_rate=today_rate,
         prediction=final_prediction
     )
+
+@router.get(
+    "/push/rate-status",
+    response_model=PushNotificationResponse,
+    summary="[Push] 환율 상태에 따른 푸시 알림 메시지 조회",
+    description="SpringBoot 서버 전용. 현재 환율의 30일 내 상태(최고/최저/일반)를 분석하여 푸시 알림에 사용할 status와 message를 반환합니다."
+)
+def get_push_notification_for_rate_status():
+    """
+    외부 인자 없이 서버에 캐시된 데이터를 기반으로 동작합니다.
+    Spring Boot 서버는 이 API를 호출하기만 하면 됩니다.
+    """
+    try:
+        historical_points, _, today_rate = load_and_prepare_data()
+        
+        if len(historical_points) < 2:
+            raise HTTPException(status_code=404, detail="분석을 위한 데이터가 충분하지 않습니다 (최소 2일치 필요).")
+
+        df_historical = pd.DataFrame(historical_points)
+        
+        min_rate_30d = df_historical['rate'].min()
+        max_rate_30d = df_historical['rate'].max()
+
+        status = "normal"
+        message = ""
+
+        today_rate = float(today_rate)
+
+        if today_rate >= max_rate_30d:
+            status = "highest"
+            message = f"📈 오늘의 환율은 {today_rate:,.2f}원으로, 최근 30일 중 최고가입니다!"
+        elif today_rate <= min_rate_30d:
+            status = "lowest"
+            message = f"📉 오늘의 환율은 {today_rate:,.2f}원으로, 최근 30일 중 최저가입니다. 환전 기회를 살펴보세요!"
+        else:
+            previous_rate = float(historical_points[-2]['rate'])
+            difference = today_rate - previous_rate
+            
+            if difference > 0.01:
+                message = f"어제보다 {difference:,.2f}원 상승했어요. (현재: {today_rate:,.2f}원)"
+            elif difference < -0.01:
+                message = f"어제보다 {abs(difference):,.2f}원 하락했어요. (현재: {today_rate:,.2f}원)"
+            else:
+                message = f"어제와 변동이 없어요. (현재: {today_rate:,.2f}원)"
+
+        return PushNotificationResponse(status=status, message=message)
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        return PushNotificationResponse(
+            status="error",
+            message=f"데이터 분석 중 오류가 발생했습니다: {e}"
+        )
