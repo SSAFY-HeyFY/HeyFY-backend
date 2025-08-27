@@ -199,4 +199,18 @@ public class AuthService {
         return getCurrentUser().getUserKey();
     }
 
+
+    public CheckPinResponseDto checkPin(String pinNumber) {
+        try {
+            Users user = getCurrentUser();
+            if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
+                throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
+            }
+            String txnToken = txnAuthTokenUtil.createTxnAuthToken();
+            return new CheckPinResponseDto(true, txnToken);
+        } catch (CustomException e) {
+            return new CheckPinResponseDto(false, null);
+        }
+    }
+
 }

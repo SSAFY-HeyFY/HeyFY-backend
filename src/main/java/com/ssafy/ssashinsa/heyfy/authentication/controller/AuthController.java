@@ -53,4 +53,12 @@ public class AuthController {
         return ResponseEntity.ok(new MessageDto("2차 인증이 성공적으로 완료되었습니다."));
     }
 
+
+    @PostMapping("/checkpin")
+    public ResponseEntity<CheckPinResponseDto> checkPin(@RequestBody PinNumberDto pinNumberDto) {
+        CheckPinResponseDto response = authService.checkPin(pinNumberDto.getPinNumber());
+
+        return ResponseEntity.ok(response);
+    }
+
 }
