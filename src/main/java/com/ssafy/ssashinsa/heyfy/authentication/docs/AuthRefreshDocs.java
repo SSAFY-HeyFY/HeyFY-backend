@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Operation(summary = "액세스 토큰 갱신", description = "리프레시 토큰으로 만료된 액세스 토큰을 갱신합니다.")
+@Operation(summary = "액세스 토큰 갱신", description = "리프레시 토큰으로 만료된 액세스 토큰을 갱신합니다.(10초 이내 동일한 요청에 대해서는 같은 액세스 토큰, 리프레시 토큰을 반환합니다)")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "토큰 갱신 성공",
                 content = @Content(schema = @Schema(implementation = TokenDto.class),
