@@ -13,9 +13,8 @@ public class RedisUtil {
     @Value("${spring.jwt.refresh-expiration}")
     private long refreshExpirationMs;
 
-    // docker 접근이 어려줘 일단 초기화해서 사용
-    //@Value("${spring.data.redis.sid-expiration}")
-    private long sidExpirationSeconds = 1800;
+    @Value("${spring.data.redis.sid-expiration}")
+    private long sidExpirationSeconds;
 
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
     private static final String TXN_AUTH_TOKEN_PREFIX = "txnAuth:";
