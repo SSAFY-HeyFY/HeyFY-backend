@@ -108,22 +108,36 @@ public class AuthService {
 
     // 리프레쉬 토큰 재발급
     public TokenDto refreshAccessToken(String authorizationHeader, String refreshToken) {
+        String refreshTokenUsername = jwtTokenProvider.getUsernameFromToken(refreshToken);
+        String refreshTokenJti = jwtTokenProvider.getJtiFromToken(refreshToken);
+
+
+        String cachedAccessToken = redisUtil.getTempAccessToken(refreshTokenJti);
+
+        if (cachedAccessToken != null) {
+            String currentRefreshToken = redisUtil.getRefreshToken(refreshTokenUsername);
+            String accessToken = authorizationHeader.substring(7);
+            String accessTokenJti = jwtTokenProvider.getJtiFromToken(accessToken);
+            if (!accessTokenJti.equals(refreshTokenJti)) {
+                throw new CustomException(AuthErrorCode.TOKEN_PAIR_MISMATCH);
+            }
+
+            return new TokenDto(cachedAccessToken, currentRefreshToken);
+        }
+
 
         validateRefreshToken(refreshToken);
-
-        String refreshTokenUsername = jwtTokenProvider.getUsernameFromToken(refreshToken);
         validateRefreshTokenInRedis(refreshTokenUsername, refreshToken);
-
         validateAccessTokenAndUserMatch(authorizationHeader, refreshToken);
 
 
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(refreshTokenUsername, null, null);
-
         String newJti = UUID.randomUUID().toString();
-
         String newAccessToken = jwtTokenProvider.createAccessToken(authentication, newJti);
         String newRefreshToken = jwtTokenProvider.createRefreshToken(authentication, newJti);
+
+        redisUtil.setTempAccessToken(refreshTokenJti, newAccessToken);
 
         redisUtil.deleteRefreshToken(refreshTokenUsername);
         redisUtil.setRefreshToken(refreshTokenUsername, newRefreshToken);
