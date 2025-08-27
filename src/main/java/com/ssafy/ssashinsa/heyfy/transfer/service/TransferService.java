@@ -2,7 +2,9 @@ package com.ssafy.ssashinsa.heyfy.transfer.service;
 
 import com.ssafy.ssashinsa.heyfy.account.exception.AccountErrorCode;
 import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
 import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
 import com.ssafy.ssashinsa.heyfy.register.exception.ShinhanRegisterApiErrorCode;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.client.ShinhanDemandDepositApiClient;
@@ -27,9 +29,16 @@ public class TransferService {
     private final PasswordEncoder passwordEncoder;
     private final ShinhanDemandDepositApiClient shinhanDemandDepositApiClient;
     private final ShinhanForeignDemandDepositApiClient shinhanForeignDemandDepositApiClient;
+    private final RedisUtil redisUtil;
 
-    public TransferResponseDto callTransfer(String depositAccountNo, String amount, String transactionSummary, String pinNumber) {
+    public TransferResponseDto callTransfer(String depositAccountNo, String amount, String transactionSummary, String pinNumber, String txnAuthToken) {
         Users user = findCurrentUser();
+
+        String studentId = SecurityUtil.getCurrentStudentId();
+        String redisToken = redisUtil.getTxnAuthToken(studentId);
+        if (redisToken == null || !redisToken.equals(txnAuthToken)) {
+            throw new CustomException(AuthErrorCode.INVALID_TXN_AUTH_TOKEN);
+        }
 
         if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
             throw new CustomException(TransferErrorCode.INVALID_PIN_NUMBER);
@@ -64,8 +73,14 @@ public class TransferService {
         }
     }
 
-    public TransferResponseDto callForeignTransfer(String depositAccountNo, String amount, String transactionSummary, String pinNumber) {
+    public TransferResponseDto callForeignTransfer(String depositAccountNo, String amount, String transactionSummary, String pinNumber, String txnAuthToken) {
         Users user = findCurrentUser();
+
+        String studentId = SecurityUtil.getCurrentStudentId();
+        String redisToken = redisUtil.getTxnAuthToken(studentId);
+        if (redisToken == null || !redisToken.equals(txnAuthToken)) {
+            throw new CustomException(AuthErrorCode.INVALID_TXN_AUTH_TOKEN);
+        }
 
         if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
             throw new CustomException(TransferErrorCode.INVALID_PIN_NUMBER);

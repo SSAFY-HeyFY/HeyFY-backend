@@ -6,6 +6,7 @@ import com.ssafy.ssashinsa.heyfy.account.repository.AccountRepository;
 import com.ssafy.ssashinsa.heyfy.account.repository.ForeignAccountRepository;
 import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.exchange.*;
 import com.ssafy.ssashinsa.heyfy.exchange.exception.ExchangeErrorCode;
 import com.ssafy.ssashinsa.heyfy.fastapi.client.FastApiClient;
@@ -41,13 +42,19 @@ public class ExchangeService {
     private final AccountRepository accountRepository;
     private final ForeignAccountRepository foreignAccountRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RedisUtil redisUtil;
 
     @Transactional
-    public ExchangeResponseDto exchangeToForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
+    public ExchangeResponseDto exchangeToForeign(String studentId, ExchangeRequestDto exchangeRequestDto, String txnAuthToken) {
         Users user = userRepository.findUserWithAccountsByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
 
         String pinNumber = exchangeRequestDto.getPinNumber();
+
+        String redisToken = redisUtil.getTxnAuthToken(studentId);
+        if (redisToken == null || !redisToken.equals(txnAuthToken)) {
+            throw new CustomException(AuthErrorCode.INVALID_TXN_AUTH_TOKEN);
+        }
 
         if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
             throw new CustomException(ExchangeErrorCode.INVALID_PIN_NUMBER);
@@ -109,9 +116,15 @@ public class ExchangeService {
     }
 
     @Transactional
-    public ExchangeResponseDto exchangeFromForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
+    public ExchangeResponseDto exchangeFromForeign(String studentId, ExchangeRequestDto exchangeRequestDto , String txnAuthToken) {
         Users user = userRepository.findUserWithAccountsByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
+
+        String redisToken = redisUtil.getTxnAuthToken(studentId);
+        if (redisToken == null || !redisToken.equals(txnAuthToken)) {
+            throw new CustomException(AuthErrorCode.INVALID_TXN_AUTH_TOKEN);
+        }
+
 
         String pinNumber = exchangeRequestDto.getPinNumber();
         if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
