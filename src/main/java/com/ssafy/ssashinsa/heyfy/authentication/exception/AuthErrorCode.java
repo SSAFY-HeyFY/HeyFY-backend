@@ -29,7 +29,8 @@ public enum AuthErrorCode implements ErrorCode {
     INVALID_TXN_AUTH_TOKEN(HttpStatus.BAD_REQUEST, "거래 인증이 유효하지 않습니다."),
     INVALID_PIN_NUMBER(HttpStatus.BAD_REQUEST, "2차 비밀번호가 일치하지 않습니다."),
     TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
-    INVALID_AUTH_HEADER(HttpStatus.UNAUTHORIZED, "Authorization 헤더 형식이 올바르지 않습니다.");
+    INVALID_AUTH_HEADER(HttpStatus.UNAUTHORIZED, "Authorization 헤더 형식이 올바르지 않습니다."),
+    SID_INVALID_OR_EXPIRED(HttpStatus.UNAUTHORIZED, "세션 ID가 유효하지 않거나 만료되었습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

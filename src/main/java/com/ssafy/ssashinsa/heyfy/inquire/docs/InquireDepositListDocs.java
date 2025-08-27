@@ -3,6 +3,8 @@ package com.ssafy.ssashinsa.heyfy.inquire.docs;
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDepositResponseRecDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,6 +36,24 @@ import java.lang.annotation.Target;
                 )
         ),
         @ApiResponse(
+                responseCode = "401",
+                description = "인증 실패 (JWT 또는 SID 누락/만료)",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = {
+                                @ExampleObject(
+                                        name = "유효하지 않은 액세스 토큰",
+                                        value = "{\"status\":401, \"httpError\":\"UNAUTHORIZED\", \"errorCode\":\"INVALID_ACCESS_TOKEN\", \"message\":\"유효하지 않은 액세스 토큰입니다.\"}"
+                                ),
+                                @ExampleObject(
+                                        name = "세션 ID 만료 또는 유효하지 않음",
+                                        value = "{\"status\":401, \"httpError\":\"UNAUTHORIZED\", \"errorCode\":\"SID_INVALID_OR_EXPIRED\", \"message\":\"세션 ID가 유효하지 않거나 만료되었습니다.\"}"
+                                )
+                        }
+                )
+        ),
+        @ApiResponse(
                 responseCode = "500",
                 description = "서버 내부 오류",
                 content = @Content(
@@ -54,5 +74,7 @@ import java.lang.annotation.Target;
                 )
         )
 })
+@Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER, required = true)
+@Parameter(name = "sid", description = "세션 ID", in = ParameterIn.HEADER, required = true)
 public @interface InquireDepositListDocs {
 }

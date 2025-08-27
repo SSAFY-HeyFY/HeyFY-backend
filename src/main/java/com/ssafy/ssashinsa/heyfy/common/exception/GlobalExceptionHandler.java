@@ -6,6 +6,7 @@ import com.ssafy.ssashinsa.heyfy.shinhanApi.exception.ShinhanException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -63,6 +64,11 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(errorResponse, httpStatus);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        return ErrorResponse.responseEntity(CommonErrorCode.INVALID_REQUEST_BODY);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

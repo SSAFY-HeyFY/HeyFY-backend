@@ -56,9 +56,13 @@ public class AuthService {
             redisUtil.deleteRefreshToken(signInDto.getStudentId());
             redisUtil.setRefreshToken(signInDto.getStudentId(), refreshToken);
 
+
+            String sid = UUID.randomUUID().toString();
+            redisUtil.setSid(sid, signInDto.getStudentId());
+
             //registerService.createAccountsForUser(signInDto.getStudentId());
 
-            return new SignInSuccessDto(accessToken, refreshToken);
+            return new SignInSuccessDto(accessToken, refreshToken, sid);
         } catch (BadCredentialsException  | InternalAuthenticationServiceException e) {
             throw new CustomException(AuthErrorCode.LOGIN_FAILED);
         }
@@ -213,4 +217,22 @@ public class AuthService {
         }
     }
 
+    public String issueSid(String pinNumber) {
+        String studentId = SecurityUtil.getCurrentStudentId();
+        if (studentId == null) {
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+
+        Users user = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.UNAUTHORIZED));
+
+        if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
+            throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
+        }
+
+        String newSid = UUID.randomUUID().toString();
+        redisUtil.setSid(newSid, studentId);
+
+        return newSid;
+    }
 }
