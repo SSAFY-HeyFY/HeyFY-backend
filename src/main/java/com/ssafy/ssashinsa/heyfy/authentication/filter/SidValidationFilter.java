@@ -56,7 +56,7 @@ public class SidValidationFilter extends OncePerRequestFilter {
             if (sid == null || !isValidSid(sid, userId)) {
                 throw new CustomException(AuthErrorCode.SID_INVALID_OR_EXPIRED);
             }
-            redisUtil.updateSidExpiration(sid);
+            redisUtil.updateSidExpiration(userId);
         } catch (CustomException e) {
             handleException(response, e.getErrorCode());
             return;
