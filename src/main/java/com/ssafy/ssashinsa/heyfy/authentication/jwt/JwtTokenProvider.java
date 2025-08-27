@@ -36,7 +36,7 @@ public class JwtTokenProvider {
                 .collect(Collectors.joining(","));
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + accessExpiration);
+        Date validity = new Date(now.getTime() + accessExpiration*1000);
 
         return JWT.create()
                 .withSubject(username)
@@ -51,7 +51,7 @@ public class JwtTokenProvider {
         String username = authentication.getName();
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + refreshExpiration);
+        Date validity = new Date(now.getTime() + refreshExpiration*1000);
 
         return JWT.create()
                 .withSubject(username)
