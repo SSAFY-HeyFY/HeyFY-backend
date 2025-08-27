@@ -229,20 +229,20 @@ def get_push_notification_for_rate_status():
 
         if today_rate >= max_rate_30d:
             status = "highest"
-            message = f"📈 오늘의 환율은 {today_rate:,.2f}원으로, 최근 30일 중 최고가입니다!"
+            message = f"📈 Today's rate is ₩{today_rate:,.2f}, the highest in the last 30 days. Consider this opportunity!"
         elif today_rate <= min_rate_30d:
             status = "lowest"
-            message = f"📉 오늘의 환율은 {today_rate:,.2f}원으로, 최근 30일 중 최저가입니다. 환전 기회를 살펴보세요!"
+            message = f"📉 Today's rate is ₩{today_rate:,.2f}, the lowest in the last 30 days."
         else:
             previous_rate = float(historical_points[-2]['rate'])
             difference = today_rate - previous_rate
             
             if difference > 0.01:
-                message = f"어제보다 {difference:,.2f}원 상승했어요. (현재: {today_rate:,.2f}원)"
+                message = f"📈 Exchange Rate up +₩{difference:,.2f} from yesterday. (Current: ₩{today_rate:,.2f})"
             elif difference < -0.01:
-                message = f"어제보다 {abs(difference):,.2f}원 하락했어요. (현재: {today_rate:,.2f}원)"
+                message = f"📉 Exchange Rate Down -₩{abs(difference):,.2f} from yesterday. (Current: ₩{today_rate:,.2f})"
             else:
-                message = f"어제와 변동이 없어요. (현재: {today_rate:,.2f}원)"
+                message = f"No Exchange Rate change from yesterday. (Current: ₩{today_rate:,.2f})"
 
         return PushNotificationResponse(status=status, message=message)
 
