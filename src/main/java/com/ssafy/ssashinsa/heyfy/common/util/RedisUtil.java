@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.TimeUnit;
+
 @Component
 @RequiredArgsConstructor
 public class RedisUtil {
@@ -16,13 +18,17 @@ public class RedisUtil {
     @Value("${spring.data.redis.sid-expiration}")
     private long sidExpirationSeconds;
 
+    // 후에 프로퍼티 파일로 빼기
+    private static final long TEMP_ACCESS_TOKEN_TIMEOUT = 10;
+
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
     private static final String TXN_AUTH_TOKEN_PREFIX = "txnAuth:";
     private static final String SID_PREFIX = "sid:";
+    private static final String TEMP_LOCK_PREFIX = "temp:";
 
     public void setRefreshToken(String key, String value) {
         long timeoutSeconds = refreshExpirationMs / 1000;
-        redisTemplate.opsForValue().set(REFRESH_TOKEN_PREFIX + key, value, timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(REFRESH_TOKEN_PREFIX + key, value, timeoutSeconds, TimeUnit.SECONDS);
     }
 
     public String getRefreshToken(String key) {
@@ -33,7 +39,7 @@ public class RedisUtil {
         redisTemplate.delete(REFRESH_TOKEN_PREFIX + key);
     }
 
-    public void setTxnAuthToken(String key, String value, long expiration, java.util.concurrent.TimeUnit timeUnit) {
+    public void setTxnAuthToken(String key, String value, long expiration, TimeUnit timeUnit) {
         redisTemplate.opsForValue().set(TXN_AUTH_TOKEN_PREFIX + key, value, expiration, timeUnit);
     }
 
@@ -46,7 +52,7 @@ public class RedisUtil {
     }
 
     public void setSid(String sid, String userId) {
-        redisTemplate.opsForValue().set(SID_PREFIX + userId, sid, sidExpirationSeconds, java.util.concurrent.TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(SID_PREFIX + userId, sid, sidExpirationSeconds, TimeUnit.SECONDS);
     }
 
     // SID를 가져올 때 userId를 사용
@@ -57,7 +63,24 @@ public class RedisUtil {
     public void updateSidExpiration(String userId) {
         // Redis에 해당 사용자 ID로 SID가 존재할 경우에만 만료 시간 갱신
         if (redisTemplate.hasKey(SID_PREFIX + userId)) {
-            redisTemplate.expire(SID_PREFIX + userId, sidExpirationSeconds, java.util.concurrent.TimeUnit.SECONDS);
+            redisTemplate.expire(SID_PREFIX + userId, sidExpirationSeconds, TimeUnit.SECONDS);
         }
     }
+
+    public void setTempAccessToken(String jti, String accessToken) {
+        redisTemplate.opsForValue().set(TEMP_LOCK_PREFIX + jti, accessToken, TEMP_ACCESS_TOKEN_TIMEOUT, TimeUnit.SECONDS);
+    }
+
+    public String getTempAccessToken(String jti) {
+        return redisTemplate.opsForValue().get(TEMP_LOCK_PREFIX + jti);
+    }
+
+    public boolean hasTempLock(String userId) {
+        return redisTemplate.hasKey(TEMP_LOCK_PREFIX + userId);
+    }
+
+    public void deleteTempLock(String userId) {
+        redisTemplate.delete(TEMP_LOCK_PREFIX + userId);
+    }
+
 }
