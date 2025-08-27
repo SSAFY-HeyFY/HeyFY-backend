@@ -1,14 +1,11 @@
 package com.ssafy.ssashinsa.heyfy.transfer.controller;
 
-import com.ssafy.ssashinsa.heyfy.account.exception.AccountErrorCode;
-import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.transfer.TransferResponseDto;
-import com.ssafy.ssashinsa.heyfy.swagger.docs.ErrorsCommonDocs;
 import com.ssafy.ssashinsa.heyfy.transfer.docs.ForeignTransferDocs;
 import com.ssafy.ssashinsa.heyfy.transfer.docs.TransferDocs;
-import com.ssafy.ssashinsa.heyfy.transfer.dto.*;
+import com.ssafy.ssashinsa.heyfy.transfer.dto.CreateTransferRequest;
+import com.ssafy.ssashinsa.heyfy.transfer.dto.TransferHistory;
 import com.ssafy.ssashinsa.heyfy.transfer.service.TransferService;
-import feign.Response;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +24,9 @@ public class TransferController {
 
     @PostMapping("/domestic")
     @TransferDocs
-    public ResponseEntity<TransferHistory> transfer(@RequestBody CreateTransferRequest req) {
+    public ResponseEntity<TransferHistory> transfer(@RequestHeader("TxnAuthToken") String txnAuthToken, @RequestBody CreateTransferRequest req) {
         TransferResponseDto transferResponse = transferService.callTransfer(
-                req.getDepositAccountNo(), req.getAmount(), req.getTransactionSummary(), req.getPinNumber()
+                req.getDepositAccountNo(), req.getAmount(), req.getTransactionSummary(), req.getPinNumber(), txnAuthToken
         );
 
         TransferHistory history = new TransferHistory(
@@ -45,9 +42,9 @@ public class TransferController {
 
     @PostMapping("/foreign")
     @ForeignTransferDocs
-    public ResponseEntity<TransferHistory>  foreignTransfer(@RequestBody CreateTransferRequest req) {
+    public ResponseEntity<TransferHistory>  foreignTransfer(@RequestHeader("TxnAuthToken") String txnAuthToken, @RequestBody CreateTransferRequest req) {
         TransferResponseDto transferResponse = transferService.callForeignTransfer(
-                req.getDepositAccountNo(), req.getAmount(), req.getTransactionSummary(), req.getPinNumber()
+                req.getDepositAccountNo(), req.getAmount(), req.getTransactionSummary(), req.getPinNumber(), txnAuthToken
         );
 
 

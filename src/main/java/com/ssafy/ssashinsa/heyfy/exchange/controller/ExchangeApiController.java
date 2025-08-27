@@ -70,13 +70,13 @@ public class ExchangeApiController {
 
     @ExchangeDocs
     @PostMapping
-    public ResponseEntity<ExchangeResponseDto> exchangeToForeign(@AuthUser UserDetails userDetails, @RequestBody ExchangeRequestDto exchangeRequestDto) {
-        return ResponseEntity.ok(exchangeService.exchangeToForeign(userDetails.getUsername(), exchangeRequestDto));
+    public ResponseEntity<ExchangeResponseDto> exchangeToForeign(@RequestHeader("TxnAuthToken") String txnAuthToken, @AuthUser UserDetails userDetails, @RequestBody ExchangeRequestDto exchangeRequestDto) {
+        return ResponseEntity.ok(exchangeService.exchangeToForeign(userDetails.getUsername(), exchangeRequestDto, txnAuthToken));
     }
 
     @ExchangeForeignDocs
     @PostMapping("/foreign")
-    public ResponseEntity<ExchangeResponseDto> exchangeFromForeign(@AuthUser UserDetails userDetails, @RequestBody ExchangeRequestDto exchangeRequestDto) {
-        return ResponseEntity.ok(exchangeService.exchangeFromForeign(userDetails.getUsername(), exchangeRequestDto));
+    public ResponseEntity<ExchangeResponseDto> exchangeFromForeign(@RequestHeader("TxnAuthToken") String txnAuthToken, @AuthUser UserDetails userDetails, @RequestBody ExchangeRequestDto exchangeRequestDto) {
+        return ResponseEntity.ok(exchangeService.exchangeFromForeign(userDetails.getUsername(), exchangeRequestDto, txnAuthToken));
     }
 }
