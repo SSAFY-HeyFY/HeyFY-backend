@@ -18,6 +18,7 @@ public class FastApiClient {
     private final WebClient.Builder webClientBuilder;
 
     public FastApiRealTimeRatesDto getRealTimeRates(){
+        log.debug("Fetching real-time rates from FastAPI at {}", fastApiProperties.getFullBaseUrl());
         FastApiRealTimeRatesDto response = getClient()
                 .get()
                 .uri("/realtime-rates")
@@ -28,6 +29,7 @@ public class FastApiClient {
                             throw new IllegalStateException("Failed to fetch real-time rates from FastAPI.");
                         }))
                 .bodyToMono(FastApiRealTimeRatesDto.class)
+                .doOnNext(this::logResponse)
                 .block();
         if(response==null){
             throw new IllegalStateException("Failed to fetch real-time rates from FastAPI.");
@@ -45,6 +47,7 @@ public class FastApiClient {
                             throw new IllegalStateException("Failed to fetch rate-graph from FastAPI.");
                         }))
                 .bodyToMono(FastApiRateGraphDto.class)
+                .doOnNext(this::logResponse)
                 .block();
         if(response==null){
             throw new IllegalStateException("Failed to fetch rate-graph from FastAPI.");
@@ -62,6 +65,7 @@ public class FastApiClient {
                             throw new IllegalStateException("Failed to fetch rate-analysis from FastAPI.");
                         }))
                 .bodyToMono(FastApiRateAnalysisDto.class)
+                .doOnNext(this::logResponse)
                 .block();
         if(response==null){
             throw new IllegalStateException("Failed to fetch rate-analysis from FastAPI.");
@@ -82,5 +86,20 @@ public class FastApiClient {
         return webClientBuilder
                 .baseUrl(baseUrl)
                 .build();
+    }
+    private void logRequest(Object requestDto) {
+        try {
+            log.info("Request JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(requestDto));
+        } catch (Exception e) {
+            log.error("Request logging error", e);
+        }
+    }
+
+    private void logResponse(Object responseDto) {
+        try {
+            log.info("Response JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(responseDto));
+        } catch (Exception e) {
+            log.error("Response logging error", e);
+        }
     }
 }
