@@ -107,6 +107,7 @@ public class ExchangeService {
                 .depositAccountBalance(depositAccountBalance)
                 .withdrawalAccountBalance(withdrawalAccountBalance)
                 .transactionBalance(exchangeRequestDto.getTransactionBalance())
+                .isCorrect(true)
                 .build();
     }
 
@@ -175,6 +176,7 @@ public class ExchangeService {
                 .depositAccountBalance(depositAccountBalance)
                 .withdrawalAccountBalance(withdrawalAccountBalance)
                 .transactionBalance(exchangeRequestDto.getTransactionBalance())
+                .isCorrect(true)
                 .build();
     }
 
