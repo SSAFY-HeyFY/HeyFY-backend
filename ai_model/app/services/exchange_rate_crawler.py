@@ -14,7 +14,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.chrome import ChromeDriverManager
+# from webdriver_manager.chrome import ChromeDriverManager # 제거해서 제대로 크롬드라이버 찾게 하기
 
 # --- Pydantic 모델 정의 ---
 # 크롤링 결과의 데이터 구조를 명확하게 정의합니다.
@@ -129,7 +129,8 @@ def parse_google_finance_vnd() -> Optional[ExchangeRateDetail]:
     # ==============================================================================
     # 🔽 [수정된 부분] 헤드리스 서버 환경을 위한 셀레니움 옵션 설정 🔽
     # ==============================================================================
-    service = Service(ChromeDriverManager().install())
+    # apt로 설치된 chromedriver를 Selenium이 자동으로 찾도록 Service()를 비워둡니다.
+    service = Service()
     options = Options() # ❗️ webdriver.ChromeOptions() 대신 Options() 사용
     
     # --- 필수 헤드리스 옵션 ---
