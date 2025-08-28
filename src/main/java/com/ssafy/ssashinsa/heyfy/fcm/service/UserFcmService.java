@@ -24,7 +24,6 @@ public class UserFcmService {
         if (!fcmTokenRepository.existsByToken(token)) {
             fcmTokenRepository.save(new FcmToken(user, token));
         } else {
-            // 다른 계정에 묶인 동일 토큰이 재등록되는 케이스 처리(선택)
             fcmTokenRepository.findByToken(token).ifPresent(t -> {
                 if (!t.getUser().getId().equals(userId)) {
                     fcmTokenRepository.deleteByToken(token);
@@ -34,12 +33,10 @@ public class UserFcmService {
         }
     }
 
-    /** 비인증 public 엔드포인트가 호출할 삭제 로직 */
     public void deleteByToken(String token) {
         fcmTokenRepository.deleteByToken(token);
     }
 
-    /** 발송 실패 시: UNREGISTERED/INVALID_ARGUMENT → 즉시 삭제 */
     public void handleSendFailure(String token, FirebaseMessagingException e) {
         MessagingErrorCode code = e.getMessagingErrorCode();
         if (code == MessagingErrorCode.UNREGISTERED || code == MessagingErrorCode.INVALID_ARGUMENT) {
