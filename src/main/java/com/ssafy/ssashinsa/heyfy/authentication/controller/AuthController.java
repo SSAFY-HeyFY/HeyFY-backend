@@ -8,6 +8,7 @@ import com.ssafy.ssashinsa.heyfy.authentication.docs.SidRefreshDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.test.MessageDto;
 import com.ssafy.ssashinsa.heyfy.authentication.service.AuthService;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +44,13 @@ public class AuthController {
     @SidRefreshDocs
     @PostMapping("/sid/refresh")
     public ResponseEntity<SidDto> issueSid(@RequestBody SecondaryAuthRequestDto requestDto) {
-        String newSid = authService.issueSid(requestDto.getPinNumber());
-        return ResponseEntity.ok(new SidDto(newSid));
+        String newSid = "";
+        try {
+            newSid = authService.issueSid(requestDto.getPinNumber());
+        }catch(CustomException e){
+            return ResponseEntity.ok(new SidDto(newSid, false));
+        }
+        return ResponseEntity.ok(new SidDto(newSid, true));
     }
 
     @PostMapping("/txntoken")
