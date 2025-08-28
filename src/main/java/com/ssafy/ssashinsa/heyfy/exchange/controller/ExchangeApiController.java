@@ -1,6 +1,8 @@
 package com.ssafy.ssashinsa.heyfy.exchange.controller;
 
 import com.ssafy.ssashinsa.heyfy.authentication.annotation.AuthUser;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.exchange.docs.*;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.exchange.*;
 import com.ssafy.ssashinsa.heyfy.exchange.service.ExchangeService;
@@ -70,13 +72,43 @@ public class ExchangeApiController {
 
     @ExchangeDocs
     @PostMapping
-    public ResponseEntity<ExchangeResponseDto> exchangeToForeign(@RequestHeader("TxnAuthToken") String txnAuthToken, @AuthUser UserDetails userDetails, @RequestBody ExchangeRequestDto exchangeRequestDto) {
-        return ResponseEntity.ok(exchangeService.exchangeToForeign(userDetails.getUsername(), exchangeRequestDto, txnAuthToken));
+    public ResponseEntity<ExchangeResponseDto> exchangeToForeign(@AuthUser UserDetails userDetails, @RequestBody ExchangeRequestDto exchangeRequestDto) {
+
+        try{
+            ExchangeResponseDto response = exchangeService.exchangeToForeign(userDetails.getUsername(), exchangeRequestDto);
+            return ResponseEntity.ok(response);
+        } catch (CustomException e){
+            if(e.getErrorCode().equals(AuthErrorCode.INVALID_PIN_NUMBER)){
+                ExchangeResponseDto response = ExchangeResponseDto.builder().
+                        depositAccountBalance(null).
+                        withdrawalAccountBalance(null).
+                        transactionBalance(null).
+                        isCorrect(false).
+                        build();
+                return ResponseEntity.ok(response);
+            }
+            throw e;
+        }
+
     }
 
     @ExchangeForeignDocs
     @PostMapping("/foreign")
-    public ResponseEntity<ExchangeResponseDto> exchangeFromForeign(@RequestHeader("TxnAuthToken") String txnAuthToken, @AuthUser UserDetails userDetails, @RequestBody ExchangeRequestDto exchangeRequestDto) {
-        return ResponseEntity.ok(exchangeService.exchangeFromForeign(userDetails.getUsername(), exchangeRequestDto, txnAuthToken));
+    public ResponseEntity<ExchangeResponseDto> exchangeFromForeign(@AuthUser UserDetails userDetails, @RequestBody ExchangeRequestDto exchangeRequestDto) {
+        try{
+            ExchangeResponseDto response = exchangeService.exchangeFromForeign(userDetails.getUsername(), exchangeRequestDto);
+            return ResponseEntity.ok(response);
+        } catch (CustomException e){
+            if(e.getErrorCode().equals(AuthErrorCode.INVALID_PIN_NUMBER)){
+                ExchangeResponseDto response = ExchangeResponseDto.builder().
+                        depositAccountBalance(null).
+                        withdrawalAccountBalance(null).
+                        transactionBalance(null).
+                        isCorrect(false).
+                        build();
+                return ResponseEntity.ok(response);
+            }
+            throw e;
+        }
     }
 }
