@@ -46,6 +46,7 @@ import java.lang.annotation.Target;
                                 )
                         }))
 })
-@Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER, required = true)
+@Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER)
+
 public @interface SidRefreshDocs {
 }

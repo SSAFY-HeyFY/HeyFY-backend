@@ -28,8 +28,8 @@ import java.lang.annotation.*;
                                         ref = "#/components/examples/MissingRequired")
                         }))
 })
-@Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER, required = true)
-@Parameter(name = "sid", description = "세션 ID", in = ParameterIn.HEADER, required = true)
+@Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER)
+@Parameter(name = "sid", description = "세션 ID", in = ParameterIn.HEADER)
 public @interface ExchangeRatePageDocs {
     // 이 어노테이션은 환전 페이지 API의 Swagger 문서화에 사용됩니다.
     // 각 API 메소드에 적용하여 응답 코드와 예시를 정의합니다.
