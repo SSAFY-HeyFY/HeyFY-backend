@@ -1,7 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.transfer.docs;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.transfer.TransferResponseDto;
+import com.ssafy.ssashinsa.heyfy.transfer.dto.TransferHistory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,11 +28,35 @@ import java.lang.annotation.Target;
                 description = "성공적으로 이체를 완료했습니다.",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = TransferResponseDto.class),
-                        examples = @ExampleObject(
-                                name = "원화 이체 성공",
-                                value = "{\n  \"depositAccountNo\": \"110123456789\",\n  \"amount\": \"10000\",\n  \"currency\": \"KRW\",\n  \"transactionSummary\": \"점심값\",\n  \"completedAt\": \"2025-08-26T23:50:15.123456+09:00\"\n}"
-                        )
+                        schema = @Schema(implementation = TransferHistory.class),
+                        examples = {
+                                @ExampleObject(
+                                        name = "이체 성공",
+                                        value = """
+                                                {
+                                                  "depositAccountNo": "110123456789",
+                                                  "amount": 10000,
+                                                  "currency": "KRW",
+                                                  "transactionSummary": "점심값",
+                                                  "completedAt": "2025-08-26T23:50:15.123456+09:00",
+                                                  "isCorrect": true
+                                                }
+                                                """
+                                ),
+                                @ExampleObject(
+                                        name = "핀 번호 오류",
+                                        value = """
+                                                {
+                                                  "depositAccountNo": null,
+                                                  "amount": null,
+                                                  "currency": null,
+                                                  "transactionSummary": null,
+                                                  "completedAt": null,
+                                                  "isCorrect": false
+                                                }
+                                                """
+                                )
+                        }
                 )
         ),
         @ApiResponse(
@@ -41,11 +66,6 @@ import java.lang.annotation.Target;
                         mediaType = "application/json",
                         schema = @Schema(implementation = ErrorResponse.class),
                         examples = {
-                                @ExampleObject(
-                                        name = "PIN 번호 불일치",
-                                        summary = "PIN 번호 오류",
-                                        value = "{\"status\": 400, \"httpError\": \"BAD_REQUEST\", \"errorCode\": \"INVALID_PIN_NUMBER\", \"message\": \"Wrong pin number\"}"
-                                ),
                                 @ExampleObject(
                                         name = "금액 오류",
                                         summary = "입력한 금액이 유효하지 않음",
@@ -101,7 +121,6 @@ import java.lang.annotation.Target;
 //        )
 })
 @Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER, required = true)
-@Parameter(name = "TxnAuthToken", description = "2차 인증을 위한 트랜잭션 토큰", in = ParameterIn.HEADER, required = true)
 @Parameter(name = "sid", description = "세션 ID", in = ParameterIn.HEADER, required = true)
 public @interface TransferDocs {
 }
