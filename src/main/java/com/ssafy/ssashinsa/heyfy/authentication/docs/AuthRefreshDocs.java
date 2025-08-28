@@ -50,7 +50,8 @@ import java.lang.annotation.Target;
                                 )
                         })),
 })
-@Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER, required = true)
+@Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER)
+
 @Parameter(name = "RefreshToken", description = "JWT 리프레시 토큰", in = ParameterIn.HEADER, required = true)
 public @interface AuthRefreshDocs {
 }
