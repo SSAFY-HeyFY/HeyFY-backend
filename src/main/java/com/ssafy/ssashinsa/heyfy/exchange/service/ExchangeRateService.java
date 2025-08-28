@@ -138,21 +138,21 @@ public class ExchangeRateService {
         RealTimeRateResponseDto cnyDto = null;
         RealTimeRateResponseDto vndDto = null;
         for (FastApiRealTimeRateDto data : apiResponse.getData()) {
-            if ("USD".equalsIgnoreCase(data.getCurrency())) {
+            if ("USDKRW".equalsIgnoreCase(data.getCurrency())) {
                 usdDto = RealTimeRateResponseDto.builder()
                         .currency("USD")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .fluctuation(data.getChangePct())
                         .build();
-            } else if ("CNY".equalsIgnoreCase(data.getCurrency())) {
+            } else if ("CNYKRW".equalsIgnoreCase(data.getCurrency())) {
                 cnyDto = RealTimeRateResponseDto.builder()
                         .currency("CNY")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .fluctuation(data.getChangePct())
                         .build();
-            } else if ("VND".equalsIgnoreCase(data.getCurrency())) {
+            } else if ("VNDKRW".equalsIgnoreCase(data.getCurrency())) {
                 vndDto = RealTimeRateResponseDto.builder()
                         .currency("VND")
                         .updatedAt(data.getUpdatedAt())
