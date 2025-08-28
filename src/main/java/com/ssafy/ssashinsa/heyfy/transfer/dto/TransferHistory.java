@@ -7,5 +7,6 @@ public record TransferHistory(
         String amount,
         String currency,
         String transactionSummary,
-        OffsetDateTime completedAt
+        OffsetDateTime completedAt,
+        boolean isCorrect
 ) {}
