@@ -15,8 +15,11 @@ import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
-    final String securitySchemeName = "Authorization";
+
+    final String AUTH_SCHEME = "Authorization";
+    final String SID_SCHEME = "sid";
     final String apiTitle = String.format("%s API", StringUtils.capitalize("HeyFY"));
+
     Info info = new Info()
             .version("v0.1.0")
             .title("HeyFY")
@@ -27,36 +30,39 @@ public class OpenApiConfig {
         Components components = new Components()
                 .addExamples("MissingRequired", new Example()
                         .summary("필수 정보 누락")
-                        .value("{\"status\":400," +
-                                "\"httpError\":\"BAD_REQUEST\"," +
-                                "\"errorCode\":\"INVALID_FIELD\"," +
-                                "\"message\":\"must not be blank\"}"))
+                        .value("{\"status\":400,\"httpError\":\"BAD_REQUEST\",\"errorCode\":\"INVALID_FIELD\",\"message\":\"must not be blank\"}"))
                 .addExamples("NotFound", new Example()
                         .summary("리소스 없음")
-                        .value("{\"status\":404," +
-                                "\"httpError\":\"NOT_FOUND\"," +
-                                "\"errorCode\":\"NOT_FOUND\"," +
-                                "\"message\":\"리소스를 찾을 수 없습니다\"}"))
+                        .value("{\"status\":404,\"httpError\":\"NOT_FOUND\",\"errorCode\":\"NOT_FOUND\",\"message\":\"리소스를 찾을 수 없습니다\"}"))
                 .addExamples("Conflict", new Example()
                         .summary("충돌")
                         .value("{\"code\":409,\"message\":\"Conflict\"}"))
                 .addExamples("InternalError", new Example()
                         .summary("서버 에러")
-                        .value("{\"status\":500," +
-                                "\"httpError\":\"INTERNAL_SERVER_ERROR\"," +
-                                "\"errorCode\":\"INTERNAL_SERVER_ERROR\"," +
-                                "\"message\":\"에러가 발생했습니다\"}"));
+                        .value("{\"status\":500,\"httpError\":\"INTERNAL_SERVER_ERROR\",\"errorCode\":\"INTERNAL_SERVER_ERROR\",\"message\":\"에러가 발생했습니다\"}"));
 
         return new OpenAPI()
-                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
+                .addSecurityItem(new SecurityRequirement()
+                        .addList(AUTH_SCHEME)   // Authorization 헤더
+                        .addList(SID_SCHEME))  // sid 헤더
                 .servers(List.of(new Server().url("/").description(apiTitle)))
-                .components(components.addSecuritySchemes(securitySchemeName,
-                        new SecurityScheme().type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")
-                                .in(SecurityScheme.In.HEADER)
-                                .description("JWT 토큰 정보")
-                ))
+                .components(components
+                        // JWT Bearer 토큰
+                        .addSecuritySchemes(AUTH_SCHEME,
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                                        .in(SecurityScheme.In.HEADER)
+                                        .description("JWT 토큰 (Authorization 헤더)"))
+                        // sid 헤더
+                        .addSecuritySchemes(SID_SCHEME,
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.APIKEY)
+                                        .in(SecurityScheme.In.HEADER)
+                                        .name("sid")
+                                        .description("세션 ID (sid 헤더)"))
+                )
                 .info(info);
     }
 }
