@@ -1,10 +1,9 @@
 package com.ssafy.ssashinsa.heyfy.fastapi.client;
 
+import com.ssafy.ssashinsa.heyfy.common.exception.CommonErrorCode;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.fastapi.config.FastApiProperties;
-import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiPredictionSummaryResponseDto;
-import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRateAnalysisDto;
-import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRateGraphDto;
-import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRealTimeRatesDto;
+import com.ssafy.ssashinsa.heyfy.fastapi.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
@@ -18,8 +17,23 @@ public class FastApiClient {
     private final FastApiProperties fastApiProperties;
     private final WebClient.Builder webClientBuilder;
 
+    public FastApiRateStatusResponseDto getRateStatus(){
+        FastApiRateStatusResponseDto response = getClient()
+                .get()
+                .uri("/push/rate-status")
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(String.class).flatMap(body -> {
+                            log.error("API Error Body: {}", body);
+                            throw new CustomException(CommonErrorCode.INTERNAL_SERVER_ERROR, "Failed to fetch from FastAPI.");
+                        }))
+                .bodyToMono(FastApiRateStatusResponseDto.class)
+                .doOnNext(this::logResponse)
+                .block();
+        return response;
+    }
+
     public FastApiRealTimeRatesDto getRealTimeRates(){
-        log.debug("Fetching real-time rates from FastAPI at {}", fastApiProperties.getFullBaseUrl());
         FastApiRealTimeRatesDto response = getClient()
                 .get()
                 .uri("/realtime-rates")
@@ -27,14 +41,11 @@ public class FastApiClient {
                 .onStatus(HttpStatusCode::isError, r ->
                         r.bodyToMono(String.class).flatMap(body -> {
                             log.error("API Error Body: {}", body);
-                            throw new IllegalStateException("Failed to fetch real-time rates from FastAPI.");
+                            throw new CustomException(CommonErrorCode.INTERNAL_SERVER_ERROR, "Failed to fetch from FastAPI.");
                         }))
                 .bodyToMono(FastApiRealTimeRatesDto.class)
                 .doOnNext(this::logResponse)
                 .block();
-        if(response==null){
-            throw new IllegalStateException("Failed to fetch real-time rates from FastAPI.");
-        }
         return response;
     }
     public FastApiRateGraphDto getRateGraph(){
@@ -45,7 +56,7 @@ public class FastApiClient {
                 .onStatus(HttpStatusCode::isError, r ->
                         r.bodyToMono(String.class).flatMap(body -> {
                             log.error("API Error Body: {}", body);
-                            throw new IllegalStateException("Failed to fetch rate-graph from FastAPI.");
+                            throw new CustomException(CommonErrorCode.INTERNAL_SERVER_ERROR, "Failed to fetch from FastAPI.");
                         }))
                 .bodyToMono(FastApiRateGraphDto.class)
                 .doOnNext(this::logResponse)
@@ -63,14 +74,11 @@ public class FastApiClient {
                 .onStatus(HttpStatusCode::isError, r ->
                         r.bodyToMono(String.class).flatMap(body -> {
                             log.error("API Error Body: {}", body);
-                            throw new IllegalStateException("Failed to fetch rate-analysis from FastAPI.");
+                            throw new CustomException(CommonErrorCode.INTERNAL_SERVER_ERROR, "Failed to fetch from FastAPI.");
                         }))
                 .bodyToMono(FastApiRateAnalysisDto.class)
                 .doOnNext(this::logResponse)
                 .block();
-        if(response==null){
-            throw new IllegalStateException("Failed to fetch rate-analysis from FastAPI.");
-        }
         return response;
     }
 
@@ -82,14 +90,11 @@ public class FastApiClient {
                 .onStatus(HttpStatusCode::isError, r ->
                         r.bodyToMono(String.class).flatMap(body -> {
                             log.error("API Error Body: {}", body);
-                            throw new IllegalStateException("Failed to fetch rate prediction summary from FastAPI.");
+                            throw new CustomException(CommonErrorCode.INTERNAL_SERVER_ERROR, "Failed to fetch from FastAPI.");
                         }))
                 .bodyToMono(FastApiPredictionSummaryResponseDto.class)
                 .doOnNext(this::logResponse)
                 .block();
-        if(response==null){
-            throw new IllegalStateException("Failed to fetch rate prediction summary from FastAPI.");
-        }
         return response;
     }
 
