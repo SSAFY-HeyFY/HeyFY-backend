@@ -9,11 +9,12 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options # 추가됨
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.chrome import ChromeDriverManager
+# from webdriver_manager.chrome import ChromeDriverManager # 제거해서 제대로 크롬드라이버 찾게 하기
 
 # --- Pydantic 모델 정의 ---
 # 크롤링 결과의 데이터 구조를 명확하게 정의합니다.
@@ -115,14 +116,39 @@ async def parse_naver_finance(client: httpx.AsyncClient, code: str) -> Optional[
 # --- 구글 금융 파서 (동기, Selenium 사용) ---
 def parse_google_finance_vnd() -> Optional[ExchangeRateDetail]:
     url = GOOGLE_URLS["VNDKRW"]
-    service = Service(ChromeDriverManager().install())
-    options = webdriver.ChromeOptions()
-    options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    # 이전 윈도우용 크롤링 옵션
+    # service = Service(ChromeDriverManager().install())
+    # options = webdriver.ChromeOptions()
+    # options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    # options.add_argument("--log-level=3")
+    # options.add_argument('--headless')
+    # options.add_argument('--no-sandbox')
+    # options.add_argument('--disable-dev-shm-usage')
+    # driver = webdriver.Chrome(service=service, options=options)
+    
+    # ==============================================================================
+    # 🔽 [수정된 부분] 헤드리스 서버 환경을 위한 셀레니움 옵션 설정 🔽
+    # ==============================================================================
+    # apt로 설치된 chromedriver를 Selenium이 자동으로 찾도록 Service()를 비워둡니다.
+    service = Service()
+    options = Options() # ❗️ webdriver.ChromeOptions() 대신 Options() 사용
+    
+    # --- 필수 헤드리스 옵션 ---
+    options.add_argument("--headless")              # 화면 없이 실행
+    options.add_argument("--no-sandbox")            # jenkins, root 등 시스템 계정으로 실행 시 필수
+    options.add_argument("--disable-dev-shm-usage") # 공유 메모리 문제 방지
+    options.add_argument("--disable-gpu")           # GPU 가속 비활성화 (서버 환경에 불필요)
+    
+    # --- 기타 옵션 ---
+    options.add_argument("--window-size=1920,1080") # 일부 웹사이트는 해상도에 따라 다른 HTML을 제공
+    options.add_argument(f"user-agent={HEADERS['User-Agent']}") # User-Agent 설정
+    options.add_experimental_option("excludeSwitches", ["enable-logging"]) # 불필요한 로그 숨기기
     options.add_argument("--log-level=3")
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
+    
     driver = webdriver.Chrome(service=service, options=options)
+    # ==============================================================================
+    # 🔼 [수정된 부분] 여기까지 🔼
+    # ==============================================================================
 
     try:
         driver.get(url)
