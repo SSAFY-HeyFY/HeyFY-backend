@@ -18,8 +18,37 @@ import java.lang.annotation.*;
 @Operation(summary = "외화->한화 환전")
 @Documented
 @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "환전 성공",
-                content = @Content(schema = @Schema(implementation = ExchangeResponseDto.class))),
+        @ApiResponse(
+                responseCode = "200",
+                description = "환전 성공 또는 핀 번호 오류",
+                content = @Content(
+                        schema = @Schema(implementation = ExchangeResponseDto.class),
+                        examples = {
+                                @ExampleObject(
+                                        name = "환전 성공",
+                                        value = """
+                                                {
+                                                  "depositAccountBalance": "100.00",
+                                                  "withdrawalAccountBalance": "500000.00",
+                                                  "transactionBalance": "100.00",
+                                                  "correct": true
+                                                }
+                                                """
+                                ),
+                                @ExampleObject(
+                                        name = "핀 번호 오류",
+                                        value = """
+                                                {
+                                                  "depositAccountBalance": null,
+                                                  "withdrawalAccountBalance": null,
+                                                  "transactionBalance": null,
+                                                  "correct": false
+                                                }
+                                                """
+                                )
+                        }
+                )
+        ),
         @ApiResponse(responseCode = "400", description = "잘못된 요청",
                 content = @Content(mediaType = "application/json",
                         schema = @Schema(implementation = ErrorResponse.class),
@@ -29,7 +58,6 @@ import java.lang.annotation.*;
                         }))
 })
 @Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER, required = true)
-@Parameter(name = "TxnAuthToken", description = "2차 인증을 위한 트랜잭션 토큰", in = ParameterIn.HEADER, required = true)
 @Parameter(name = "sid", description = "세션 ID", in = ParameterIn.HEADER, required = true)
 public @interface ExchangeForeignDocs {
 }
