@@ -1,6 +1,7 @@
 package com.ssafy.ssashinsa.heyfy.fastapi.client;
 
 import com.ssafy.ssashinsa.heyfy.fastapi.config.FastApiProperties;
+import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiPredictionSummaryResponseDto;
 import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRateAnalysisDto;
 import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRateGraphDto;
 import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRealTimeRatesDto;
@@ -73,6 +74,25 @@ public class FastApiClient {
         return response;
     }
 
+    public FastApiPredictionSummaryResponseDto getPredictionSummary(){
+        FastApiPredictionSummaryResponseDto response = getClient()
+                .get()
+                .uri("/rate-prediction-summary")
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(String.class).flatMap(body -> {
+                            log.error("API Error Body: {}", body);
+                            throw new IllegalStateException("Failed to fetch rate prediction summary from FastAPI.");
+                        }))
+                .bodyToMono(FastApiPredictionSummaryResponseDto.class)
+                .doOnNext(this::logResponse)
+                .block();
+        if(response==null){
+            throw new IllegalStateException("Failed to fetch rate prediction summary from FastAPI.");
+        }
+        return response;
+    }
+
     private WebClient getClient() {
         String baseUrl = fastApiProperties.getFullBaseUrl() + "/api";
 
@@ -87,6 +107,7 @@ public class FastApiClient {
                 .baseUrl(baseUrl)
                 .build();
     }
+
     private void logRequest(Object requestDto) {
         try {
             log.info("Request JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(requestDto));

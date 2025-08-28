@@ -45,4 +45,15 @@ class FastApiClientTest {
             System.out.println("getRateAnalysis error: " + e.getMessage());
         }
     }
+
+    @Test
+    @DisplayName("FastApiClient 환율 분석 API 실행 테스트")
+    void getPredictionSummary() {
+        try {
+            var result = fastApiClient.getPredictionSummary();
+            System.out.println("getRateAnalysis result: " + result);
+        } catch (Exception e) {
+            System.out.println("getRateAnalysis error: " + e.getMessage());
+        }
+    }
 }

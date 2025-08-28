@@ -42,7 +42,7 @@ public class ExchangeRateApiController {
     @ExchangeRatePredictionDocs
     @GetMapping("/prediction")
     public ResponseEntity<PredictionResponseDto> getPrediction() {
-        return ResponseEntity.ok(exchangeRateService.getPrediction());
+        return ResponseEntity.ok(exchangeRateService.getPredictionSummary());
     }
 
     @ExchangeRateTuitionDocs
