@@ -14,6 +14,5 @@ public class PredictionResponseDto {
     private String description;
     private double changePercent;
     private int periodDays;
-    private String actionLabel;
 }
 

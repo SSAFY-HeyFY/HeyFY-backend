@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RateAnalysisResponseDto {
+    private double todayRate;
+    private double finalPredictedRate;
     private HistoricalAnalysisResponseDto historicalAnalysis;
     private AIPredictionResponseDto aiPrediction;
 }

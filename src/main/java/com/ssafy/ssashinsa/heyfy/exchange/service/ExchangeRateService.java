@@ -3,9 +3,7 @@ package com.ssafy.ssashinsa.heyfy.exchange.service;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.*;
 import com.ssafy.ssashinsa.heyfy.exchange.repository.ExchangeRateRepository;
 import com.ssafy.ssashinsa.heyfy.fastapi.client.FastApiClient;
-import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRateGraphDto;
-import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRealTimeRateDto;
-import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRealTimeRatesDto;
+import com.ssafy.ssashinsa.heyfy.fastapi.dto.*;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
 import lombok.RequiredArgsConstructor;
@@ -73,21 +71,21 @@ public class ExchangeRateService {
         RealTimeRateResponseDto cnyDto = null;
         RealTimeRateResponseDto vndDto = null;
         for (FastApiRealTimeRateDto data : realTimeRatesResponse.getData()) {
-            if ("USD".equalsIgnoreCase(data.getCurrency())) {
+            if ("USDKRW".equalsIgnoreCase(data.getCurrency())) {
                 usdDto = RealTimeRateResponseDto.builder()
                         .currency("USD")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .fluctuation(data.getChangePct())
                         .build();
-            } else if ("CNY".equalsIgnoreCase(data.getCurrency())) {
+            } else if ("CNYKRW".equalsIgnoreCase(data.getCurrency())) {
                 cnyDto = RealTimeRateResponseDto.builder()
                         .currency("CNY")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .fluctuation(data.getChangePct())
                         .build();
-            } else if ("VND".equalsIgnoreCase(data.getCurrency())) {
+            } else if ("VNDKRW".equalsIgnoreCase(data.getCurrency())) {
                 vndDto = RealTimeRateResponseDto.builder()
                         .currency("VND")
                         .updatedAt(data.getUpdatedAt())
@@ -103,22 +101,22 @@ public class ExchangeRateService {
                 .build();
 
         // 3. Prediction, Tuition 더미 데이터 생성
+        FastApiPredictionSummaryResponseDto apiResponse = fastApiClient.getPredictionSummary();
+        FastApiPredictionResponseDto apiData = apiResponse.getPrediction();
         PredictionResponseDto prediction = PredictionResponseDto.builder()
-                .trend("bearish")
-                .description("The rate might decline over the next 3 days")
-                .changePercent(-1.24)
-                .periodDays(3)
-                .actionLabel("Exchange")
+                .trend(apiData.getTrendType())
+                .description(apiData.getHeader())
+                .changePercent(apiData.getChangeLabel().getPercent())
+                .periodDays(apiData.getChangeLabel().getDays())
                 .build();
         TuitionResponseDto tuition = TuitionResponseDto.builder()
                 .period(PeriodResponseDto.builder()
-                        .start(java.time.LocalDate.of(2024, 3, 1))
-                        .end(java.time.LocalDate.of(2024, 3, 31))
+                        .start(java.time.LocalDate.of(2025, 9, 1))
+                        .end(java.time.LocalDate.of(2025, 9, 6))
                         .build())
-                .recommendedDate(java.time.LocalDate.of(2024, 3, 15))
+                .recommendedDate(java.time.LocalDate.of(2025, 9, 4))
                 .recommendationNote("The exchange rate is expected to be highest on this day")
                 .build();
-
         // 4. 최종 DTO 조립
         return ExchangeRatePageResponseDto.builder()
                 .exchangeRateHistories(exchangeRateHistories)
@@ -138,21 +136,21 @@ public class ExchangeRateService {
         RealTimeRateResponseDto cnyDto = null;
         RealTimeRateResponseDto vndDto = null;
         for (FastApiRealTimeRateDto data : apiResponse.getData()) {
-            if ("USD".equalsIgnoreCase(data.getCurrency())) {
+            if ("USDKRW".equalsIgnoreCase(data.getCurrency())) {
                 usdDto = RealTimeRateResponseDto.builder()
                         .currency("USD")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .fluctuation(data.getChangePct())
                         .build();
-            } else if ("CNY".equalsIgnoreCase(data.getCurrency())) {
+            } else if ("CNYKRW".equalsIgnoreCase(data.getCurrency())) {
                 cnyDto = RealTimeRateResponseDto.builder()
                         .currency("CNY")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
                         .fluctuation(data.getChangePct())
                         .build();
-            } else if ("VND".equalsIgnoreCase(data.getCurrency())) {
+            } else if ("VNDKRW".equalsIgnoreCase(data.getCurrency())) {
                 vndDto = RealTimeRateResponseDto.builder()
                         .currency("VND")
                         .updatedAt(data.getUpdatedAt())
@@ -168,17 +166,15 @@ public class ExchangeRateService {
                 .build();
     }
 
-    /**
-     * 환율 예측 정보 반환 (더미 데이터)
-     */
     @Transactional
-    public PredictionResponseDto getPrediction() {
+    public PredictionResponseDto getPredictionSummary(){
+        FastApiPredictionSummaryResponseDto apiResponse = fastApiClient.getPredictionSummary();
+        FastApiPredictionResponseDto apiData = apiResponse.getPrediction();
         return PredictionResponseDto.builder()
-                .trend("bearish")
-                .description("The rate might decline over the next 3 days")
-                .changePercent(-1.24)
-                .periodDays(3)
-                .actionLabel("Exchange")
+                .trend(apiData.getTrendType())
+                .description(apiData.getHeader())
+                .changePercent(apiData.getChangeLabel().getPercent())
+                .periodDays(apiData.getChangeLabel().getDays())
                 .build();
     }
 
@@ -189,10 +185,10 @@ public class ExchangeRateService {
     public TuitionResponseDto getTuition() {
         return TuitionResponseDto.builder()
                 .period(PeriodResponseDto.builder()
-                        .start(java.time.LocalDate.of(2024, 3, 1))
-                        .end(java.time.LocalDate.of(2024, 3, 31))
+                        .start(java.time.LocalDate.of(2025, 9, 1))
+                        .end(java.time.LocalDate.of(2025, 9, 6))
                         .build())
-                .recommendedDate(java.time.LocalDate.of(2024, 3, 15))
+                .recommendedDate(java.time.LocalDate.of(2025, 9, 4))
                 .recommendationNote("The exchange rate is expected to be highest on this day")
                 .build();
     }
