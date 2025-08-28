@@ -1,13 +1,14 @@
 package com.ssafy.ssashinsa.heyfy.authentication.controller;
 
-import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthCheckPinDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthRefreshDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignInDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignUpDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.SidRefreshDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.test.MessageDto;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.authentication.service.AuthService;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +44,16 @@ public class AuthController {
     @SidRefreshDocs
     @PostMapping("/sid/refresh")
     public ResponseEntity<SidDto> issueSid(@RequestBody SecondaryAuthRequestDto requestDto) {
-        String newSid = authService.issueSid(requestDto.getPinNumber());
-        return ResponseEntity.ok(new SidDto(newSid));
+        String newSid = "";
+        try {
+            newSid = authService.issueSid(requestDto.getPinNumber());
+        }catch(CustomException e){
+            if(e.getErrorCode().equals(AuthErrorCode.INVALID_PIN_NUMBER)){
+                return ResponseEntity.ok(new SidDto(newSid, false));
+            }
+            throw e;
+        }
+        return ResponseEntity.ok(new SidDto(newSid, true));
     }
 
     @PostMapping("/txntoken")
@@ -63,12 +72,12 @@ public class AuthController {
     }
 
 
-    @AuthCheckPinDocs
-    @PostMapping("/checkpin")
-    public ResponseEntity<CheckPinResponseDto> checkPin(@RequestBody PinNumberDto pinNumberDto) {
-        CheckPinResponseDto response = authService.checkPin(pinNumberDto.getPinNumber());
-
-        return ResponseEntity.ok(response);
-    }
+//    @AuthCheckPinDocs
+//    @PostMapping("/checkpin")
+//    public ResponseEntity<CheckPinResponseDto> checkPin(@RequestBody PinNumberDto pinNumberDto) {
+//        CheckPinResponseDto response = authService.checkPin(pinNumberDto.getPinNumber());
+//
+//        return ResponseEntity.ok(response);
+//    }
 
 }

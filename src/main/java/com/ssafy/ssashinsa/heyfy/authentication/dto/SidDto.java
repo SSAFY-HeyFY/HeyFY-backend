@@ -11,4 +11,5 @@ import lombok.Setter;
 @Schema(description = "sid 응답 DTO")
 public class SidDto {
     private String sid;
+    private boolean isCorrect;
 }

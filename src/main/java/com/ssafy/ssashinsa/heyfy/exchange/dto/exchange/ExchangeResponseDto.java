@@ -9,4 +9,5 @@ public class ExchangeResponseDto {
     private Double depositAccountBalance;
     private Double withdrawalAccountBalance;
     private Double transactionBalance;
+    private boolean isCorrect;
 }

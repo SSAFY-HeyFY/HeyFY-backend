@@ -31,17 +31,11 @@ public class TransferService {
     private final ShinhanForeignDemandDepositApiClient shinhanForeignDemandDepositApiClient;
     private final RedisUtil redisUtil;
 
-    public TransferResponseDto callTransfer(String depositAccountNo, String amount, String transactionSummary, String pinNumber, String txnAuthToken) {
+    public TransferResponseDto callTransfer(String depositAccountNo, String amount, String transactionSummary, String pinNumber) {
         Users user = findCurrentUser();
 
-        String studentId = SecurityUtil.getCurrentStudentId();
-        String redisToken = redisUtil.getTxnAuthToken(studentId);
-        if (redisToken == null || !redisToken.equals(txnAuthToken)) {
-            throw new CustomException(AuthErrorCode.INVALID_TXN_AUTH_TOKEN);
-        }
-
         if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
-            throw new CustomException(TransferErrorCode.INVALID_PIN_NUMBER);
+            throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
         }
 
         String withdrawalAccountNo = accountService.getAccounts()
@@ -73,17 +67,11 @@ public class TransferService {
         }
     }
 
-    public TransferResponseDto callForeignTransfer(String depositAccountNo, String amount, String transactionSummary, String pinNumber, String txnAuthToken) {
+    public TransferResponseDto callForeignTransfer(String depositAccountNo, String amount, String transactionSummary, String pinNumber) {
         Users user = findCurrentUser();
 
-        String studentId = SecurityUtil.getCurrentStudentId();
-        String redisToken = redisUtil.getTxnAuthToken(studentId);
-        if (redisToken == null || !redisToken.equals(txnAuthToken)) {
-            throw new CustomException(AuthErrorCode.INVALID_TXN_AUTH_TOKEN);
-        }
-
         if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
-            throw new CustomException(TransferErrorCode.INVALID_PIN_NUMBER);
+            throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
         }
 
         String withdrawalAccountNo = accountService.getAccounts()

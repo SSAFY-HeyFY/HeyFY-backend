@@ -45,19 +45,14 @@ public class ExchangeService {
     private final RedisUtil redisUtil;
 
     @Transactional
-    public ExchangeResponseDto exchangeToForeign(String studentId, ExchangeRequestDto exchangeRequestDto, String txnAuthToken) {
+    public ExchangeResponseDto exchangeToForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
         Users user = userRepository.findUserWithAccountsByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
 
         String pinNumber = exchangeRequestDto.getPinNumber();
 
-        String redisToken = redisUtil.getTxnAuthToken(studentId);
-        if (redisToken == null || !redisToken.equals(txnAuthToken)) {
-            throw new CustomException(AuthErrorCode.INVALID_TXN_AUTH_TOKEN);
-        }
-
         if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
-            throw new CustomException(ExchangeErrorCode.INVALID_PIN_NUMBER);
+            throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
         }
 
         Account account = user.getAccount();
@@ -116,19 +111,14 @@ public class ExchangeService {
     }
 
     @Transactional
-    public ExchangeResponseDto exchangeFromForeign(String studentId, ExchangeRequestDto exchangeRequestDto , String txnAuthToken) {
+    public ExchangeResponseDto exchangeFromForeign(String studentId, ExchangeRequestDto exchangeRequestDto) {
         Users user = userRepository.findUserWithAccountsByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
-
-        String redisToken = redisUtil.getTxnAuthToken(studentId);
-        if (redisToken == null || !redisToken.equals(txnAuthToken)) {
-            throw new CustomException(AuthErrorCode.INVALID_TXN_AUTH_TOKEN);
-        }
 
 
         String pinNumber = exchangeRequestDto.getPinNumber();
         if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
-            throw new CustomException(ExchangeErrorCode.INVALID_PIN_NUMBER);
+            throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
         }
 
         Account account = user.getAccount();
