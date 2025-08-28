@@ -21,7 +21,8 @@ public class ApiPaths {
 
     // JWT는 필요하지만, SID는 필요 없는 경로 리스트 (기본적으로 모든 경로는 SID 검증이 필요하다고 가정)
     public static final List<String> NON_SENSITIVE_PATHS = List.of(
-            "/auth/sid/refresh**"
+            "/auth/sid/refresh**",
+            "/auth/sid/refresh"
     );
 
 }
