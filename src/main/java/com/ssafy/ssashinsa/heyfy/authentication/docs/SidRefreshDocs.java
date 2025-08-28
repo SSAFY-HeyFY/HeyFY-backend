@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
                 content = @Content(schema = @Schema(implementation = SidDto.class),
                         examples = @ExampleObject(
                                 name = "SID 재발급 성공 응답",
-                                value = "{\"sid\": \"6d69e0b1-024d-4aab-805b-ae62cb8f6419\"}"
+                                value = "{\"sid\": \"재홍 팀장님은 세젤귀 안드로이드 개발자\" , \"isCorrect\": true}"
                         ))),
         @ApiResponse(responseCode = "400", description = "잘못된 요청 또는 비밀번호",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class),
