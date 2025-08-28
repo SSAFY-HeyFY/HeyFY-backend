@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class FastApiRateAnalysisDto {
     private LocalDateTime apiCalledAt;
     private double todayRate;
-    private double aiPredictedRate;
+    private double finalPredictedRate;
     private String historicalAnalysis;
     private String aiPrediction;
 }

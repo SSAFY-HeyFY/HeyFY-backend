@@ -236,11 +236,13 @@ public class ExchangeService {
         FastApiRateAnalysisDto apiResponse = fastApiClient.getRateAnalysis();
         return RateAnalysisResponseDto.builder()
                 .historicalAnalysis(HistoricalAnalysisResponseDto.builder()
-                        .message("Over the past 30 days, today shows the highest exchange rate")
+                        .message(apiResponse.getHistoricalAnalysis())
                         .build())
                 .aiPrediction(AIPredictionResponseDto.builder()
-                        .message("The rate may increase by $0.54 more in the near future")
+                        .message(apiResponse.getAiPrediction())
                         .build())
+                .todayRate(apiResponse.getTodayRate())
+                .finalPredictedRate(apiResponse.getFinalPredictedRate())
                 .build();
     }
 
