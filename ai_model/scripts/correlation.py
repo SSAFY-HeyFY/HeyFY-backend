@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from statsmodels.tsa.stattools import ccf, grangercausalitytests
 import statsmodels.api as sm
 
@@ -27,3 +29,14 @@ print(model.summary())
 
 # 5. Granger 인과 검정 (최대 3일 lag)
 grangercausalitytests(df[["kr_change", "spread"]].dropna(), maxlag=3)
+
+# 1. 산점도 + 회귀선
+plt.figure(figsize=(8,6))
+sns.regplot(x=df["spread"], y=df["kr_change"], line_kws={"color":"red"}, scatter_kws={"alpha":0.3})
+plt.axhline(0, color='black', linestyle='--', linewidth=1)
+plt.axvline(0, color='black', linestyle='--', linewidth=1)
+
+plt.title("미국-한국 환율 차익 vs 다음날 한국 환율 변화", fontsize=14)
+plt.xlabel("Spread (US_t - KR_t)", fontsize=12)
+plt.ylabel("ΔKR (KR_t+1 - KR_t)", fontsize=12)
+plt.show()
