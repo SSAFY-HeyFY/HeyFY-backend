@@ -8,7 +8,7 @@ import yfinance as yf
 import pandas as pd
 import FinanceDataReader as fdr
 from datetime import datetime, timedelta
-from apscheduler.schedulers.blocking import BlockingScheduler
+# from apscheduler.schedulers.blocking import BlockingScheduler
 from dotenv import load_dotenv
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -156,17 +156,17 @@ def run_prediction_job():
     asyncio.run(run_and_cache_prediction_async())
 
 # --- 스케줄러 설정 (기존과 동일) ---
-sched = BlockingScheduler(timezone='Asia/Seoul')
-@sched.scheduled_job('interval', minutes=10)
-def scheduled_job():
-    run_prediction_job()
+# sched = BlockingScheduler(timezone='Asia/Seoul')
+# @sched.scheduled_job('interval', minutes=10)
+# def scheduled_job():
+#     run_prediction_job()
 
 if __name__ == "__main__":
     print("🚀 AI 예측 스케줄러를 시작합니다 (Prophet 모델 + 실시간 데이터 처리 버전).")
-    print("초기 예측을 먼저 1회 실행합니다...")
+    # print("초기 예측을 먼저 1회 실행합니다...")
     run_prediction_job()
-    print("\n🗓️ 10분 간격으로 다음 작업이 실행됩니다.")
-    try:
-        sched.start()
-    except (KeyboardInterrupt, SystemExit):
-        print("스케줄러를 종료합니다.")
+    # print("\n🗓️ 10분 간격으로 다음 작업이 실행됩니다.")
+    # try:
+    #     sched.start()
+    # except (KeyboardInterrupt, SystemExit):
+    #     print("스케줄러를 종료합니다.")

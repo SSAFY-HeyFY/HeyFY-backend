@@ -3,7 +3,7 @@ import sys
 import json
 import asyncio
 from datetime import datetime
-from apscheduler.schedulers.blocking import BlockingScheduler
+# from apscheduler.schedulers.blocking import BlockingScheduler
 from dotenv import load_dotenv
 
 # .env 파일에서 환경 변수를 로드합니다.
@@ -98,24 +98,24 @@ def run_crawling_job():
     """비동기 크롤링 함수를 실행하기 위한 동기 래퍼 함수"""
     asyncio.run(run_and_cache_rates_async())
 
-# --- 스케줄러 설정 ---
-sched = BlockingScheduler(timezone='Asia/Seoul')
+# # --- 스케줄러 설정 ---
+# sched = BlockingScheduler(timezone='Asia/Seoul')
 
 # 매 10분마다 'run_crawling_job' 함수를 실행합니다.
-@sched.scheduled_job('interval', minutes=10)
-def scheduled_job():
-    run_crawling_job()
+# @sched.scheduled_job('interval', minutes=10)
+# def scheduled_job():
+#     run_crawling_job()
 
 if __name__ == "__main__":
     print("🚀 실시간 환율 크롤링 스케줄러를 시작합니다.")
     print(f"📌 크롤링 결과는 '{os.path.abspath(REALTIME_CACHE_FILE)}' 파일에 저장됩니다.")
     
     # 스케줄러 시작 전, 먼저 1회 즉시 실행하여 초기 데이터를 생성합니다.
-    print("초기 크롤링을 먼저 1회 실행합니다...")
+    # print("초기 크롤링을 먼저 1회 실행합니다...")
     run_crawling_job()
     
-    print("\n🗓️ 10분 간격으로 다음 크롤링 작업이 실행됩니다.")
-    try:
-        sched.start()
-    except (KeyboardInterrupt, SystemExit):
-        print("스케줄러를 종료합니다.")
+    # print("\n🗓️ 10분 간격으로 다음 크롤링 작업이 실행됩니다.")
+    # try:
+    #     sched.start()
+    # except (KeyboardInterrupt, SystemExit):
+    #     print("스케줄러를 종료합니다.")
