@@ -18,8 +18,9 @@ public class RedisUtil {
     @Value("${spring.data.redis.sid-expiration}")
     private long sidExpirationSeconds;
 
-    // 후에 프로퍼티 파일로 빼기
-    private static final long TEMP_ACCESS_TOKEN_TIMEOUT = 10;
+
+    @Value("${spring.data.redis.temp-access-token-timeout}")
+    private long TEMP_ACCESS_TOKEN_TIMEOUT;
 
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
     private static final String TXN_AUTH_TOKEN_PREFIX = "txnAuth:";
@@ -27,7 +28,7 @@ public class RedisUtil {
     private static final String TEMP_LOCK_PREFIX = "temp:";
 
     public void setRefreshToken(String key, String value) {
-        long timeoutSeconds = refreshExpirationMs / 1000;
+        long timeoutSeconds = refreshExpirationMs;
         redisTemplate.opsForValue().set(REFRESH_TOKEN_PREFIX + key, value, timeoutSeconds, TimeUnit.SECONDS);
     }
 
