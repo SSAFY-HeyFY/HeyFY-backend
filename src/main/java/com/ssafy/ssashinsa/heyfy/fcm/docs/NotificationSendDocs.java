@@ -14,12 +14,8 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Tag(
-        name = "FCM Notifications (TEST)",
-        description = "테스트/QA 용 단건 발송 엔드포인트"
-)
 @Operation(
-        summary = "[TEST] 단일 토큰으로 푸시 발송",
+        summary = "단일 토큰으로 푸시 발송",
         description = "특정 FCM 토큰으로 알림을 보내는 테스트/QA용 API입니다."
 )
 @ApiResponses({
