@@ -97,26 +97,46 @@ import java.lang.annotation.Target;
                         }
                 )
         ),
-//        @ApiResponse(
-//                responseCode = "400",
-//                description = "인증 실패",
-//                content = @Content(
-//                        mediaType = "application/json",
-//                        schema = @Schema(implementation = ErrorResponse.class),
-//                        examples = {
-//                                @ExampleObject(
-//                                name = "유저 키 누락",
-//                                summary = "인증 정보에서 유저 키를 찾을 수 없음",
-//                                value = "{\"status\": 400, \"httpError\": \"UNAUTHORIZED\", \"errorCode\": \"MISSING_USER_KEY\", \"message\": \"유저키가 누락되었습니다.\"}"
-//                                ),
-//                                @ExampleObject(
-//                                        name = "유저 없음",
-//                                        summary = "인증 정보에서 유저를 찾을 수 없음",
-//                                        value = "{\"status\": 400, \"httpError\": \"UNAUTHORIZED\", \"errorCode\": \"USER_NOT_FOUND\", \"message\": \"유저를 찾을 수 없습니다.\"}"
-//                                ),
-//                        }
-//                )
-//        )
+        @ApiResponse(
+                responseCode = "403",
+                description = "거래 잠금",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "거래 잠금",
+                                summary = "PIN 입력 실패 횟수 초과로 인한 잠금",
+                                value = """
+                                        {
+                                          "status": 403,
+                                          "httpError": "FORBIDDEN",
+                                          "errorCode": "TRADE_LOCKED",
+                                          "message": "Trading is temporarily locked. Please try again after a while."
+                                        }
+                                        """
+                        )
+                )
+        ),
+        @ApiResponse(
+                responseCode = "429",
+                description = "요청 과다",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "PIN 입력 횟수 초과",
+                                summary = "PIN 입력 5회 실패",
+                                value = """
+                                        {
+                                          "status": 429,
+                                          "httpError": "TOO_MANY_REQUESTS",
+                                          "errorCode": "PIN_TRADE_ATTEMPTS_EXCEEDED",
+                                          "message": "PIN authentication failed 5 times. Please try again after 30 seconds."
+                                        }
+                                        """
+                        )
+                )
+        )
 })
 public @interface TransferDocs {
 }
