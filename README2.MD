@@ -113,3 +113,56 @@ java -jar build/libs/heyfy-0.0.1-SNAPSHOT.jar
         └── java
             └── com/ssafy/ssashinsa/heyfy # 테스트
 ```
+
+## AI (`ai_model/`)
+
+AI 모델은 과거 환율 데이터를 학습하여 미래 환율을 예측하고 환전 타이밍을 추천하는 역할을 합니다. FastAPI를 통해 API 형태로 제공됩니다.
+
+### 4.1. 개발 환경
+
+- **Language:** `Python 3.9+`
+- **Framework:** `FastAPI`
+- **의존성 관리:** `pip` 및 `requirements.txt`
+
+### 4.2. 모델 다운로드
+
+[AI 모델 다운로드 링크](https://drive.google.com/drive/folders/1gfALOI0HOB9SnkZpQcIFCVsNHhhImDVD?usp=sharing)
+
+파일을 다운받고 다음 경로에 저장하면 됩니다.
+
+- `ai_model/models/prophet_1day_model`: 1일 예측 Prophet 모델
+- `ai_model/models/prophet_multi_day_model`: 2일 이상 예측 Prophet 모델
+
+### 4.3. 빌드 및 실행 (AI 서버 단독)
+
+1.  **디렉토리 이동**
+    ```bash
+    cd ai_model
+    ```
+
+2.  **가상 환경 생성 및 활성화 (권장)**
+    ```bash
+    python -m venv venv
+
+    # macOS/Linux
+    source venv/bin/activate
+    
+    # Windows
+    venv\Scripts\activate
+    ```
+
+3.  **의존성 설치**
+    `ai_model` 디렉토리에서 아래 명령어를 실행합니다.
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **AI 서버 실행**
+    `ai_model` 디렉토리에서 아래 명령어를 실행하여 FastAPI 서버를 시작합니다.
+    ```bash
+    uvicorn app.main:app --host 0.0.0.0 --port 8888 --reload
+    ```
+    - `--reload` 옵션은 코드 변경 시 서버를 자동으로 재시작해 주어 개발에 유용합니다.
+
+5.  **API 문서 확인**
+    서버 실행 후, 웹 브라우저에서 `http://localhost:8888/docs` 로 접속하면 API 명세를 확인하고 직접 테스트해볼 수 있습니다.
