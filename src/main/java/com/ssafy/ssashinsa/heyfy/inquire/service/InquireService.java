@@ -1,6 +1,5 @@
 package com.ssafy.ssashinsa.heyfy.inquire.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.account.domain.Account;
 import com.ssafy.ssashinsa.heyfy.account.repository.AccountRepository;
 import com.ssafy.ssashinsa.heyfy.account.repository.ForeignAccountRepository;
@@ -14,8 +13,6 @@ import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.InquireSingleTra
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.InquireTransactionHistoryResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireSingleDepositResponseDto;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.common.ShinhanCommonRequestHeaderDto;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,23 +28,7 @@ public class InquireService {
     private final AccountRepository accountRepository;
     private final ForeignAccountRepository foreignAccountRepository;
     private final ShinhanApiClient shinhanApiClient;
-    private final ShinhanApiUtil shinhanApiUtil;
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final ShinhanDemandDepositApiClient shinhanDemandDepositApiClient;
-
-    public boolean checkAccount() {
-        String studentId = SecurityUtil.getCurrentStudentId();
-        if (studentId == null) {
-            return false;
-        }
-
-        Users user = userRepository.findByStudentId(studentId).orElse(null);
-
-        if (user != null && accountRepository.findByUser(user).isPresent()) {
-            return true;
-        }
-        return false;
-    }
 
     public ShinhanInquireSingleDepositResponseDto inquireSingleDeposit() {
 
@@ -64,9 +45,7 @@ public class InquireService {
                 .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND))
                 .getAccountNo();
 
-        ShinhanInquireSingleDepositResponseDto response = shinhanDemandDepositApiClient.inquireDemandDepositAccount(userKey, accountNo);
-
-        return response;
+        return shinhanDemandDepositApiClient.inquireDemandDepositAccount(userKey, accountNo);
     }
 
     public ShinhanInquireSingleDepositResponseDto inquireSingleDeposit(String accountNo) {
@@ -83,9 +62,7 @@ public class InquireService {
         Account account = accountRepository.findByUserAndAccountNo(user, accountNo)
                 .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND));
 
-        ShinhanInquireSingleDepositResponseDto response = shinhanDemandDepositApiClient.inquireDemandDepositAccount(userKey, accountNo);
-
-        return response;
+        return shinhanDemandDepositApiClient.inquireDemandDepositAccount(userKey, accountNo);
     }
 
 
@@ -105,9 +82,7 @@ public class InquireService {
                     .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND))
                     .getAccountNo();
 
-            ShinhanInquireSingleDepositResponseDto response = shinhanDemandDepositApiClient.inquireDemandForeignDepositAccount(userKey, accountNo);
-
-            return response;
+            return shinhanDemandDepositApiClient.inquireDemandForeignDepositAccount(userKey, accountNo);
         } catch (Exception e) {
             log.error("계좌 등록 API 호출 실패 : {}", e.getMessage(), e);
             throw e;
@@ -126,9 +101,7 @@ public class InquireService {
 //            ForeignAccount account = foreignAccountRepository.findByUserAndAccountNo(user, accountNo)
 //                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND));
 
-        ShinhanInquireSingleDepositResponseDto response = shinhanDemandDepositApiClient.inquireDemandForeignDepositAccount(userKey, accountNo);
-
-        return response;
+        return shinhanDemandDepositApiClient.inquireDemandForeignDepositAccount(userKey, accountNo);
     }
 
 
@@ -141,14 +114,12 @@ public class InquireService {
         if (userKey == null || userKey.isEmpty()) {
             throw new CustomException(ShinhanInquireApiErrorCode.MISSING_USER_KEY);
         }
-        ShinhanInquireDepositResponseDto response = shinhanDemandDepositApiClient.inquireDemandDepositAccountList(userKey);
 
-        return response;
+        return shinhanDemandDepositApiClient.inquireDemandDepositAccountList(userKey);
     }
 
 
     public InquireTransactionHistoryResponseDto getTransactionHistory() {
-        String apiKey = shinhanApiClient.getManagerKey();
 
         String studentId = SecurityUtil.getCurrentStudentId();
         Users user = userRepository.findByStudentId(studentId)
@@ -163,20 +134,10 @@ public class InquireService {
                 .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND))
                 .getAccountNo();
 
-        InquireTransactionHistoryResponseDto response = shinhanDemandDepositApiClient.inquireTransactionHistoryList(userKey, accountNo);
-
-        ShinhanCommonRequestHeaderDto commonHeaderDto = shinhanApiUtil.createHeaderDto(
-                "inquireTransactionHistoryList",
-                "inquireTransactionHistoryList",
-                apiKey,
-                userKey
-        );
-
-        return response;
+        return shinhanDemandDepositApiClient.inquireTransactionHistoryList(userKey, accountNo);
     }
 
     public InquireTransactionHistoryResponseDto getTransactionHistory(String accountNo) {
-        String apiKey = shinhanApiClient.getManagerKey();
 
         String studentId = SecurityUtil.getCurrentStudentId();
         Users user = userRepository.findByStudentId(studentId)
@@ -190,9 +151,7 @@ public class InquireService {
 //            Account account = accountRepository.findByUserAndAccountNo(user, accountNo)
 //                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND));
 
-        InquireTransactionHistoryResponseDto response = shinhanDemandDepositApiClient.inquireTransactionHistoryList(userKey, accountNo);
-
-        return response;
+        return shinhanDemandDepositApiClient.inquireTransactionHistoryList(userKey, accountNo);
     }
 
     public InquireSingleTransactionHistoryResponseDto getSingleTransactionHistory(String accountNo, String transactionUniqueNo) {
@@ -205,9 +164,7 @@ public class InquireService {
             throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
         }
 
-        InquireSingleTransactionHistoryResponseDto response = shinhanDemandDepositApiClient.inquireTransactionHistory(userKey, accountNo, transactionUniqueNo);
-
-        return response;
+        return shinhanDemandDepositApiClient.inquireTransactionHistory(userKey, accountNo, transactionUniqueNo);
     }
 
     public InquireTransactionHistoryResponseDto getForeignTransactionHistory(String accountNo) {
@@ -220,8 +177,6 @@ public class InquireService {
             throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
         }
 
-        InquireTransactionHistoryResponseDto response = shinhanDemandDepositApiClient.inquireForeignTransactionHistoryList(userKey, accountNo);
-
-        return response;
+        return shinhanDemandDepositApiClient.inquireForeignTransactionHistoryList(userKey, accountNo);
     }
 }
