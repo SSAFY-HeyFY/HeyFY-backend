@@ -1,5 +1,6 @@
 package com.ssafy.ssashinsa.heyfy.shinhanApi.client;
 
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.*;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDemandDepositAccountBalanceRequestDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDemandDepositAccountBalanceResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanUpdateAccountRequestDto;
@@ -7,10 +8,6 @@ import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanUpdateAcc
 import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.create.ShinhanCreateDepositRequestDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.create.ShinhanCreateDepositResponseDto;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.InquireSingleTransactionHistoryRequestDto;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.InquireSingleTransactionHistoryResponseDto;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.InquireTransactionHistoryRequestDto;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.InquireTransactionHistoryResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDepositRequestDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireSingleDepositRequestDto;
@@ -35,6 +32,37 @@ import java.time.format.DateTimeFormatter;
 public class ShinhanDemandDepositApiClient {
     private final ShinhanApiClient shinhanApiClient;
     private final ShinhanApiUtil shinhanApiUtil;
+
+    public ExchangeHistoryResponseDto exchangeHistory(String userKey, String accountNo) {
+        ShinhanCommonRequestHeaderDto header = shinhanApiUtil.createHeaderDto("exchangeHistory", "exchangeHistory", userKey);
+        LocalDateTime now = LocalDateTime.now();
+
+        ExchangeHistoryRequestDto requestDto = ExchangeHistoryRequestDto.builder()
+                .Header(header)
+                .accountNo(accountNo)
+                .startDate("20230101")
+                .endDate(now.format(DateTimeFormatter.ofPattern("yyyyMMdd")))
+                .build();
+        shinhanApiUtil.logRequest(requestDto);
+        ExchangeHistoryResponseDto response = shinhanApiClient.getClient("exchange")
+                .post()
+                .uri("/exchangeHistory")
+                .header("Content-Type", "application/json")
+                .bodyValue(requestDto)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r ->
+                        r.bodyToMono(String.class).flatMap(body -> {
+                            log.error("API Error Body: {}", body);
+                            String responseCode = shinhanApiUtil.getResponseCode(body);
+                            throw new ShinhanException(ShinhanErrorCode.valueOf(responseCode));
+                        }))
+                .bodyToMono(ExchangeHistoryResponseDto.class)
+                .doOnNext(shinhanApiUtil::logResponse)
+                .block();
+        return response;
+    }
+
+
 
     public ShinhanCreateDepositResponseDto createDemandDepositAccount(String userKey) {
         ShinhanCommonRequestHeaderDto header = shinhanApiUtil.createHeaderDto("createDemandDepositAccount", "createDemandDepositAccount", userKey);
