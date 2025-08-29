@@ -98,6 +98,22 @@ public class FastApiClient {
         return response;
     }
 
+    public FastApiTuitionPeriodDto getTuitionPeriod() {
+        FastApiTuitionPeriodDto response = getClient()
+                .get()
+                .uri("/analyze-tuition-period")
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, r->
+                        r.bodyToMono(String.class).flatMap(body -> {
+                            log.error("API Error Body: {}", body);
+                            throw new CustomException(CommonErrorCode.INTERNAL_SERVER_ERROR, "Faild to fetch from FastAPI.");
+                        }))
+                .bodyToMono(FastApiTuitionPeriodDto.class)
+                .doOnNext(this::logResponse)
+                .block();
+        return response;
+    }
+
     private WebClient getClient() {
         String baseUrl = fastApiProperties.getFullBaseUrl() + "/api";
 
