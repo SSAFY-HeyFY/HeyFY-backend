@@ -70,7 +70,6 @@ public class SidValidationFilter extends OncePerRequestFilter {
         return storedSid != null && storedSid.equals(sid);
     }
 
-    // 💡 ErrorCode를 매개변수로 받도록 변경
     private void handleException(HttpServletResponse response, ErrorCode errorCode) throws IOException {
         ResponseEntity<ErrorResponse> responseEntity = ErrorResponse.responseEntity(errorCode);
         response.setStatus(responseEntity.getStatusCode().value());
