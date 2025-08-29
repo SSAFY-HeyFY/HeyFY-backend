@@ -2,6 +2,7 @@ package com.ssafy.ssashinsa.heyfy.user.domain;
 
 import com.ssafy.ssashinsa.heyfy.account.domain.Account;
 import com.ssafy.ssashinsa.heyfy.account.domain.ForeignAccount;
+import com.ssafy.ssashinsa.heyfy.exchange.domain.ExchangeReservation;
 import com.ssafy.ssashinsa.heyfy.fcm.domain.FcmToken;
 import jakarta.persistence.*;
 import lombok.*;
@@ -65,6 +66,9 @@ public class Users {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FcmToken> fcmTokens = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExchangeReservation> exchangeReservationList = new ArrayList<>();
 
     @PrePersist
     public void generateIds() {
