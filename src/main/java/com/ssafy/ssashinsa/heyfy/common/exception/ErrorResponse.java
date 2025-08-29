@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 @Getter
@@ -20,6 +21,7 @@ public class ErrorResponse {
     public static ResponseEntity<ErrorResponse> responseEntity(ErrorCode errorCode) {
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.builder()
                         .status(errorCode.getHttpStatus().value())
                         .httpError(errorCode.getHttpStatus().name())
@@ -31,6 +33,7 @@ public class ErrorResponse {
     public static ResponseEntity<ErrorResponse> responseEntity(ErrorCode errorCode, String message) {
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(ErrorResponse.builder()
                         .status(errorCode.getHttpStatus().value())
                         .httpError(errorCode.getHttpStatus().name())
