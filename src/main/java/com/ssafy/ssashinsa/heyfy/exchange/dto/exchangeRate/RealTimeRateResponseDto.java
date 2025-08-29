@@ -16,6 +16,5 @@ public class RealTimeRateResponseDto {
     private String currency;
     private LocalDateTime updatedAt;
     private double rate;
-    private double changeAbs;
     private double fluctuation;
 }
