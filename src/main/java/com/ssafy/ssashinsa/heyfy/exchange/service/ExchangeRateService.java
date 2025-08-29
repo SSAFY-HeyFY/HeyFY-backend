@@ -1,11 +1,8 @@
 package com.ssafy.ssashinsa.heyfy.exchange.service;
 
 import com.ssafy.ssashinsa.heyfy.exchange.dto.exchangeRate.*;
-import com.ssafy.ssashinsa.heyfy.exchange.repository.ExchangeRateRepository;
 import com.ssafy.ssashinsa.heyfy.fastapi.client.FastApiClient;
 import com.ssafy.ssashinsa.heyfy.fastapi.dto.*;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.config.ShinhanApiClient;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.utils.ShinhanApiUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,9 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExchangeRateService {
 
-    private final ShinhanApiClient apiClient;
-    private final ShinhanApiUtil shinhanApiUtil;
-    private final ExchangeRateRepository exchangeRateRepository;
     private final FastApiClient fastApiClient;
 
     /**
