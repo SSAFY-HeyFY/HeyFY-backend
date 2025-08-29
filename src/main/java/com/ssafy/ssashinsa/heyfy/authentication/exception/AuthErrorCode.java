@@ -32,7 +32,10 @@ public enum AuthErrorCode implements ErrorCode {
     INVALID_AUTH_HEADER(HttpStatus.UNAUTHORIZED, "Authorization header format is invalid."),
     SID_INVALID_OR_EXPIRED(HttpStatus.UNAUTHORIZED, "Session ID is invalid or has expired."),
     TOKEN_REFRESH_IN_PROGRESS(HttpStatus.CONFLICT, "Token refresh request is already in progress."),
-    PIN_ATTEMPTS_EXCEEDED(HttpStatus.UNAUTHORIZED, "PIN authentication failed 5 times. Please login again.");
+    PIN_ATTEMPTS_EXCEEDED(HttpStatus.UNAUTHORIZED, "PIN authentication failed 5 times. Please login again."),
+    PIN_TRADE_ATTEMPTS_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "PIN authentication failed 5 times. Please try again after 30 seconds."),
+    TRADE_LOCKED(HttpStatus.FORBIDDEN, "Trading is temporarily locked. Please try again after a while.");
+
 
     private final HttpStatus httpStatus;
     private final String message;
