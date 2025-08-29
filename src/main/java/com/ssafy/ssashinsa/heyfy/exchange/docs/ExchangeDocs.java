@@ -20,7 +20,48 @@ import java.lang.annotation.*;
                 content = @Content(
                         schema = @Schema(implementation = ExchangeResponseDto.class)
                 )
+        ),
+        @ApiResponse(
+                responseCode = "403",
+                description = "거래 잠금",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = {
+                                @ExampleObject(
+                                        name = "거래 잠금",
+                                        value = """
+                                                {
+                                                  "status": 403,
+                                                  "httpError": "FORBIDDEN",
+                                                  "errorCode": "TRADE_LOCKED",
+                                                  "message": "Trading is temporarily locked. Please try again after a while."
+                                                }
+                                                """
+                                )
+                        }
+                )
+        ),
+        @ApiResponse(
+                responseCode = "429",
+                description = "핀 시도 초과",
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = {
+                                @ExampleObject(
+                                        name = "핀 시도 초과",
+                                        value = """
+                                                {
+                                                  "status": 429,
+                                                  "httpError": "TOO_MANY_REQUESTS",
+                                                  "errorCode": "PIN_TRADE_ATTEMPTS_EXCEEDED",
+                                                  "message": "PIN authentication failed 5 times. Please try again after 30 seconds."
+                                                }
+                                                """
+                                )
+                        }
+                )
         )
 })
-public @interface ExchangeDocs {
-}
+public @interface ExchangeDocs { }

@@ -33,10 +33,26 @@ public class TransferService {
 
     public TransferResponseDto callTransfer(String depositAccountNo, String amount, String transactionSummary, String pinNumber) {
         Users user = findCurrentUser();
+        String studentId = user.getStudentId();
+
+        if (redisUtil.isTradePinLocked(studentId)) {
+            throw new CustomException(AuthErrorCode.TRADE_LOCKED);
+        }
 
         if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
+            long failedAttempts = redisUtil.incrementTradePinFailedAttempts(studentId);
+
+            if (failedAttempts >= 5) {
+                redisUtil.setTradePinLock(studentId);
+                redisUtil.deleteTradePinFailedAttempts(studentId);
+                throw new CustomException(AuthErrorCode.PIN_TRADE_ATTEMPTS_EXCEEDED);
+            }
+
             throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
         }
+
+        redisUtil.deleteTradePinFailedAttempts(studentId);
+        redisUtil.deleteTradePinLock(studentId);
 
         String withdrawalAccountNo = accountService.getAccounts()
                 .orElseThrow(() -> new CustomException(AccountErrorCode.WITHDRAWAL_ACCOUNT_NOT_FOUND))
@@ -70,9 +86,26 @@ public class TransferService {
     public TransferResponseDto callForeignTransfer(String depositAccountNo, String amount, String transactionSummary, String pinNumber) {
         Users user = findCurrentUser();
 
+        String studentId = user.getStudentId();
+
+        if (redisUtil.isTradePinLocked(studentId)) {
+            throw new CustomException(AuthErrorCode.TRADE_LOCKED);
+        }
+
         if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
+            long failedAttempts = redisUtil.incrementTradePinFailedAttempts(studentId);
+
+            if (failedAttempts >= 5) {
+                redisUtil.setTradePinLock(studentId);
+                redisUtil.deleteTradePinFailedAttempts(studentId);
+                throw new CustomException(AuthErrorCode.PIN_TRADE_ATTEMPTS_EXCEEDED);
+            }
+
             throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
         }
+
+        redisUtil.deleteTradePinFailedAttempts(studentId);
+        redisUtil.deleteTradePinLock(studentId);
 
         String withdrawalAccountNo = accountService.getAccounts()
                 .orElseThrow(() -> new CustomException(AccountErrorCode.WITHDRAWAL_ACCOUNT_NOT_FOUND))
