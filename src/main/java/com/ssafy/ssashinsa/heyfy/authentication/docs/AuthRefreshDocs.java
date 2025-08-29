@@ -49,6 +49,12 @@ import java.lang.annotation.Target;
                                         value = "{\"status\":401, \"httpError\":\"UNAUTHORIZED\", \"errorCode\":\"MISSING_ACCESS_TOKEN\", \"message\":\"액세스 토큰이 누락되었습니다.\"}"
                                 )
                         })),
+        @ApiResponse(responseCode = "409", description = "토큰 재발급 요청 중복",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(
+                                name = "토큰 재발급 요청 중복",
+                                value = "{\"status\":409, \"httpError\":\"CONFLICT\", \"errorCode\":\"TOKEN_REFRESH_IN_PROGRESS\", \"message\":\"토큰 재발급 요청이 이미 진행 중입니다.\"}"
+                        )))
 })
 @Parameter(name = "Authorization", description = "JWT 액세스 토큰 (Bearer <token>)", in = ParameterIn.HEADER)
 

@@ -68,20 +68,12 @@ public class RedisUtil {
         }
     }
 
-    public void setTempAccessToken(String jti, String accessToken) {
-        redisTemplate.opsForValue().set(TEMP_LOCK_PREFIX + jti, accessToken, TEMP_ACCESS_TOKEN_TIMEOUT, TimeUnit.SECONDS);
+    public boolean setTokenRefreshLock(String jti, long timeout, TimeUnit timeUnit) {
+        return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(TEMP_LOCK_PREFIX + jti, "locked", timeout, timeUnit));
     }
 
-    public String getTempAccessToken(String jti) {
-        return redisTemplate.opsForValue().get(TEMP_LOCK_PREFIX + jti);
-    }
-
-    public boolean hasTempLock(String userId) {
-        return redisTemplate.hasKey(TEMP_LOCK_PREFIX + userId);
-    }
-
-    public void deleteTempLock(String userId) {
-        redisTemplate.delete(TEMP_LOCK_PREFIX + userId);
+    public void deleteTokenRefreshLock(String jti) {
+        redisTemplate.delete(TEMP_LOCK_PREFIX + jti);
     }
 
 }
