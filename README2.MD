@@ -77,3 +77,39 @@ java -jar build/libs/heyfy-0.0.1-SNAPSHOT.jar
 서버가 실행되면, 아래 주소에서 API 명세(Swagger UI)를 확인할 수 있습니다.
 
 -   [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+
+## 📁 디렉토리 구조
+
+프로젝트의 주요 디렉토리 구조는 다음과 같습니다.
+
+```
+.
+├── build.gradle              # 프로젝트 의존성 및 빌드 설정
+├── Dockerfile                # 백엔드 서버 Docker 이미지 설정
+├── docker-compose-local.yml  # Docker Compose를 이용한 로컬 환경 설정
+├── gradlew                   # Gradle Wrapper
+└── src                       # 소스 코드
+    ├── main
+    │   ├── java
+    │   │   └── com/ssafy/ssashinsa/heyfy
+    │   │       ├── HeyfyApplication.java     # Spring Boot 메인 애플리케이션
+    │   │       ├── account                   # 계좌
+    │   │       ├── authentication            # 인증 및 JWT
+    │   │       ├── common                    # 공통 예외 처리, 설정 등
+    │   │       ├── exchange                  # 환전 및 환율 정보
+    │   │       ├── fastapi                   # AI 예측 모델(FastAPI) 연동
+    │   │       ├── fcm                       # FCM 푸시 알림
+    │   │       ├── home                      # 홈 화면
+    │   │       ├── inquire                   # 계좌/거래내역 조회
+    │   │       ├── log                       # 로깅
+    │   │       ├── register                  # 계좌 생성/등록
+    │   │       ├── shinhanApi                # 신한은행 API 연동
+    │   │       ├── swagger                   # Swagger API 문서 설정
+    │   │       ├── transfer                  # 송금
+    │   │       └── user                      # 사용자 정보
+    │   └── resources
+    │       └── logback-spring.xml      # 로그 설정
+    └── test
+        └── java
+            └── com/ssafy/ssashinsa/heyfy # 테스트
+```
