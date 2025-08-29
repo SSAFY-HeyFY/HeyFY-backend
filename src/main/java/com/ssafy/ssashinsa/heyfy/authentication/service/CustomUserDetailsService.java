@@ -27,9 +27,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new CustomException(AuthErrorCode.LOGIN_FAILED));
 
         return new CustomUserDetails(
-                user.getStudentId(), // username 필드에 학번 저장
+                user.getStudentId(),
                 user.getPassword(),
-                user.getEmail(), // email 필드에 이메일 저장
+                user.getEmail(),
+                null,
                 Collections.emptyList()
         );
     }

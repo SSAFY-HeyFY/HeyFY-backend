@@ -15,12 +15,15 @@ public class RedisUtil {
     @Value("${spring.jwt.refresh-expiration}")
     private long refreshExpirationMs;
 
+    @Value("${spring.jwt.access-expiration}")
+    private long accessExpirationMs;
+
     @Value("${spring.data.redis.sid-expiration}")
     private long sidExpirationSeconds;
 
-
-    @Value("${spring.data.redis.temp-access-token-timeout}")
-    private long TEMP_ACCESS_TOKEN_TIMEOUT;
+    private static final String PIN_FAILED_ATTEMPTS_PREFIX = "pinFailed:";
+    private static final long PIN_FAILED_ATTEMPTS_EXPIRATION = 24 * 60 * 60; // 24시간
+    private static final String AT_BLACKLIST_PREFIX = "atBlacklist:";
 
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
     private static final String TXN_AUTH_TOKEN_PREFIX = "txnAuth:";
@@ -74,6 +77,28 @@ public class RedisUtil {
 
     public void deleteTokenRefreshLock(String jti) {
         redisTemplate.delete(TEMP_LOCK_PREFIX + jti);
+    }
+
+
+    public long incrementPinFailedAttempts(String studentId) {
+        String key = PIN_FAILED_ATTEMPTS_PREFIX + studentId;
+        Long count = redisTemplate.opsForValue().increment(key);
+        if (count != null && count == 1) {
+            redisTemplate.expire(key, PIN_FAILED_ATTEMPTS_EXPIRATION, TimeUnit.SECONDS);
+        }
+        return count != null ? count : 0;
+    }
+
+    public void deletePinFailedAttempts(String studentId) {
+        redisTemplate.delete(PIN_FAILED_ATTEMPTS_PREFIX + studentId);
+    }
+
+    public void setAccessTokenBlacklist(String jti) {
+        redisTemplate.opsForValue().set(AT_BLACKLIST_PREFIX + jti, "blacklisted", accessExpirationMs, TimeUnit.SECONDS);
+    }
+
+    public boolean isAccessTokenBlacklisted(String jti) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(AT_BLACKLIST_PREFIX + jti));
     }
 
 }

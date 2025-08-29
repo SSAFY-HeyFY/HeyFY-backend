@@ -61,6 +61,10 @@ public class AuthService {
             String sid = UUID.randomUUID().toString();
             redisUtil.setSid(sid, signInDto.getStudentId());
 
+            String studentId = signInDto.getStudentId();
+
+            redisUtil.deletePinFailedAttempts(studentId);
+
             //registerService.createAccountsForUser(signInDto.getStudentId());
 
             return new SignInSuccessDto(accessToken, refreshToken, sid);
@@ -214,4 +218,42 @@ public class AuthService {
 
         return newSid;
     }
+
+    public SidDto issueSidWithPinFailureLogic(String pinNumber) {
+        String studentId = SecurityUtil.getCurrentStudentId();
+        String jti = SecurityUtil.getCurrentJti();
+
+        System.out.println("studentId: " + studentId + ", jti: " + jti);
+        if (studentId == null || jti == null) {
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
+        }
+
+        Users user = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new CustomException(AuthErrorCode.UNAUTHORIZED));
+
+
+        if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
+            long failedAttempts = redisUtil.incrementPinFailedAttempts(studentId);
+
+            if (failedAttempts >= 5) {
+                redisUtil.deleteRefreshToken(studentId);
+                redisUtil.setAccessTokenBlacklist(jti);
+
+                redisUtil.deletePinFailedAttempts(studentId);
+                throw new CustomException(AuthErrorCode.PIN_ATTEMPTS_EXCEEDED);
+            }
+
+            return new SidDto(null, false);
+        }
+
+        redisUtil.deletePinFailedAttempts(studentId);
+
+        String newSid = UUID.randomUUID().toString();
+        redisUtil.setSid(newSid, studentId);
+
+        return new SidDto(newSid, true);
+    }
+
+
+
 }

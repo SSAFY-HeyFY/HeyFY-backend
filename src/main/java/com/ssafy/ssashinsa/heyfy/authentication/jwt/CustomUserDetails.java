@@ -10,9 +10,11 @@ import java.util.Collection;
 @Setter
 public class CustomUserDetails extends User {
     private String email;
+    private String jti;
 
-    public CustomUserDetails(String username, String password, String email, Collection<? extends GrantedAuthority> authorities) {
+    public CustomUserDetails(String username, String password, String email, String jti, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
         this.email = email;
+        this.jti = jti;
     }
 }
