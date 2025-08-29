@@ -15,6 +15,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+// SidRefreshDocs.java (수정)
+
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(summary = "SID 재발급", description = "유효한 액세스 토큰과 2차 비밀번호를 통해 새로운 SID를 발급합니다.")
@@ -37,12 +39,17 @@ import java.lang.annotation.Target;
                                         value = "{\"status\":400, \"httpError\":\"BAD_REQUEST\", \"errorCode\":\"INVALID_REQUEST_BODY\", \"message\":\"요청 본문이 없거나 형식이 유효하지 않습니다.\"}"
                                 )
                         })),
-        @ApiResponse(responseCode = "401", description = "인증 실패 (JWT 토큰 누락 또는 만료)",
+        @ApiResponse(responseCode = "401", description = "인증 실패 (JWT 토큰 누락, 만료 또는 5회 실패)",
                 content = @Content(schema = @Schema(implementation = ErrorResponse.class),
                         examples = {
                                 @ExampleObject(
                                         name = "유효하지 않은 액세스 토큰",
                                         value = "{\"status\":401, \"httpError\":\"UNAUTHORIZED\", \"errorCode\":\"INVALID_ACCESS_TOKEN\", \"message\":\"유효하지 않은 액세스 토큰입니다.\"}"
+                                ),
+                                // 📌 이 부분을 추가합니다.
+                                @ExampleObject(
+                                        name = "PIN 번호 5회 실패",
+                                        value = "{\"status\":401, \"httpError\":\"UNAUTHORIZED\", \"errorCode\":\"PIN_ATTEMPTS_EXCEEDED\", \"message\":\"PIN authentication failed 5 times. Please login again.\"}"
                                 )
                         }))
 })
