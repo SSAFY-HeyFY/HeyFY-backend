@@ -135,6 +135,7 @@ public class ExchangeRateService {
                         .currency("USD")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
+                        .changeAbs(data.getChangeAbs())
                         .fluctuation(data.getChangePct())
                         .build();
             } else if ("CNYKRW".equalsIgnoreCase(data.getCurrency())) {
@@ -142,6 +143,7 @@ public class ExchangeRateService {
                         .currency("CNY")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
+                        .changeAbs(data.getChangeAbs())
                         .fluctuation(data.getChangePct())
                         .build();
             } else if ("VNDKRW".equalsIgnoreCase(data.getCurrency())) {
@@ -149,6 +151,7 @@ public class ExchangeRateService {
                         .currency("VND")
                         .updatedAt(data.getUpdatedAt())
                         .rate(data.getRate())
+                        .changeAbs(data.getChangeAbs())
                         .fluctuation(data.getChangePct())
                         .build();
             }
