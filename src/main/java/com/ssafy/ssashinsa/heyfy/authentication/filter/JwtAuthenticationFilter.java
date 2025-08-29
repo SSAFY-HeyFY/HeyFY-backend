@@ -2,10 +2,12 @@ package com.ssafy.ssashinsa.heyfy.authentication.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ssashinsa.heyfy.authentication.config.ApiPaths;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
+import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
+    private final RedisUtil redisUtil;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
@@ -45,9 +48,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null) {
             try {
                 jwtTokenProvider.validateToken(token);
+
+                String jti = jwtTokenProvider.getJtiFromToken(token);
+
+
+                if (redisUtil.isAccessTokenBlacklisted(jti)) {
+                    throw new CustomException(AuthErrorCode.INVALID_ACCESS_TOKEN);
+                }
+
                 String username = jwtTokenProvider.getUsernameFromToken(token);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(jti);
+
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (CustomException e) {
                 handleException(response, e.getErrorCode());

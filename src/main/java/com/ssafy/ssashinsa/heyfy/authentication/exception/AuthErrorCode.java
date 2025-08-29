@@ -31,7 +31,8 @@ public enum AuthErrorCode implements ErrorCode {
     TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, "Token not found."),
     INVALID_AUTH_HEADER(HttpStatus.UNAUTHORIZED, "Authorization header format is invalid."),
     SID_INVALID_OR_EXPIRED(HttpStatus.UNAUTHORIZED, "Session ID is invalid or has expired."),
-    TOKEN_REFRESH_IN_PROGRESS(HttpStatus.CONFLICT, "Token refresh request is already in progress.");
+    TOKEN_REFRESH_IN_PROGRESS(HttpStatus.CONFLICT, "Token refresh request is already in progress."),
+    PIN_ATTEMPTS_EXCEEDED(HttpStatus.UNAUTHORIZED, "PIN authentication failed 5 times. Please login again.");
 
     private final HttpStatus httpStatus;
     private final String message;

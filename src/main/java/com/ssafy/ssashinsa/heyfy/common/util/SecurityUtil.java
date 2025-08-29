@@ -27,4 +27,14 @@ public class SecurityUtil {
         CustomUserDetails userDetails = getCurrentUserDetails();
         return (userDetails != null) ? userDetails.getEmail() : null;
     }
+
+    public static String getCurrentJti() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getDetails() instanceof String) {
+            return (String) authentication.getDetails();
+        }
+        return null;
+    }
+
+
 }
