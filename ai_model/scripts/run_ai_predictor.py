@@ -38,6 +38,7 @@ async def run_and_cache_prediction_async():
     try:
         # --- 1. AI 예측에 필요한 데이터 준비 ---
         today = datetime.now()
+        yesterday = today - timedelta(days=1) # 어제 날짜를 명시적으로 계산
         start_date_fetch = today - timedelta(days=400) # 넉넉하게 과거 데이터 조회
 
         # 1.1. Inv_Close 과거 데이터 조회 (yfinance)
@@ -48,7 +49,7 @@ async def run_and_cache_prediction_async():
         print(f"✅ yfinance 데이터 로드 완료 (최신 Inv_Close: {latest_inv_close:.2f})")
 
         # 1.2. ECOS_Close 과거 데이터 조회 (FinanceDataReader)
-        df_ecos = fdr.DataReader('ECOS-KEYSTAT:K152', start_date_fetch, today)
+        df_ecos = fdr.DataReader('ECOS-KEYSTAT:K152', start_date_fetch, yesterday)
         df_ecos.rename(columns={df_ecos.columns[0]: 'ECOS_Close'}, inplace=True)
         print("✅ FinanceDataReader 데이터 로드 완료")
 
