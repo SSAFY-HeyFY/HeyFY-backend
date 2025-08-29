@@ -62,8 +62,8 @@ async def run_and_cache_prediction_async():
         print(f"✅ 실시간 크롤링 완료 (현재 환율: {today_current_rate:.2f})")
 
         # 1.4. 데이터 병합 및 최종 데이터프레임 생성
-        historical_df = pd.merge(df_inv, df_ecos, left_index=True, right_index=True, how='outer')
-        historical_df.ffill(inplace=True) # 누락된 값 채우기
+        historical_df = pd.merge(df_inv, df_ecos, left_index=True, right_index=True, how='outer')     
+        historical_df.dropna(inplace=True)
         
         # 'Date' 컬럼을 위해 인덱스 리셋
         historical_df.reset_index(inplace=True)
