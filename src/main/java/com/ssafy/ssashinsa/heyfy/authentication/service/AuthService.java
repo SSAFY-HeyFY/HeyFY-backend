@@ -140,27 +140,11 @@ public class AuthService {
         }
     }
 
-    public String createTxnAuthToken() {
-        return txnAuthTokenUtil.createTxnAuthToken();
-    }
-
-    public void verifySecondaryAuth(String pinNumber, String txnAuthToken) {
-        String studentId = SecurityUtil.getCurrentStudentId();
-        if (studentId == null) {
-            throw new CustomException(AuthErrorCode.UNAUTHORIZED);
-        }
-
-        txnAuthTokenUtil.verifySecondaryAuth(pinNumber, txnAuthToken);
-
-
-    }
-
     private void validateRefreshToken(String refreshToken) {
         if (refreshToken == null || refreshToken.isEmpty()) {
             throw new CustomException(AuthErrorCode.MISSING_REFRESH_TOKEN);
         }
 
-        // jwtTokenProvider의 새로운 전용 메서드를 호출
         jwtTokenProvider.validateRefreshToken(refreshToken);
     }
 

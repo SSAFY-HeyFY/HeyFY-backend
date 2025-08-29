@@ -5,7 +5,6 @@ import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignInDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.AuthSignUpDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.docs.SidRefreshDocs;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
-import com.ssafy.ssashinsa.heyfy.authentication.dto.test.MessageDto;
 import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.authentication.service.AuthService;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
@@ -55,29 +54,4 @@ public class AuthController {
         }
         return ResponseEntity.ok(new SidDto(newSid, true));
     }
-
-    @PostMapping("/txntoken")
-    public ResponseEntity<TxnAuthTokenDto> issueTxnAuthToken() {
-        String token = authService.createTxnAuthToken();
-        return ResponseEntity.ok(new TxnAuthTokenDto(token));
-    }
-
-    @PostMapping("/verifypin")
-    public ResponseEntity<MessageDto> verifyPinAndTxnToken(
-                                                            @RequestHeader("TxnAuthToken") String txnAuthToken,
-                                                            @RequestBody TxnAuthRequestDto requestDto
-    ) {
-        authService.verifySecondaryAuth(requestDto.getPinNumber(), txnAuthToken);
-        return ResponseEntity.ok(new MessageDto("2차 인증이 성공적으로 완료되었습니다."));
-    }
-
-
-//    @AuthCheckPinDocs
-//    @PostMapping("/checkpin")
-//    public ResponseEntity<CheckPinResponseDto> checkPin(@RequestBody PinNumberDto pinNumberDto) {
-//        CheckPinResponseDto response = authService.checkPin(pinNumberDto.getPinNumber());
-//
-//        return ResponseEntity.ok(response);
-//    }
-
 }
