@@ -2,17 +2,16 @@ package com.ssafy.ssashinsa.heyfy.authentication.service;
 
 import com.ssafy.ssashinsa.heyfy.authentication.controller.AuthController;
 import com.ssafy.ssashinsa.heyfy.authentication.dto.*;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.authentication.jwt.JwtTokenProvider;
-import com.ssafy.ssashinsa.heyfy.common.util.TxnAuthTokenUtil;
-import com.ssafy.ssashinsa.heyfy.register.service.RegisterService;
-import com.ssafy.ssashinsa.heyfy.user.domain.Users;
-import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
 import com.ssafy.ssashinsa.heyfy.common.util.SecurityUtil;
-import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
-import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
+import com.ssafy.ssashinsa.heyfy.register.service.RegisterService;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.member.ShinhanUserResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.service.ShinhanApiService;
+import com.ssafy.ssashinsa.heyfy.user.domain.Users;
+import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,6 @@ public class AuthService {
     private final RedisUtil redisUtil;
     private final ShinhanApiService shinhanApiService;
     private final RegisterService registerService;
-    private final TxnAuthTokenUtil txnAuthTokenUtil;
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     public SignInSuccessDto signIn(SignInDto signInDto) {

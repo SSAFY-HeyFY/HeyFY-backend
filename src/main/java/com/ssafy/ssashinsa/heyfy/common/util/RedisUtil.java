@@ -20,15 +20,13 @@ public class RedisUtil {
 
     @Value("${spring.data.redis.sid-expiration}")
     private long sidExpirationSeconds;
-
     private static final String PIN_FAILED_ATTEMPTS_PREFIX = "pinFailed:";
-    private static final long PIN_FAILED_ATTEMPTS_EXPIRATION = 24 * 60 * 60; // 24시간
     private static final String AT_BLACKLIST_PREFIX = "atBlacklist:";
-
     private static final String REFRESH_TOKEN_PREFIX = "refresh:";
-    private static final String TXN_AUTH_TOKEN_PREFIX = "txnAuth:";
     private static final String SID_PREFIX = "sid:";
     private static final String TEMP_LOCK_PREFIX = "temp:";
+    private static final String TRADE_PIN_FAILED_PREFIX = "tradePinFailed:";
+    private static final String TRADE_PIN_LOCK_PREFIX = "tradePinLock:";
 
     public void setRefreshToken(String key, String value) {
         long timeoutSeconds = refreshExpirationMs;
@@ -41,18 +39,6 @@ public class RedisUtil {
 
     public void deleteRefreshToken(String key) {
         redisTemplate.delete(REFRESH_TOKEN_PREFIX + key);
-    }
-
-    public void setTxnAuthToken(String key, String value, long expiration, TimeUnit timeUnit) {
-        redisTemplate.opsForValue().set(TXN_AUTH_TOKEN_PREFIX + key, value, expiration, timeUnit);
-    }
-
-    public String getTxnAuthToken(String key) {
-        return redisTemplate.opsForValue().get(TXN_AUTH_TOKEN_PREFIX + key);
-    }
-
-    public void deleteTxnAuthToken(String key) {
-        redisTemplate.delete(TXN_AUTH_TOKEN_PREFIX + key);
     }
 
     public void setSid(String sid, String userId) {
@@ -84,7 +70,7 @@ public class RedisUtil {
         String key = PIN_FAILED_ATTEMPTS_PREFIX + studentId;
         Long count = redisTemplate.opsForValue().increment(key);
         if (count != null && count == 1) {
-            redisTemplate.expire(key, PIN_FAILED_ATTEMPTS_EXPIRATION, TimeUnit.SECONDS);
+            redisTemplate.expire(key, accessExpirationMs, TimeUnit.SECONDS);
         }
         return count != null ? count : 0;
     }
@@ -100,5 +86,35 @@ public class RedisUtil {
     public boolean isAccessTokenBlacklisted(String jti) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(AT_BLACKLIST_PREFIX + jti));
     }
+
+    public long incrementTradePinFailedAttempts(String studentId) {
+        String key = TRADE_PIN_FAILED_PREFIX + studentId;
+        Long count = redisTemplate.opsForValue().increment(key);
+        if (count != null && count == 1) {
+            redisTemplate.expire(key, accessExpirationMs, TimeUnit.SECONDS);
+        }
+        return count != null ? count : 0;
+    }
+
+    public void deleteTradePinFailedAttempts(String studentId) {
+        redisTemplate.delete(TRADE_PIN_FAILED_PREFIX + studentId);
+    }
+
+    public void setTradePinLock(String studentId) {
+        redisTemplate.opsForValue().set(TRADE_PIN_LOCK_PREFIX + studentId, "locked", 30L, TimeUnit.SECONDS);
+    }
+
+    public boolean isTradePinLocked(String studentId) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(TRADE_PIN_LOCK_PREFIX + studentId));
+    }
+
+    public void deleteTradePinLock(String studentId) {
+        redisTemplate.delete(TRADE_PIN_LOCK_PREFIX + studentId);
+    }
+
+
+
+
+
 
 }
