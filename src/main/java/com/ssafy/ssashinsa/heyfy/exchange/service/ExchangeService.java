@@ -51,7 +51,24 @@ public class ExchangeService {
 
         String pinNumber = exchangeRequestDto.getPinNumber();
 
-        redisUtil.validateTradePin(studentId, pinNumber, user.getPinNumber());
+        if (redisUtil.isTradePinLocked(studentId)) {
+            throw new CustomException(AuthErrorCode.TRADE_LOCKED);
+        }
+
+        if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
+            long failedAttempts = redisUtil.incrementTradePinFailedAttempts(studentId);
+
+            if (failedAttempts >= 5) {
+                redisUtil.setTradePinLock(studentId);
+                redisUtil.deleteTradePinFailedAttempts(studentId);
+                throw new CustomException(AuthErrorCode.PIN_TRADE_ATTEMPTS_EXCEEDED);
+            }
+
+            throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
+        }
+
+        redisUtil.deleteTradePinFailedAttempts(studentId);
+        redisUtil.deleteTradePinLock(studentId);
 
         Account account = user.getAccount();
         ForeignAccount foreignAccount = user.getForeignAccount();
@@ -116,7 +133,24 @@ public class ExchangeService {
 
 
         String pinNumber = exchangeRequestDto.getPinNumber();
-        redisUtil.validateTradePin(studentId, pinNumber, user.getPinNumber());
+        if (redisUtil.isTradePinLocked(studentId)) {
+            throw new CustomException(AuthErrorCode.TRADE_LOCKED);
+        }
+
+        if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
+            long failedAttempts = redisUtil.incrementTradePinFailedAttempts(studentId);
+
+            if (failedAttempts >= 5) {
+                redisUtil.setTradePinLock(studentId);
+                redisUtil.deleteTradePinFailedAttempts(studentId);
+                throw new CustomException(AuthErrorCode.PIN_TRADE_ATTEMPTS_EXCEEDED);
+            }
+
+            throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
+        }
+
+        redisUtil.deleteTradePinFailedAttempts(studentId);
+        redisUtil.deleteTradePinLock(studentId);
 
         Account account = user.getAccount();
         ForeignAccount foreignAccount = user.getForeignAccount();
