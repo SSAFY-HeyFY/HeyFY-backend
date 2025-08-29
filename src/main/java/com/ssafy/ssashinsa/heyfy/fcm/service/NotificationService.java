@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class FcmService {
+public class NotificationService {
 
     private final UserFcmService userFcmService;
     private final FcmTokenRepository fcmTokenRepository;
