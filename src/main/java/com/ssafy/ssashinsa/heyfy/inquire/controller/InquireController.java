@@ -1,21 +1,16 @@
 package com.ssafy.ssashinsa.heyfy.inquire.controller;
 
-import com.ssafy.ssashinsa.heyfy.inquire.docs.GetForeignTransactionHistoryDocs;
-import com.ssafy.ssashinsa.heyfy.inquire.docs.GetTransactionHistoryDocs;
 import com.ssafy.ssashinsa.heyfy.account.dto.AccountNoDto;
-import com.ssafy.ssashinsa.heyfy.inquire.dto.TransactionHistoryDto;
-import com.ssafy.ssashinsa.heyfy.inquire.dto.TransactionHistoryResponseRecDto;
-import com.ssafy.ssashinsa.heyfy.inquire.docs.InquireDepositListDocs;
-import com.ssafy.ssashinsa.heyfy.inquire.docs.InquireSingleDepositDocs;
-import com.ssafy.ssashinsa.heyfy.inquire.docs.InquireSingleForeignDepositDocs;
-import com.ssafy.ssashinsa.heyfy.inquire.dto.ForeignSingleDepositResponseDto;
-import com.ssafy.ssashinsa.heyfy.inquire.dto.SingleDepositResponseDto;
+import com.ssafy.ssashinsa.heyfy.inquire.docs.*;
+import com.ssafy.ssashinsa.heyfy.inquire.dto.*;
 import com.ssafy.ssashinsa.heyfy.inquire.service.InquireService;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.ExchangeHistoryResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.InquireTransactionHistoryResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.InquireTransactionHistoryResponseRecDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDepositResponseRecDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireSingleDepositResponseDto;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -145,6 +140,28 @@ public class InquireController {
 
         return ResponseEntity.ok(finalResponse);
     }
+
+
+    @Hidden
+    @GetMapping("/exchangehistory")
+    public ResponseEntity<ExchangeHistoryResponseDto> getExchangeHistoryTest() {
+
+        ExchangeHistoryResponseDto originalResponseDto = inquireService.getExchangeHistory();
+
+        return ResponseEntity.ok(originalResponseDto);
+
+    }
+
+    @GetExchangeHistoryDocs
+    @PostMapping("/exchangehistory")
+    public ResponseEntity<List<ExchangeHistorySimplifiedDto>> getExchangeHistory() {
+        List<ExchangeHistorySimplifiedDto> simplifiedList = inquireService.getSimplifiedExchangeHistory();
+        return ResponseEntity.ok(simplifiedList);
+    }
+
+
+
+
 
 
 }
