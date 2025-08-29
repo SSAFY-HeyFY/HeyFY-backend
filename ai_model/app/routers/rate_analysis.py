@@ -37,6 +37,11 @@ class PredictionSummaryResponse(BaseModel):
 class PushNotificationResponse(BaseModel):
     status: str
     message: str
+    
+# Endpoint 4: /analyze-tuition-period 용 모델
+class TuitionAnalysisResponse(BaseModel):
+    highest_rate_date: str
+    highest_rate_value: float
 
 # --- 라우터 생성 및 설정 ---
 router = APIRouter()
@@ -253,3 +258,62 @@ def get_push_notification_for_rate_status():
             status="error",
             message=f"데이터 분석 중 오류가 발생했습니다: {e}"
         )
+
+# --- [추가된 부분 시작] ---
+@router.get(
+    "/analyze-tuition-period",
+    response_model=TuitionAnalysisResponse,
+    summary="등록금 납부 기간 환율 분석",
+    description="지정된 등록금 납부 기간(2025-09-01 ~ 2025-09-05) 내에서 과거 및 예측 데이터를 모두 포함하여 환율이 가장 높은 날짜를 분석하고 반환합니다."
+)
+def analyze_tuition_period():
+    """
+    과거 및 예측 캐시 데이터를 모두 로드하여 지정된 기간 내 가장 환율이 높을 것으로 예상되는 날을 찾습니다.
+    """
+    # 1. 분석 대상 기간 및 현재 날짜 설정
+    start_date = date(2025, 9, 1)
+    end_date = date(2025, 9, 5)
+    today = date.today()
+
+    # 2. 마감일 확인
+    if today > end_date:
+        return TuitionAnalysisResponse(
+            highest_rate_date="Tuition deadline passed",
+            highest_rate_value=None,
+            message="The tuition payment period has ended."
+        )
+
+    # 3. 헬퍼 함수를 사용하여 데이터 로드
+    historical_points, predicted_points, _ = load_and_prepare_data()
+    all_points = historical_points + predicted_points
+
+    # 4. 해당 기간의 데이터 필터링
+    relevant_points = []
+    points_by_date = {}
+    for point in all_points:
+        try:
+            point_date = datetime.strptime(point["date"], "%Y-%m-%d").date()
+            if start_date <= point_date <= end_date:
+                points_by_date[point_date] = point
+        except (ValueError, KeyError):
+            continue
+    
+    relevant_points = list(points_by_date.values())
+
+    if not relevant_points:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No valid data found for the period from {start_date} to {end_date}."
+        )
+
+    # 5. 가장 환율이 높은 날짜 찾기
+    highest_rate_point = max(relevant_points, key=lambda x: x.get("rate", 0))
+
+    # 6. 날짜 형식 변경 및 결과 반환
+    highest_date_obj = datetime.strptime(highest_rate_point.get("date"), "%Y-%m-%d")
+    formatted_date = highest_date_obj.strftime("%b. %d, %Y") # 예: "Sep. 04, 2025"
+
+    return TuitionAnalysisResponse(
+        highest_rate_date=formatted_date,
+        highest_rate_value=highest_rate_point.get("rate")
+    )
