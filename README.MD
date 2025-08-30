@@ -23,6 +23,8 @@ HeyFY는 환율 정보 제공 및 예측, 그리고 간편 환전 및 송금 서
 -   **Containerization**: Docker, Docker Compose
 -   **Database**: Redis (캐싱 및 인증 토큰 관리)
 
+<a id="backend-build"></a>
+
 ## ⚙️ 빌드 및 실행 방법
 
 ### 1. Docker 사용 - MySQL, Redis 실행
@@ -116,6 +118,7 @@ java -jar build/libs/heyfy-0.0.1-SNAPSHOT.jar
         └── java
             └── com/ssafy/ssashinsa/heyfy # 테스트
 ```
+<a id="ai-build"></a>
 
 ## AI (`ai_model/`)
 
