@@ -4,13 +4,11 @@ import com.ssafy.ssashinsa.heyfy.account.dto.AccountNoDto;
 import com.ssafy.ssashinsa.heyfy.inquire.docs.*;
 import com.ssafy.ssashinsa.heyfy.inquire.dto.*;
 import com.ssafy.ssashinsa.heyfy.inquire.service.InquireService;
-import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.ExchangeHistoryResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.InquireTransactionHistoryResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.history.InquireTransactionHistoryResponseRecDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDepositResponseDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDepositResponseRecDto;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireSingleDepositResponseDto;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +26,7 @@ public class InquireController {
     private final InquireService inquireService;
 
     @InquireDepositListDocs
-    @GetMapping("/depositlist")
+    @PostMapping("/depositlist")
     public ResponseEntity<List<ShinhanInquireDepositResponseRecDto>> inquireDepositList() {
 
         ShinhanInquireDepositResponseDto response = inquireService.inquireDepositList();
@@ -141,22 +139,13 @@ public class InquireController {
         return ResponseEntity.ok(finalResponse);
     }
 
-
-    @Hidden
-    @GetMapping("/exchangehistory")
-    public ResponseEntity<ExchangeHistoryResponseDto> getExchangeHistoryTest() {
-
-        ExchangeHistoryResponseDto originalResponseDto = inquireService.getExchangeHistory();
-
-        return ResponseEntity.ok(originalResponseDto);
-
-    }
-
     @GetExchangeHistoryDocs
     @PostMapping("/exchangehistory")
-    public ResponseEntity<List<ExchangeHistorySimplifiedDto>> getExchangeHistory() {
+    public ResponseEntity<ExchangeHistorysDto> getExchangeHistory() {
+
         List<ExchangeHistorySimplifiedDto> simplifiedList = inquireService.getSimplifiedExchangeHistory();
-        return ResponseEntity.ok(simplifiedList);
+        ExchangeHistorysDto responseDto = new ExchangeHistorysDto(simplifiedList);
+        return ResponseEntity.ok(responseDto);
     }
 
 
