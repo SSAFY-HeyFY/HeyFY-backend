@@ -30,24 +30,6 @@ public class AccountService {
         return userRepository.findAccountsByUserEmail(userEmail);
     }
 
-    public AccountAuthResponseDto AccountAuth() {
-        String studentId = SecurityUtil.getCurrentStudentId();
-        Users user = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
-
-        String userKey = user.getUserKey();
-        if (userKey == null || userKey.isEmpty()) {
-            throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
-        }
-
-        String accountNo = accountRepository.findByUser(user)
-                .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND))
-                .getAccountNo();
-
-        AccountAuthResponseDto response = shinhanAccountAuthApiClient.openAccountAuth(userKey, accountNo);
-        return response;
-    }
-
     public AccountAuthResponseDto AccountAuth(String accountNo) {
         String studentId = SecurityUtil.getCurrentStudentId();
         Users user = userRepository.findByStudentId(studentId)
