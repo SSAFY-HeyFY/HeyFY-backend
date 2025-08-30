@@ -1,6 +1,6 @@
 # HeyFY Backend
 
-해커톤 출품작 HeyFY 서비스의 백엔드 레포지토리입니다.
+**싸신사**팀의 해커톤 출품작 HeyFY 서비스의 백엔드 레포지토리입니다.
 
 ## 🚀 프로젝트 소개
 
@@ -18,8 +18,8 @@ HeyFY는 환율 정보 제공 및 예측, 그리고 간편 환전 및 송금 서
 ## 🛠️ 개발 환경
 
 -   **Language**: Java 17
--   **Framework**: Spring Boot 3.2.4
--   **Build Tool**: Gradle 8.7
+-   **Framework**: Spring Boot 3.5.4
+-   **Build Tool**: Gradle 8.8
 -   **Containerization**: Docker, Docker Compose
 -   **Database**: Redis (캐싱 및 인증 토큰 관리)
 
@@ -47,7 +47,7 @@ docker-compose -f docker-compose-local.yml up --build
 
 **사전 요구사항**:
 -   Java 17 (JDK 17)
--   Gradle 8.7
+-   Gradle 8.8
 
 **빌드 명령어**:
 
@@ -120,7 +120,7 @@ AI 모델은 과거 환율 데이터를 학습하여 미래 환율을 예측하�
 
 ### 4.1. 개발 환경
 
-- **Language:** `Python 3.9+`
+- **Language:** `Python 3.10.4`
 - **Framework:** `FastAPI`
 - **의존성 관리:** `pip` 및 `requirements.txt`
 
