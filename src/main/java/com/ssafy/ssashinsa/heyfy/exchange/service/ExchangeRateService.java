@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -103,12 +104,15 @@ public class ExchangeRateService {
                 .changePercent(apiData.getChangeLabel().getPercent())
                 .periodDays(apiData.getChangeLabel().getDays())
                 .build();
+
+        FastApiTuitionPeriodDto apiTuitionResponse = fastApiClient.getTuitionPeriod();
+
         TuitionResponseDto tuition = TuitionResponseDto.builder()
                 .period(PeriodResponseDto.builder()
                         .start(java.time.LocalDate.of(2025, 9, 1))
                         .end(java.time.LocalDate.of(2025, 9, 6))
                         .build())
-                .recommendedDate(java.time.LocalDate.of(2025, 9, 4))
+                .recommendedDate(apiTuitionResponse.getRecommendDate())
                 .recommendationNote("The exchange rate is expected to be highest on this day")
                 .build();
         // 4. 최종 DTO 조립
@@ -180,12 +184,13 @@ public class ExchangeRateService {
      */
     @Transactional
     public TuitionResponseDto getTuition() {
+        FastApiTuitionPeriodDto apiResponse = fastApiClient.getTuitionPeriod();
         return TuitionResponseDto.builder()
                 .period(PeriodResponseDto.builder()
                         .start(java.time.LocalDate.of(2025, 9, 1))
                         .end(java.time.LocalDate.of(2025, 9, 6))
                         .build())
-                .recommendedDate(java.time.LocalDate.of(2025, 9, 4))
+                .recommendedDate(apiResponse.getRecommendDate())
                 .recommendationNote("The exchange rate is expected to be highest on this day")
                 .build();
     }
