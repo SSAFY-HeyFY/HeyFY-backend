@@ -1,8 +1,11 @@
 package com.ssafy.ssashinsa.heyfy.common.util;
 
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -11,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class RedisUtil {
     private final StringRedisTemplate redisTemplate;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${spring.jwt.refresh-expiration}")
     private long refreshExpirationMs;
@@ -112,6 +116,27 @@ public class RedisUtil {
         redisTemplate.delete(TRADE_PIN_LOCK_PREFIX + studentId);
     }
 
+
+    public void validateTradePin(String studentId, String pinNumber, String userPinNumber) {
+        if (isTradePinLocked(studentId)) {
+            throw new CustomException(AuthErrorCode.TRADE_LOCKED);
+        }
+
+        if (!passwordEncoder.matches(pinNumber, userPinNumber)) {
+            long failedAttempts = incrementTradePinFailedAttempts(studentId);
+
+            if (failedAttempts >= 5) {
+                setTradePinLock(studentId);
+                deleteTradePinFailedAttempts(studentId);
+                throw new CustomException(AuthErrorCode.PIN_TRADE_ATTEMPTS_EXCEEDED);
+            }
+
+            throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
+        }
+
+        deleteTradePinFailedAttempts(studentId);
+        deleteTradePinLock(studentId);
+    }
 
 
 
