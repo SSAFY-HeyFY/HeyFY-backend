@@ -14,6 +14,7 @@ import com.ssafy.ssashinsa.heyfy.fastapi.client.FastApiClient;
 import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRealTimeRatesDto;
 import com.ssafy.ssashinsa.heyfy.fcm.domain.FcmToken;
 import com.ssafy.ssashinsa.heyfy.register.exception.ShinhanRegisterApiErrorCode;
+import com.ssafy.ssashinsa.heyfy.shinhanApi.client.ShinhanDemandDepositApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.client.ShinhanExchangeApiClient;
 import com.ssafy.ssashinsa.heyfy.shinhanApi.client.ShinhanForeignDemandDepositApiClient;
 import com.ssafy.ssashinsa.heyfy.user.domain.Users;
@@ -39,6 +40,7 @@ public class ExchangeReservationService {
     private final FastApiClient fastApiClient;
     private final ShinhanExchangeApiClient shinhanExchangeApiClient;
     private final ShinhanForeignDemandDepositApiClient shinhanForeignDemandDepositApiClient;
+    private final ShinhanDemandDepositApiClient shinhanDemandDepositApiClient;
 
     @Transactional
     public ExchangeReservation cancelExchangeReservation(String studentId, Long reservationId) {
@@ -75,13 +77,13 @@ public class ExchangeReservationService {
 
         String withdrawalAccountNo = "";
         String depositAccountNo = "";
-        Currency withdrawalAccountCurrency = Currency.KRW;
-        Currency depositAccountCurrency = Currency.USD;
-        if (requestDto.getCurrency().equals("USD")) {
-            withdrawalAccountNo = account.getAccountNo();
-            withdrawalAccountCurrency = Currency.KRW;
-            depositAccountNo = foreignAccount.getAccountNo();
-            depositAccountCurrency = Currency.USD;
+        Currency withdrawalAccountCurrency = Currency.USD;
+        Currency depositAccountCurrency = Currency.KRW;
+        if (requestDto.getCurrency().equals("KRW")) {
+            withdrawalAccountNo = foreignAccount.getAccountNo();
+            withdrawalAccountCurrency = Currency.USD;
+            depositAccountNo = account.getAccountNo();
+            depositAccountCurrency = Currency.KRW;
         }
         if (withdrawalAccountNo.equals("") || depositAccountNo.equals("")) {
             throw new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND, "Account not found.");
@@ -125,13 +127,13 @@ public class ExchangeReservationService {
                                 reservation.getTransactionBalance(),
                                 reservation.getUser().getUserKey()
                         );
-                        log.info("환전 처리 완료, 외화 입금 시작: reservationId=" + reservation.getId());
-                        shinhanForeignDemandDepositApiClient.updateForeignCurrencyDemandDepositAccountDeposit(
+                        log.info("환전 처리 완료, 한화 입금 시작: reservationId=" + reservation.getId());
+                        shinhanDemandDepositApiClient.updateDemandDepositAccountDeposit(
                                 reservation.getDepositAccountNo(),
                                 reservation.getTransactionBalance(),
                                 reservation.getUser().getUserKey()
                         );
-                        log.info("외화 입금 완료: reservationId=" + reservation.getId());
+                        log.info("한화 입금 완료: reservationId=" + reservation.getId());
                         return reservation.getUser().getFcmTokens().get(0);
                     } catch (Exception e) {
                         log.error("환전 처리 중 오류 발생: reservationId={}, error={}", reservation.getId(), e.getMessage(), e);

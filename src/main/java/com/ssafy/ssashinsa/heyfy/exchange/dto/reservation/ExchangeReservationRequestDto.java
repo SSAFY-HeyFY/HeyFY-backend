@@ -17,7 +17,7 @@ public class ExchangeReservationRequestDto {
     @Schema(description = "환전량(환전통화기준)", example = "100")
     @NotNull
     private Double transactionBalance;
-    @Schema(description = "환전통화", example = "USD")
+    @Schema(description = "환전통화", example = "KRW")
     @NotNull
     private String currency;
     @Schema(description = "pin", example = "123456")
