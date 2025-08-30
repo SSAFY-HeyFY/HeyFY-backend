@@ -1,19 +1,122 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
-    <!-- converterClass 대신 class 사용 (logback 1.5 권장) -->
-    <conversionRule conversionWord="mask" class="com.ssafy.ssashinsa.heyfy.log.MaskingConverter"/>
+<configuration scan="true">
 
-    <property name="LOG_PATTERN"
-              value="%d{yyyy-MM-dd'T'HH:mm:ss.SSS,Asia/Seoul} %-5level [%X{traceId:-na}] %logger{36} - %mask(%msg)\n"/>
+    <property name="LOG_DIR" value="${LOG_DIR:-.}"/>
 
-    value="[%d{yyyy-MM-dd HH:mm:ss}:%-3relative] %-5level ${PID:-} --- [%15.15thread] %-40.40logger{36} : %msg%n"
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
+    <!-- 마스킹 컨버터 등록 -->
+    <conversionRule conversionWord="mask"
+                    converterClass="com.ssafy.ssashinsa.heyfy.log.MaskingConverter"/>
+
+    <!-- 콘솔(JSON) -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp><timeZone>Asia/Seoul</timeZone></timestamp>
+                <pattern>
+                    <pattern>{
+                        "ts":"%date{yyyy-MM-dd'T'HH:mm:ss.SSS,Asia/Seoul}",
+                        "level":"%level","logger":"%logger","thread":"%thread",
+                        "traceId":"%X{traceId:-}","message":"%mask(%msg)","exception":"%exception{5}"
+                        }</pattern>
+                </pattern>
+                <mdc/><context/>
+            </providers>
         </encoder>
     </appender>
 
+    <!-- =========================
+         INFO 이상 로그 (날짜별)
+         ========================= -->
+    <appender name="FILE_INFO_RAW" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/app-info.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/app-info.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>14</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp><timeZone>Asia/Seoul</timeZone></timestamp>
+                <pattern>
+                    <pattern>{
+                        "ts":"%date{yyyy-MM-dd'T'HH:mm:ss.SSS,Asia/Seoul}",
+                        "level":"%level","logger":"%logger","thread":"%thread",
+                        "traceId":"%X{traceId:-}","message":"%mask(%msg)","exception":"%exception{5}"
+                        }</pattern>
+                </pattern>
+                <mdc/><context/>
+            </providers>
+        </encoder>
+    </appender>
+
+    <appender name="FILE_INFO" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE_INFO_RAW"/>
+        <queueSize>8192</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+    <!-- =========================
+         DEBUG + TRACE 로그 (날짜별)
+         ========================= -->
+    <appender name="FILE_DEBUG_RAW" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/app-debug.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/app-debug.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        <!-- TRACE 제외 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>TRACE</level>
+            <onMatch>DENY</onMatch>
+            <onMismatch>NEUTRAL</onMismatch>
+        </filter>
+
+        <!-- DEBUG만 허용 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp><timeZone>Asia/Seoul</timeZone></timestamp>
+                <pattern>
+                    <pattern>{
+                        "ts":"%date{yyyy-MM-dd'T'HH:mm:ss.SSS,Asia/Seoul}",
+                        "level":"%level","logger":"%logger","thread":"%thread",
+                        "traceId":"%X{traceId:-}","message":"%mask(%msg)","exception":"%exception{5}"
+                        }</pattern>
+                </pattern>
+                <mdc/><context/>
+            </providers>
+        </encoder>
+    </appender>
+
+    <appender name="FILE_DEBUG" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE_DEBUG_RAW"/>
+        <queueSize>8192</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+    <!-- ROOT: INFO 이상 -->
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="JSON_CONSOLE"/>
+        <appender-ref ref="FILE_INFO"/>
     </root>
+
+    <!-- 특정 패키지에 DEBUG/TRACE 켜기 -->
+    <logger name="com.ssafy.ssashinsa" level="DEBUG">
+        <appender-ref ref="JSON_CONSOLE"/>
+        <appender-ref ref="FILE_DEBUG"/>
+    </logger>
+
 </configuration>
