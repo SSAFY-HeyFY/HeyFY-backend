@@ -139,11 +139,13 @@ AI 모델은 과거 환율 데이터를 학습하여 미래 환율을 예측하�
 ### 4.3. 빌드 및 실행 (AI 서버 단독)
 
 1.  **디렉토리 이동**
+
     ```bash
     cd ai_model
     ```
 
 2.  **가상 환경 생성 및 활성화 (권장)**
+
     ```bash
     python -m venv venv
 
@@ -155,17 +157,36 @@ AI 모델은 과거 환율 데이터를 학습하여 미래 환율을 예측하�
     ```
 
 3.  **의존성 설치**
+
     `ai_model` 디렉토리에서 아래 명령어를 실행합니다.
     ```bash
     pip install -r requirements.txt
     ```
 
-4.  **AI 서버 실행**
+4. **📈 실시간 환율 크롤러 실행**
+
+    ```run_realtime_crawler.py```는 현재 시점의 환율 정보를 실시간으로 크롤링하여 별도의 캐시 파일로 저장하는 스크립트입니다. 앱에서 보여주는 '현재 환율' 정보를 최신으로 유지하는 역할을 합니다.
+
+    ```
+    python scripts/run_realtime_crawler.py
+    ```
+
+5. **🤖 AI 예측 스케줄러 실행**
+
+    ```run_ai_predictor.py```는 AI 환율 예측을 주기적으로 실행하고 결과를 캐시 파일로 저장하는 핵심 스케줄러입니다. 10분마다 다음 작업을 자동으로 수행합니다.
+    학습된 하이브리드 Prophet 모델을 호출하여 미래 5일(영업일 기준)의 환율을 예측합니다. 과거 30일치 데이터와 미래 예측 데이터를 결합하여 API가 사용할 수 있도록 prediction_cache.json 파일에 저장합니다.
+
+    ```
+    python scripts/run_ai_predictor.py
+    ```
+
+6.  **AI 서버 실행**
+
     `ai_model` 디렉토리에서 아래 명령어를 실행하여 FastAPI 서버를 시작합니다.
     ```bash
     uvicorn app.main:app --host 0.0.0.0 --port 8888 --reload
     ```
     - `--reload` 옵션은 코드 변경 시 서버를 자동으로 재시작해 주어 개발에 유용합니다.
 
-5.  **API 문서 확인**
+7.  **API 문서 확인**
     서버 실행 후, 웹 브라우저에서 `http://localhost:8888/docs` 로 접속하면 API 명세를 확인하고 직접 테스트해볼 수 있습니다.
