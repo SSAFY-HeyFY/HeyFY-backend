@@ -71,7 +71,7 @@ public class ExchangeReservationApiController {
 
     }
 
-    @GetMapping
+    @PostMapping("/historys")
     @ExchangeReservationListDocs
     public ResponseEntity<ExchangeReservationListDto> getReservations(@AuthUser UserDetails userDetails){
         List<ExchangeReservation> result =  exchangeReservationService.getExchangeReservations(userDetails.getUsername());

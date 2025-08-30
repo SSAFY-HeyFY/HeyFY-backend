@@ -6,7 +6,7 @@ import com.ssafy.ssashinsa.heyfy.home.service.HomeService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -17,7 +17,7 @@ public class HomeController {
     private final HomeService homeService;
 
     @HomeDocs
-    @GetMapping("/home")
+    @PostMapping("/home")
     public ResponseEntity<HomeDto> home() {
 
         HomeDto homeDto = homeService.getHome();
