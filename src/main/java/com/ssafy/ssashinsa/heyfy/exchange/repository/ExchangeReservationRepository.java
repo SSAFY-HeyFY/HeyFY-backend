@@ -27,4 +27,7 @@ public interface ExchangeReservationRepository extends JpaRepository<ExchangeRes
 
     @Query("SELECT e FROM ExchangeReservation e WHERE e.user.studentId = :studentId")
     List<ExchangeReservation> findByStudentId(@Param("studentId") String studentId);
+
+    @Query("SELECT e FROM ExchangeReservation e JOIN FETCH e.user WHERE e.id = :id")
+    ExchangeReservation findByIdWithUser(@Param("id") Long id);
 }

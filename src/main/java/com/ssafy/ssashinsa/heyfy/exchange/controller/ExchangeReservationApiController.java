@@ -1,13 +1,11 @@
 package com.ssafy.ssashinsa.heyfy.exchange.controller;
 
 import com.ssafy.ssashinsa.heyfy.authentication.annotation.AuthUser;
+import com.ssafy.ssashinsa.heyfy.exchange.docs.ExchangeReservationCancelDocs;
 import com.ssafy.ssashinsa.heyfy.exchange.docs.ExchangeReservationDocs;
 import com.ssafy.ssashinsa.heyfy.exchange.docs.ExchangeReservationListDocs;
 import com.ssafy.ssashinsa.heyfy.exchange.domain.ExchangeReservation;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.reservation.ExchangeReservationItemDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.reservation.ExchangeReservationListDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.reservation.ExchangeReservationRequestDto;
-import com.ssafy.ssashinsa.heyfy.exchange.dto.reservation.ExchangeReservationResponseDto;
+import com.ssafy.ssashinsa.heyfy.exchange.dto.reservation.*;
 import com.ssafy.ssashinsa.heyfy.exchange.service.ExchangeReservationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,6 +24,16 @@ import java.util.List;
 @RequestMapping("/exchange/reservation")
 public class ExchangeReservationApiController {
     private final ExchangeReservationService exchangeReservationService;
+
+    @PostMapping("/cancel")
+    @ExchangeReservationCancelDocs
+    public ResponseEntity<ExchangeReservationCancelResponseDto> cancelExchangeReservation(@AuthUser UserDetails userDetails, @RequestBody @Valid ExchangeReservationCancelRequestDto requestDto){
+        log.info("환전 예약 취소 요청 들어옴");
+        exchangeReservationService.cancelExchangeReservation(userDetails.getUsername(),requestDto.getReservationId());
+        return ResponseEntity.ok(ExchangeReservationCancelResponseDto.builder()
+                .success(true)
+                .build());
+    }
 
     @PostMapping
     @ExchangeReservationDocs

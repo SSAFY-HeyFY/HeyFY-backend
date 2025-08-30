@@ -2,11 +2,13 @@ package com.ssafy.ssashinsa.heyfy.exchange.service;
 
 import com.ssafy.ssashinsa.heyfy.account.domain.Account;
 import com.ssafy.ssashinsa.heyfy.account.domain.ForeignAccount;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.CommonErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.exchange.domain.Currency;
 import com.ssafy.ssashinsa.heyfy.exchange.domain.ExchangeReservation;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.reservation.ExchangeReservationRequestDto;
+import com.ssafy.ssashinsa.heyfy.exchange.exception.ExchangeErrorCode;
 import com.ssafy.ssashinsa.heyfy.exchange.repository.ExchangeReservationRepository;
 import com.ssafy.ssashinsa.heyfy.fastapi.client.FastApiClient;
 import com.ssafy.ssashinsa.heyfy.fastapi.dto.FastApiRealTimeRatesDto;
@@ -37,6 +39,23 @@ public class ExchangeReservationService {
     private final FastApiClient fastApiClient;
     private final ShinhanExchangeApiClient shinhanExchangeApiClient;
     private final ShinhanForeignDemandDepositApiClient shinhanForeignDemandDepositApiClient;
+
+    @Transactional
+    public ExchangeReservation cancelExchangeReservation(String studentId, Long reservationId) {
+        ExchangeReservation reservation = exchangeReservationRepository.findByIdWithUser(reservationId);
+        if (!reservation.getUser().getStudentId().equals(studentId)) {
+            throw new CustomException(AuthErrorCode.UNAUTHORIZED, "권한이 없습니다: " + studentId);
+        }
+        if (reservation.isCanceled()) {
+            throw new CustomException(ExchangeErrorCode.ALREADY_CANCELED);
+        }
+        if (reservation.isExchangeCompleted()) {
+            throw new CustomException(ExchangeErrorCode.ALREADY_COMPLETED);
+        }
+        reservation.cancel();
+        log.info("환전 예약 취소: " + reservation);
+        return reservation;
+    }
 
     @Transactional
     public List<ExchangeReservation> getExchangeReservations(String studentId) {

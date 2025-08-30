@@ -46,6 +46,11 @@ public class ExchangeReservation {
     @JoinColumn(name = "user_id")
     private Users user;
 
+    public void cancel() {
+        this.isCanceled = true;
+    }
+
+
     public static ExchangeReservation create(Users user,
                                              String withdrawalAccountNo, Currency withdrawalAccountCurrency,
                                              String depositAccountNo, Currency depositAccountCurrency,
