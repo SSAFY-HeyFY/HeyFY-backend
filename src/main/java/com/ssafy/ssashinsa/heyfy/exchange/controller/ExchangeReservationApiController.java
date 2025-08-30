@@ -1,6 +1,8 @@
 package com.ssafy.ssashinsa.heyfy.exchange.controller;
 
 import com.ssafy.ssashinsa.heyfy.authentication.annotation.AuthUser;
+import com.ssafy.ssashinsa.heyfy.authentication.exception.AuthErrorCode;
+import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.exchange.docs.ExchangeReservationDocs;
 import com.ssafy.ssashinsa.heyfy.exchange.domain.ExchangeReservation;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.reservation.ExchangeReservationRequestDto;
@@ -28,7 +30,19 @@ public class ExchangeReservationApiController {
     @ExchangeReservationDocs
     public ExchangeReservationResponseDto makeReservation(@AuthUser UserDetails userDetails, @RequestBody @Valid ExchangeReservationRequestDto requestDto){
         log.info("환전 예약 요청 들어옴");
-        ExchangeReservation exchangeReservation = exchangeReservationService.createExchangeReservation(userDetails.getUsername(),requestDto);
+        try{
+            ExchangeReservation exchangeReservation = exchangeReservationService.createExchangeReservation(userDetails.getUsername(),requestDto);
+        } catch (CustomException e){
+            if(e.getErrorCode().equals(AuthErrorCode.INVALID_PIN_NUMBER)){
+                ExchangeReservationResponseDto response = ExchangeReservationResponseDto.builder()
+                        .success(false)
+                        .build();
+                return response;
+            }
+            throw e;
+        }
+
+
         return ExchangeReservationResponseDto.builder()
                 .success(true)
                 .build();

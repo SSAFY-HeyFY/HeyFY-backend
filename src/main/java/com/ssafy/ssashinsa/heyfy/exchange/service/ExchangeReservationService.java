@@ -4,6 +4,7 @@ import com.ssafy.ssashinsa.heyfy.account.domain.Account;
 import com.ssafy.ssashinsa.heyfy.account.domain.ForeignAccount;
 import com.ssafy.ssashinsa.heyfy.common.exception.CommonErrorCode;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
+import com.ssafy.ssashinsa.heyfy.common.util.RedisUtil;
 import com.ssafy.ssashinsa.heyfy.exchange.domain.Currency;
 import com.ssafy.ssashinsa.heyfy.exchange.domain.ExchangeReservation;
 import com.ssafy.ssashinsa.heyfy.exchange.dto.reservation.ExchangeReservationRequestDto;
@@ -37,12 +38,16 @@ public class ExchangeReservationService {
     private final FastApiClient fastApiClient;
     private final ShinhanExchangeApiClient shinhanExchangeApiClient;
     private final ShinhanForeignDemandDepositApiClient shinhanForeignDemandDepositApiClient;
+    private final RedisUtil redisUtil;
 
     @Transactional
     public ExchangeReservation createExchangeReservation(String studentId, @RequestBody ExchangeReservationRequestDto requestDto) {
         Users user = userRepository.findUserWithAccountsByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(CommonErrorCode.USER_NOT_FOUND, "사용자를 찾을 수 없습니다: " + studentId));
         log.info("유저 조회: " + user.getName());
+
+        String pinNumber = requestDto.getPinNumber();
+        redisUtil.validateTradePin(studentId, pinNumber, user.getPinNumber());
 
         ForeignAccount foreignAccount = user.getForeignAccount();
         Account account = user.getAccount();
