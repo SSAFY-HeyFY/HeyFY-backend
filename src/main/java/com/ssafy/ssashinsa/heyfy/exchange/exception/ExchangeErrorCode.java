@@ -15,7 +15,9 @@ public enum ExchangeErrorCode implements ErrorCode {
     EXCHANGE_MIN_AMOUNT(HttpStatus.BAD_REQUEST, "Minimum exchange amount is 100 USD"),
     INVALID_TRANSACTION_AMOUNT(HttpStatus.BAD_REQUEST, "Invalid transaction amount"),
     FOREIGN_ACCOUNT_ONLY(HttpStatus.BAD_REQUEST, "Only foreign currency accounts are allowed"),
-    KRW_ACCOUNT_ONLY(HttpStatus.BAD_REQUEST, "Only KRW accounts are allowed");
+    KRW_ACCOUNT_ONLY(HttpStatus.BAD_REQUEST, "Only KRW accounts are allowed"),
+    ALREADY_CANCELED(HttpStatus.BAD_REQUEST, "This reservation is already canceled"),
+    ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "This reservation is already completed");
 
     private final HttpStatus httpStatus;
     private final String message;

@@ -18,8 +18,16 @@ public interface ExchangeReservationRepository extends JpaRepository<ExchangeRes
            "LEFT JOIN FETCH u.fcmTokens " +
            "WHERE e.exchangeCompleted = false")
     List<ExchangeReservation> findAllNotCompletedWithUserAndFcmTokens();
+    @Query("SELECT e FROM ExchangeReservation e JOIN FETCH e.user WHERE e.isCanceled = false AND e.exchangeCompleted = false")
+    List<ExchangeReservation> findAllNotCanceledAndNotCompletedWithUser();
 
     @Modifying
     @Query("UPDATE ExchangeReservation e SET e.exchangeCompleted = true WHERE e.id IN :ids")
     int bulkComplete(@Param("ids") List<Long> ids);
+
+    @Query("SELECT e FROM ExchangeReservation e WHERE e.user.studentId = :studentId")
+    List<ExchangeReservation> findByStudentId(@Param("studentId") String studentId);
+
+    @Query("SELECT e FROM ExchangeReservation e JOIN FETCH e.user WHERE e.id = :id")
+    ExchangeReservation findByIdWithUser(@Param("id") Long id);
 }

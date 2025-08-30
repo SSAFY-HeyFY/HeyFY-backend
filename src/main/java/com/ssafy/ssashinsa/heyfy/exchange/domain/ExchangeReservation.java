@@ -34,6 +34,7 @@ public class ExchangeReservation {
     private Double transactionBalance;
 
     private boolean exchangeCompleted = false;
+    private boolean isCanceled = false;
 
     private Double baseExchangeRate;
 
@@ -44,6 +45,11 @@ public class ExchangeReservation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Users user;
+
+    public void cancel() {
+        this.isCanceled = true;
+    }
+
 
     public static ExchangeReservation create(Users user,
                                              String withdrawalAccountNo, Currency withdrawalAccountCurrency,
