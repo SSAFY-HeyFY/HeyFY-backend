@@ -26,7 +26,7 @@ public class InquireController {
     private final InquireService inquireService;
 
     @InquireDepositListDocs
-    @GetMapping("/depositlist")
+    @PostMapping("/depositlist")
     public ResponseEntity<List<ShinhanInquireDepositResponseRecDto>> inquireDepositList() {
 
         ShinhanInquireDepositResponseDto response = inquireService.inquireDepositList();

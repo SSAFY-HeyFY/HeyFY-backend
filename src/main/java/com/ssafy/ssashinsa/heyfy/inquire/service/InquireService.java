@@ -76,29 +76,6 @@ public class InquireService {
         return shinhanDemandDepositApiClient.inquireDemandDepositAccount(userKey, accountNo);
     }
 
-
-    public ShinhanInquireSingleDepositResponseDto inquireSingleForeignDeposit() {
-        try {
-            String studentId = SecurityUtil.getCurrentStudentId();
-            Users user = userRepository.findByStudentId(studentId)
-                    .orElseThrow(() -> new CustomException(ShinhanInquireApiErrorCode.USER_NOT_FOUND));
-
-            String userKey = user.getUserKey();
-            if (userKey == null || userKey.isEmpty()) {
-                throw new CustomException(ShinhanInquireApiErrorCode.MISSING_USER_KEY);
-            }
-
-            String accountNo = foreignAccountRepository.findByUser(user)
-                    .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND))
-                    .getAccountNo();
-
-            return shinhanDemandDepositApiClient.inquireDemandForeignDepositAccount(userKey, accountNo);
-        } catch (Exception e) {
-            log.error("계좌 등록 API 호출 실패 : {}", e.getMessage(), e);
-            throw e;
-        }
-    }
-
     public ShinhanInquireSingleDepositResponseDto inquireSingleForeignDeposit(String accountNo) {
         String studentId = SecurityUtil.getCurrentStudentId();
         Users user = userRepository.findByStudentId(studentId)
@@ -126,25 +103,6 @@ public class InquireService {
         }
 
         return shinhanDemandDepositApiClient.inquireDemandDepositAccountList(userKey);
-    }
-
-
-    public InquireTransactionHistoryResponseDto getTransactionHistory() {
-
-        String studentId = SecurityUtil.getCurrentStudentId();
-        Users user = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
-
-        String userKey = user.getUserKey();
-        if (userKey == null || userKey.isEmpty()) {
-            throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
-        }
-
-        String accountNo = accountRepository.findByUser(user)
-                .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND))
-                .getAccountNo();
-
-        return shinhanDemandDepositApiClient.inquireTransactionHistoryList(userKey, accountNo);
     }
 
     public InquireTransactionHistoryResponseDto getTransactionHistory(String accountNo) {
@@ -190,22 +148,6 @@ public class InquireService {
         return shinhanDemandDepositApiClient.inquireForeignTransactionHistoryList(userKey, accountNo);
     }
 
-    public ExchangeHistoryResponseDto getExchangeHistory() {
-        String studentId = SecurityUtil.getCurrentStudentId();
-        Users user = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
-
-        String accountNo = foreignAccountRepository.findByUser(user)
-                .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.ACCOUNT_NOT_FOUND))
-                .getAccountNo();
-        String userKey = user.getUserKey();
-        if (userKey == null || userKey.isEmpty()) {
-            throw new CustomException(ShinhanRegisterApiErrorCode.MISSING_USER_KEY);
-        }
-
-        return shinhanDemandDepositApiClient.exchangeHistory(userKey, accountNo);
-    }
-
     public ExchangeHistoryResponseDto getExchangeHistory(String accountNo) {
         String studentId = SecurityUtil.getCurrentStudentId();
         Users user = userRepository.findByStudentId(studentId)
@@ -249,7 +191,6 @@ public class InquireService {
                         String exchangeAmount = Optional.ofNullable(recDto.getExchangeCurrency().getAmount())
                                 .map(BigDecimal::new)
                                 .map(bd -> {
-                                    // 📌 exchangeCurrency가 KRW일 경우 소수점 제거
                                     if ("KRW".equals(recDto.getExchangeCurrency().getCurrency())) {
                                         return bd.stripTrailingZeros();
                                     } else {
@@ -292,7 +233,6 @@ public class InquireService {
                         String exchangeAmount = Optional.ofNullable(recDto.getExchangeCurrency().getAmount())
                                 .map(BigDecimal::new)
                                 .map(bd -> {
-                                    // 📌 exchangeCurrency가 KRW일 경우 소수점 제거
                                     if ("KRW".equals(recDto.getExchangeCurrency().getCurrency())) {
                                         return bd.stripTrailingZeros();
                                     } else {
@@ -302,7 +242,6 @@ public class InquireService {
                                 .map(BigDecimal::toPlainString)
                                 .orElse(null);
 
-                        // 📌 환율 재계산
                         BigDecimal calculatedRate = Optional.ofNullable(recDto.getExchangeCurrency().getAmount())
                                 .flatMap(exAmount -> Optional.ofNullable(recDto.getCurrency().getAmount())
                                         .map(amount -> BigDecimal.valueOf(exAmount).divide(BigDecimal.valueOf(amount), 1, RoundingMode.HALF_UP)))

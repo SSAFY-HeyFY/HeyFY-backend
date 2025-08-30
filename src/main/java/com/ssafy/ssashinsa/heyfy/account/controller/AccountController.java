@@ -3,7 +3,10 @@ package com.ssafy.ssashinsa.heyfy.account.controller;
 import com.ssafy.ssashinsa.heyfy.account.docs.AccountCheckDocs;
 import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountAuthDocs;
 import com.ssafy.ssashinsa.heyfy.account.docs.GetMyAccountsDocs;
-import com.ssafy.ssashinsa.heyfy.account.dto.*;
+import com.ssafy.ssashinsa.heyfy.account.dto.AccountAuthHttpResponseDto;
+import com.ssafy.ssashinsa.heyfy.account.dto.AccountNoDto;
+import com.ssafy.ssashinsa.heyfy.account.dto.AccountPairDto;
+import com.ssafy.ssashinsa.heyfy.account.dto.AuthCheckDto;
 import com.ssafy.ssashinsa.heyfy.account.service.AccountService;
 import com.ssafy.ssashinsa.heyfy.common.exception.CustomException;
 import com.ssafy.ssashinsa.heyfy.inquire.service.InquireService;
@@ -15,7 +18,6 @@ import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.auth.AccountAuthResponseDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +34,7 @@ public class AccountController {
     private final InquireService inquireService;
 
     @GetMyAccountsDocs
-    @GetMapping("/accounts")
+    @PostMapping("/accounts")
     public ResponseEntity<AccountPairDto> getMyAccounts() {
 
         Optional<AccountPairDto> accounts = accountService.getAccounts();
