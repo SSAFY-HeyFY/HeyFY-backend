@@ -23,7 +23,6 @@ import com.ssafy.ssashinsa.heyfy.user.domain.Users;
 import com.ssafy.ssashinsa.heyfy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +40,6 @@ public class ExchangeService {
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
     private final ForeignAccountRepository foreignAccountRepository;
-    private final PasswordEncoder passwordEncoder;
     private final RedisUtil redisUtil;
 
     @Transactional
@@ -50,25 +48,7 @@ public class ExchangeService {
                 .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
 
         String pinNumber = exchangeRequestDto.getPinNumber();
-
-        if (redisUtil.isTradePinLocked(studentId)) {
-            throw new CustomException(AuthErrorCode.TRADE_LOCKED);
-        }
-
-        if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
-            long failedAttempts = redisUtil.incrementTradePinFailedAttempts(studentId);
-
-            if (failedAttempts >= 5) {
-                redisUtil.setTradePinLock(studentId);
-                redisUtil.deleteTradePinFailedAttempts(studentId);
-                throw new CustomException(AuthErrorCode.PIN_TRADE_ATTEMPTS_EXCEEDED);
-            }
-
-            throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
-        }
-
-        redisUtil.deleteTradePinFailedAttempts(studentId);
-        redisUtil.deleteTradePinLock(studentId);
+        redisUtil.validateTradePin(studentId, pinNumber, user.getPinNumber());
 
         Account account = user.getAccount();
         ForeignAccount foreignAccount = user.getForeignAccount();
@@ -133,24 +113,7 @@ public class ExchangeService {
 
 
         String pinNumber = exchangeRequestDto.getPinNumber();
-        if (redisUtil.isTradePinLocked(studentId)) {
-            throw new CustomException(AuthErrorCode.TRADE_LOCKED);
-        }
-
-        if (!passwordEncoder.matches(pinNumber, user.getPinNumber())) {
-            long failedAttempts = redisUtil.incrementTradePinFailedAttempts(studentId);
-
-            if (failedAttempts >= 5) {
-                redisUtil.setTradePinLock(studentId);
-                redisUtil.deleteTradePinFailedAttempts(studentId);
-                throw new CustomException(AuthErrorCode.PIN_TRADE_ATTEMPTS_EXCEEDED);
-            }
-
-            throw new CustomException(AuthErrorCode.INVALID_PIN_NUMBER);
-        }
-
-        redisUtil.deleteTradePinFailedAttempts(studentId);
-        redisUtil.deleteTradePinLock(studentId);
+        redisUtil.validateTradePin(studentId, pinNumber, user.getPinNumber());
 
         Account account = user.getAccount();
         ForeignAccount foreignAccount = user.getForeignAccount();
