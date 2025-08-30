@@ -138,6 +138,12 @@ AI 모델은 과거 환율 데이터를 학습하여 미래 환율을 예측하�
 
 ### 4.3. 빌드 및 실행 (AI 서버 단독)
 
+0. **ai 브랜치 클론**
+
+    ```bash
+    git clone -b ai https://github.com/SSAFY-HeyFY/HeyFY-backend.git
+    ```
+
 1.  **디렉토리 이동**
 
     ```bash
