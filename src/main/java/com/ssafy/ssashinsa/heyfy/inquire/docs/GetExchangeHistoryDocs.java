@@ -1,13 +1,14 @@
 package com.ssafy.ssashinsa.heyfy.inquire.docs;
 
 import com.ssafy.ssashinsa.heyfy.common.exception.ErrorResponse;
-import com.ssafy.ssashinsa.heyfy.inquire.dto.ExchangeHistorySimplifiedDto;
+import com.ssafy.ssashinsa.heyfy.inquire.dto.ExchangeHistorysDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,7 +26,7 @@ import java.lang.annotation.Target;
                 description = "성공적으로 환전 내역을 통합하여 조회했습니다.",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = ExchangeHistorySimplifiedDto.class)
+                        schema = @Schema(implementation = ExchangeHistorysDto.class)
                 )
         ),
         @ApiResponse(
