@@ -46,6 +46,7 @@ public class UserFcmController {
     @FcmDeletePublicDocs
     @DeleteMapping("/tokens/public")
     public ResponseEntity<Void> deletePublic(@RequestBody FcmTokenRequest request) {
+        log.info("FCM 토큰 삭제 요청. Token: {}", request.getFcmToken());
         userFcmService.deleteByToken(request.getFcmToken());
         return ResponseEntity.ok().build();
     }

@@ -22,6 +22,7 @@ public class ExchangeRateApiController {
     @ExchangeRatePageDocs
     @GetMapping("/page")
     public ResponseEntity<ExchangeRatePageResponseDto> getExchangeRatePage() {
+        log.info("환율 페이지 조회 요청");
         ExchangeRatePageResponseDto response = exchangeRateService.getExchangeRatePage();
         return ResponseEntity.ok(response);
     }
@@ -29,25 +30,28 @@ public class ExchangeRateApiController {
     @ExchangeRateHistoriesDocs
     @GetMapping("/histories")
     public ResponseEntity<ExchangeRateHistoriesResponseDto> getExchangeRateHistories() {
-        // 기본값: USD, 29일
+        log.info("환전 그래프 데이터 조회 요청");
         return ResponseEntity.ok(exchangeRateService.getExchangeRateHistories());
     }
 
     @ExchangeRateCurrentDocs
     @GetMapping("/current")
     public ResponseEntity<RealTimeRateGroupResponseDto> getCurrentExchangeRates() {
+        log.info("실시간 환율 조회 요청");
         return ResponseEntity.ok(exchangeRateService.getRealTimeRate());
     }
 
     @ExchangeRatePredictionDocs
     @GetMapping("/prediction")
     public ResponseEntity<PredictionResponseDto> getPrediction() {
+        log.info("환율 예측 조회 요청");
         return ResponseEntity.ok(exchangeRateService.getPredictionSummary());
     }
 
     @ExchangeRateTuitionDocs
     @GetMapping("/tuition")
     public ResponseEntity<TuitionResponseDto> getTuition() {
+        log.info("환전 일자 추천 요청");
         return ResponseEntity.ok(exchangeRateService.getTuition());
     }
 }

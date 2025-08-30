@@ -131,7 +131,7 @@ public class FastApiClient {
 
     private void logRequest(Object requestDto) {
         try {
-            log.info("Request JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(requestDto));
+            log.debug("Request JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(requestDto));
         } catch (Exception e) {
             log.error("Request logging error", e);
         }
@@ -139,7 +139,7 @@ public class FastApiClient {
 
     private void logResponse(Object responseDto) {
         try {
-            log.info("Response JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(responseDto));
+            log.debug("Response JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(responseDto));
         } catch (Exception e) {
             log.error("Response logging error", e);
         }
