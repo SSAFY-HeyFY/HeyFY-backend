@@ -39,6 +39,13 @@ public class ExchangeReservationService {
     private final ShinhanForeignDemandDepositApiClient shinhanForeignDemandDepositApiClient;
 
     @Transactional
+    public List<ExchangeReservation> getExchangeReservations(String studentId) {
+        List<ExchangeReservation> reservations = exchangeReservationRepository.findByStudentId(studentId);
+        log.info("환전 예약 조회: " + reservations.size() + "건");
+        return reservations;
+    }
+
+    @Transactional
     public ExchangeReservation createExchangeReservation(String studentId, @RequestBody ExchangeReservationRequestDto requestDto) {
         Users user = userRepository.findUserWithAccountsByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(CommonErrorCode.USER_NOT_FOUND, "사용자를 찾을 수 없습니다: " + studentId));
@@ -83,7 +90,7 @@ public class ExchangeReservationService {
                 .orElseThrow(() -> new IllegalStateException("USD 환율 데이터가 없습니다."))
                 .getRate();
         log.info("현재 USD 환율: " + usdRate);
-        List<ExchangeReservation> reservationList = exchangeReservationRepository.findAllNotCompletedWithUser();
+        List<ExchangeReservation> reservationList = exchangeReservationRepository.findAllNotCanceledAndNotCompletedWithUser();
         log.info("처리 대상 예약 수: " + reservationList.size());
         List<ExchangeReservation> exchangeList = reservationList.stream()
                 .filter(reservation -> reservation.getBaseExchangeRate() < usdRate)

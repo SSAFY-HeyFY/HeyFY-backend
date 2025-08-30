@@ -34,6 +34,7 @@ public class ExchangeReservation {
     private Double transactionBalance;
 
     private boolean exchangeCompleted = false;
+    private boolean isCanceled = false;
 
     private Double baseExchangeRate;
 
