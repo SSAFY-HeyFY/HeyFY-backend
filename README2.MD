@@ -25,7 +25,7 @@ HeyFY는 환율 정보 제공 및 예측, 그리고 간편 환전 및 송금 서
 
 ## ⚙️ 빌드 및 실행 방법
 
-### 1. Docker 사용 (권장)
+### 1. Docker 사용 - MySQL, Redis 실행
 
 프로젝트 실행에 필요한 모든 환경이 Docker Compose에 설정되어 있어 가장 간편하게 실행할 수 있습니다.
 
@@ -40,14 +40,17 @@ HeyFY는 환율 정보 제공 및 예측, 그리고 간편 환전 및 송금 서
 docker-compose -f docker-compose-local.yml up --build
 ```
 
-위 명령어를 통해 프로젝트 빌드 및 Docker 이미지 생성, 그리고 컨테이너 실행이 한번에 진행됩니다.
-서버는 `http://localhost:8080` 에서 실행됩니다.
+위 명령어를 통해 mysql, redis를 시킬 수 있습니다.
+
 
 ### 2. 로컬에서 직접 실행
 
 **사전 요구사항**:
 -   Java 17 (JDK 17)
 -   Gradle 8.8
+**환경변수 **
+- [싸신사](https://drive.google.com/drive/folders/1lwBdA0eKgV6-9OnhEwMciOb5puspOnl4?usp=sharing)
+- 위 링크를 통해 다운받은 4개의 파일을 `src/main/resources` 경로에 저장합니다.
 
 **빌드 명령어**:
 
@@ -108,7 +111,7 @@ java -jar build/libs/heyfy-0.0.1-SNAPSHOT.jar
     │   │       ├── transfer                  # 송금
     │   │       └── user                      # 사용자 정보
     │   └── resources
-    │       └── logback-spring.xml      # 로그 설정
+    │       
     └── test
         └── java
             └── com/ssafy/ssashinsa/heyfy # 테스트
