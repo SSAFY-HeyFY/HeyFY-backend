@@ -31,10 +31,21 @@ public class ExchangeReservationApiController {
     @ExchangeReservationCancelDocs
     public ResponseEntity<ExchangeReservationCancelResponseDto> cancelExchangeReservation(@AuthUser UserDetails userDetails, @RequestBody @Valid ExchangeReservationCancelRequestDto requestDto){
         log.info("환전 예약 취소 요청 들어옴");
-        exchangeReservationService.cancelExchangeReservation(userDetails.getUsername(),requestDto.getReservationId());
-        return ResponseEntity.ok(ExchangeReservationCancelResponseDto.builder()
-                .success(true)
-                .build());
+        try {
+            exchangeReservationService.cancelExchangeReservation(userDetails.getUsername(),requestDto.getReservationId(), requestDto.getPinNumber());
+            return ResponseEntity.ok(ExchangeReservationCancelResponseDto.builder()
+                    .success(true)
+                    .build());
+        }catch (CustomException e){
+            if(e.getErrorCode().equals(AuthErrorCode.INVALID_PIN_NUMBER)){
+                ExchangeReservationCancelResponseDto response = ExchangeReservationCancelResponseDto.builder()
+                        .success(false)
+                        .build();
+                return ResponseEntity.ok(response);
+            }
+            throw e;
+        }
+
     }
 
     @PostMapping
@@ -53,7 +64,7 @@ public class ExchangeReservationApiController {
             throw e;
         }
         ExchangeReservationResponseDto response = ExchangeReservationResponseDto.builder()
-                        .success(false)
+                        .success(true)
                         .build();
 
         return ResponseEntity.ok(response);
