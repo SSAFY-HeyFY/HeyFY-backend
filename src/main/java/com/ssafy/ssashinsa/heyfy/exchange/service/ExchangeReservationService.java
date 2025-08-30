@@ -45,7 +45,11 @@ public class ExchangeReservationService {
     private final ShinhanDemandDepositApiClient shinhanDemandDepositApiClient;
 
     @Transactional
-    public ExchangeReservation cancelExchangeReservation(String studentId, Long reservationId) {
+    public ExchangeReservation cancelExchangeReservation(String studentId, Long reservationId, String pinNumber) {
+        Users user = userRepository.findUserWithAccountsByStudentId(studentId)
+                .orElseThrow(() -> new CustomException(CommonErrorCode.USER_NOT_FOUND, "사용자를 찾을 수 없습니다: " + studentId));
+
+        redisUtil.validateTradePin(studentId, pinNumber, user.getPinNumber());
         ExchangeReservation reservation = exchangeReservationRepository.findByIdWithUser(reservationId);
         if (!reservation.getUser().getStudentId().equals(studentId)) {
             throw new CustomException(AuthErrorCode.UNAUTHORIZED, "권한이 없습니다: " + studentId);
