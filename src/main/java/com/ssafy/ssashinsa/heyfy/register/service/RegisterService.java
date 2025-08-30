@@ -90,7 +90,7 @@ public class RegisterService {
     @Transactional
     public String registerAccountFromShinhan(String accountNo) {
         String studentId = SecurityUtil.getCurrentStudentId();
-        log.info("학생 ID [{}]의 계좌 등록을 시작합니다.", studentId);
+        log.debug("학생 ID [{}]의 계좌 등록을 시작합니다.", studentId);
 
         Users user = userRepository.findByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
@@ -106,7 +106,7 @@ public class RegisterService {
     @Transactional
     public String registerForeignAccountFromShinhan(String accountNo) {
         String studentId = SecurityUtil.getCurrentStudentId();
-        log.info("학생 ID [{}]의 외화 계좌 등록을 시작합니다.", studentId);
+        log.debug("학생 ID [{}]의 외화 계좌 등록을 시작합니다.", studentId);
 
         Users user = userRepository.findByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
@@ -123,7 +123,7 @@ public class RegisterService {
     @Transactional
     public void registerAccount(String accountNo) {
         String studentId = SecurityUtil.getCurrentStudentId();
-        log.info("학생 ID [{}]의 계좌 등록을 시작합니다.", studentId);
+        log.debug("학생 ID [{}]의 계좌 등록을 시작합니다.", studentId);
 
         Users user = userRepository.findByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
@@ -141,13 +141,13 @@ public class RegisterService {
 
         accountRepository.save(newAccount);
 
-        log.info("학생 ID [{}]의 일반 계좌가 성공적으로 개설되었습니다. 계좌번호: {}", user.getStudentId(), accountNo);
+        log.debug("학생 ID [{}]의 일반 계좌가 성공적으로 개설되었습니다. 계좌번호: {}", user.getStudentId(), accountNo);
     }
 
     @Transactional
     public void registerForeignAccount(String accountNo, String currency) {
         String studentId = SecurityUtil.getCurrentStudentId();
-        log.info("학생 ID [{}]의 외화 계좌 등록을 시작합니다.", studentId);
+        log.debug("학생 ID [{}]의 외화 계좌 등록을 시작합니다.", studentId);
 
         Users user = userRepository.findByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(ShinhanRegisterApiErrorCode.USER_NOT_FOUND));
@@ -166,7 +166,7 @@ public class RegisterService {
 
         foreignAccountRepository.save(newAccount);
 
-        log.info("학생 ID [{}]의 외환 계좌가 성공적으로 개설되었습니다. 계좌번호: {}", user.getStudentId(), accountNo);
+        log.debug("학생 ID [{}]의 외환 계좌가 성공적으로 개설되었습니다. 계좌번호: {}", user.getStudentId(), accountNo);
     }
 
     // 외부에서 직접 호출되지 않도록 private 메서드로 변경
@@ -189,7 +189,7 @@ public class RegisterService {
                     .build();
             foreignAccountRepository.save(foreignAccount);
 
-            log.info("학생 ID [{}]의 외화 계좌가 성공적으로 개설되었습니다. 계좌번호: {}", user.getStudentId(), accountNo);
+            log.debug("학생 ID [{}]의 외화 계좌가 성공적으로 개설되었습니다. 계좌번호: {}", user.getStudentId(), accountNo);
 
         } catch (CustomException ce) {
             log.error("학생 ID [{}]의 외화 계좌 개설 중 커스텀 예외 발생: {}", user.getStudentId(), ce.getMessage());

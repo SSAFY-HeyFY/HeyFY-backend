@@ -30,7 +30,7 @@ public class ExchangeReservationApiController {
     @PostMapping("/cancel")
     @ExchangeReservationCancelDocs
     public ResponseEntity<ExchangeReservationCancelResponseDto> cancelExchangeReservation(@AuthUser UserDetails userDetails, @RequestBody @Valid ExchangeReservationCancelRequestDto requestDto){
-        log.info("환전 예약 취소 요청 들어옴");
+        log.info("환전 예약 취소 요청");
         try {
             exchangeReservationService.cancelExchangeReservation(userDetails.getUsername(),requestDto.getReservationId(), requestDto.getPinNumber());
             return ResponseEntity.ok(ExchangeReservationCancelResponseDto.builder()
@@ -51,7 +51,7 @@ public class ExchangeReservationApiController {
     @PostMapping
     @ExchangeReservationDocs
     public ResponseEntity<ExchangeReservationResponseDto> makeReservation(@AuthUser UserDetails userDetails, @RequestBody @Valid ExchangeReservationRequestDto requestDto){
-        log.info("환전 예약 요청 들어옴");
+        log.info("환전 예약 요청");
         try{
             ExchangeReservation exchangeReservation = exchangeReservationService.createExchangeReservation(userDetails.getUsername(),requestDto);
         } catch (CustomException e){
@@ -74,6 +74,7 @@ public class ExchangeReservationApiController {
     @PostMapping("/historys")
     @ExchangeReservationListDocs
     public ResponseEntity<ExchangeReservationListDto> getReservations(@AuthUser UserDetails userDetails){
+        log.info("환전 예약 내역 조회 요청");
         List<ExchangeReservation> result =  exchangeReservationService.getExchangeReservations(userDetails.getUsername());
         List<ExchangeReservationItemDto> data = result.stream().map(reservation -> {
             return ExchangeReservationItemDto.builder()

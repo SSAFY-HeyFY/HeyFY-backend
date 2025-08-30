@@ -21,25 +21,9 @@ public class ShinhanExchangeClient {
     private final ShinhanApiClient apiClient;
     private final ShinhanApiUtil shinhanApiUtil;
 
-    private void logRequest(Object requestDto) {
-        try {
-            log.info("Request JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(requestDto));
-        } catch (Exception e) {
-            log.error("Request logging error", e);
-        }
-    }
-
-    private void logResponse(Object responseDto) {
-        try {
-            log.info("Response JSON: {}", new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(responseDto));
-        } catch (Exception e) {
-            log.error("Response logging error", e);
-        }
-    }
-
     public ShinhanExchangeResponseDto exchange(String accountNo, String exchangeCurrency, Double exchangeAmount, String userKey) {
         ShinhanExchangeRequestDto requestDto = createExchangeRequestDto(accountNo, exchangeCurrency, exchangeAmount, userKey);
-        logRequest(requestDto);
+        shinhanApiUtil.logRequest(requestDto);
         ShinhanExchangeResponseDto response = apiClient.getClient("edu")
                 .post()
                 .uri("/exchange")
@@ -52,14 +36,14 @@ public class ShinhanExchangeClient {
                             throw new CustomException(CommonErrorCode.INTERNAL_SERVER_ERROR);
                         }))
                 .bodyToMono(ShinhanExchangeResponseDto.class)
-                .doOnNext(this::logResponse)
+                .doOnNext(shinhanApiUtil::logResponse)
                 .block();
         return response;
     }
 
     public ShinhanInquireDemandDepositResponseDto getAccountInfoFromExternalApi(String accountNo, String userKey) {
         ShinhanInquireDemandDepositAccountBalanceRequestDto requestDto = createAccountBalanceRequestDto(accountNo, userKey);
-        logRequest(requestDto);
+        shinhanApiUtil.logRequest(requestDto);
         ShinhanInquireDemandDepositResponseDto response = apiClient.getClient("edu")
                 .post()
                 .uri("/demandDeposit/inquireDemandDepositAccount")
@@ -72,7 +56,7 @@ public class ShinhanExchangeClient {
                             throw new CustomException(ExchangeErrorCode.ACCOUNT_NOT_FOUND);
                         }))
                 .bodyToMono(ShinhanInquireDemandDepositResponseDto.class)
-                .doOnNext(this::logResponse)
+                .doOnNext(shinhanApiUtil::logResponse)
                 .block();
         return response;
     }
@@ -123,7 +107,7 @@ public class ShinhanExchangeClient {
 
     public ShinhanUpdateAccountResponseDto updateForeignAccount(String accountNo, Double transactionBalance, String userKey) {
         ShinhanUpdateAccountRequestDto requestDto = createUpdateForeignAccountRequestDto(accountNo, transactionBalance, userKey);
-        logRequest(requestDto);
+        shinhanApiUtil.logRequest(requestDto);
         ShinhanUpdateAccountResponseDto response = apiClient.getClient("edu")
                 .post()
                 .uri("/demandDeposit/foreignCurrency/updateForeignCurrencyDemandDepositAccountDeposit")
@@ -136,14 +120,14 @@ public class ShinhanExchangeClient {
                             throw new CustomException(ExchangeErrorCode.ACCOUNT_NOT_FOUND);
                         }))
                 .bodyToMono(ShinhanUpdateAccountResponseDto.class)
-                .doOnNext(this::logResponse)
+                .doOnNext(shinhanApiUtil::logResponse)
                 .block();
         return response;
     }
 
     public ShinhanInquireDemandDepositAccountBalanceResponseDto getAccountBalanceFromExternalApi(String accountNo, String userKey) {
         ShinhanInquireDemandDepositAccountBalanceRequestDto requestDto = createAccountBalanceRequestDto(accountNo, userKey);
-        logRequest(requestDto);
+        shinhanApiUtil.logRequest(requestDto);
         ShinhanInquireDemandDepositAccountBalanceResponseDto response = apiClient.getClient("edu")
                 .post()
                 .uri("/demandDeposit/inquireDemandDepositAccountBalance")
@@ -156,14 +140,14 @@ public class ShinhanExchangeClient {
                             throw new CustomException(ExchangeErrorCode.ACCOUNT_NOT_FOUND);
                         }))
                 .bodyToMono(ShinhanInquireDemandDepositAccountBalanceResponseDto.class)
-                .doOnNext(this::logResponse)
+                .doOnNext(shinhanApiUtil::logResponse)
                 .block();
         return response;
     }
 
     public ShinhanUpdateAccountResponseDto updateAccount(String accountNo, Double transactionBalance, String userKey) {
         ShinhanUpdateAccountRequestDto requestDto = createUpdateAccountRequestDto(accountNo, transactionBalance, userKey);
-        logRequest(requestDto);
+        shinhanApiUtil.logRequest(requestDto);
         ShinhanUpdateAccountResponseDto response = apiClient.getClient("edu")
                 .post()
                 .uri("/demandDeposit/updateDemandDepositAccountDeposit")
@@ -176,7 +160,7 @@ public class ShinhanExchangeClient {
                             throw new CustomException(ExchangeErrorCode.ACCOUNT_NOT_FOUND);
                         }))
                 .bodyToMono(ShinhanUpdateAccountResponseDto.class)
-                .doOnNext(this::logResponse)
+                .doOnNext(shinhanApiUtil::logResponse)
                 .block();
         return response;
     }
@@ -185,7 +169,7 @@ public class ShinhanExchangeClient {
 
     public ShinhanInquireDemandDepositAccountBalanceResponseDto getForeignAccountBalanceFromExternalApi(String accountNo, String userKey) {
         ShinhanInquireDemandDepositAccountBalanceRequestDto requestDto = createForeignAccountBalanceRequestDto(accountNo, userKey);
-        logRequest(requestDto);
+        shinhanApiUtil.logRequest(requestDto);
         ShinhanInquireDemandDepositAccountBalanceResponseDto response = apiClient.getClient("edu")
                 .post()
                 .uri("/demandDeposit/foreignCurrency/inquireForeignCurrencyDemandDepositAccountBalance")
@@ -198,7 +182,7 @@ public class ShinhanExchangeClient {
                             throw new CustomException(ExchangeErrorCode.ACCOUNT_NOT_FOUND);
                         }))
                 .bodyToMono(ShinhanInquireDemandDepositAccountBalanceResponseDto.class)
-                .doOnNext(this::logResponse)
+                .doOnNext(shinhanApiUtil::logResponse)
                 .block();
         return response;
     }

@@ -61,14 +61,14 @@ public class ExchangeReservationService {
             throw new CustomException(ExchangeErrorCode.ALREADY_COMPLETED);
         }
         reservation.cancel();
-        log.info("환전 예약 취소: " + reservation);
+        log.debug("환전 예약 취소: " + reservation);
         return reservation;
     }
 
     @Transactional
     public List<ExchangeReservation> getExchangeReservations(String studentId) {
         List<ExchangeReservation> reservations = exchangeReservationRepository.findByStudentId(studentId);
-        log.info("환전 예약 조회: " + reservations.size() + "건");
+        log.debug("환전 예약 조회: " + reservations.size() + "건");
         return reservations;
     }
 
@@ -77,7 +77,7 @@ public class ExchangeReservationService {
     public ExchangeReservation createExchangeReservation(String studentId, @RequestBody ExchangeReservationRequestDto requestDto) {
         Users user = userRepository.findUserWithAccountsByStudentId(studentId)
                 .orElseThrow(() -> new CustomException(CommonErrorCode.USER_NOT_FOUND, "사용자를 찾을 수 없습니다: " + studentId));
-        log.info("유저 조회: " + user.getName());
+        log.debug("유저 조회: " + user.getName());
 
         String pinNumber = requestDto.getPinNumber();
         redisUtil.validateTradePin(studentId, pinNumber, user.getPinNumber());
@@ -107,43 +107,43 @@ public class ExchangeReservationService {
                 requestDto.getBaseExchangeRate()
         );
 
-        log.info("환전 예약 생성: " + reservation);
+        log.debug("환전 예약 생성: " + reservation);
         return exchangeReservationRepository.save(reservation);
     }
 
     @Transactional
     public List<FcmToken> exchangeToForeignBatch() {
-        log.info("환전 예약 배치 작업 시작");
+        log.debug("환전 예약 배치 작업 시작");
         FastApiRealTimeRatesDto realTimeRates = fastApiClient.getRealTimeRates();
         Double usdRate = realTimeRates.getData().stream()
                 .filter(rate -> "USDKRW".equals(rate.getCurrency()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("USD 환율 데이터가 없습니다."))
                 .getRate();
-        log.info("현재 USD 환율: " + usdRate);
+        log.debug("현재 USD 환율: " + usdRate);
         List<ExchangeReservation> reservationList = exchangeReservationRepository.findAllNotCanceledAndNotCompletedWithUser();
-        log.info("처리 대상 예약 수: " + reservationList.size());
+        log.debug("처리 대상 예약 수: " + reservationList.size());
         List<ExchangeReservation> exchangeList = reservationList.stream()
                 .filter(reservation -> reservation.getBaseExchangeRate() < usdRate)
                 .collect(Collectors.toList());
-        log.info("환전 처리 대상 예약 수: " + exchangeList.size());
+        log.debug("환전 처리 대상 예약 수: " + exchangeList.size());
         List<FcmToken> result = exchangeList.stream()
                 .map(reservation -> {
                     try {
-                        log.info("환전 처리 시작: reservationId=" + reservation.getId());
+                        log.debug("환전 처리 시작: reservationId=" + reservation.getId());
                         shinhanExchangeApiClient.exchange(
                                 reservation.getWithdrawalAccountNo(),
                                 reservation.getDepositAccountCurrency().toString(),
                                 reservation.getTransactionBalance(),
                                 reservation.getUser().getUserKey()
                         );
-                        log.info("환전 처리 완료, 한화 입금 시작: reservationId=" + reservation.getId());
+                        log.debug("환전 처리 완료, 한화 입금 시작: reservationId=" + reservation.getId());
                         shinhanDemandDepositApiClient.updateDemandDepositAccountDeposit(
                                 reservation.getDepositAccountNo(),
                                 reservation.getTransactionBalance(),
                                 reservation.getUser().getUserKey()
                         );
-                        log.info("한화 입금 완료: reservationId=" + reservation.getId());
+                        log.debug("한화 입금 완료: reservationId=" + reservation.getId());
                         return reservation.getUser().getFcmTokens().get(0);
                     } catch (Exception e) {
                         log.error("환전 처리 중 오류 발생: reservationId={}, error={}", reservation.getId(), e.getMessage(), e);

@@ -17,6 +17,7 @@ import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.auth.AccountAuthCheckResponseDto
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.auth.AccountAuthResponseDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "계좌 관리", description = "계좌 관리 API")
@@ -36,7 +38,7 @@ public class AccountController {
     @GetMyAccountsDocs
     @PostMapping("/accounts")
     public ResponseEntity<AccountPairDto> getMyAccounts() {
-
+        log.info("내 계좌 조회 요청");
         Optional<AccountPairDto> accounts = accountService.getAccounts();
 
         return accounts.map(ResponseEntity::ok)
@@ -46,6 +48,7 @@ public class AccountController {
     @GetMyAccountAuthDocs
     @PostMapping("/accountauth")
     public ResponseEntity<AccountAuthHttpResponseDto> getMyAccountAuth(@RequestBody AccountNoDto accountNoDto) {
+        log.info("내 계좌 인증 요청");
         String accountNo = accountNoDto.getAccountNo();
         AccountAuthResponseDto accountAuthResponse = accountService.AccountAuth(accountNo);
 
@@ -62,7 +65,7 @@ public class AccountController {
     @AccountCheckDocs
     @PostMapping("/accouncheck")
     public ResponseEntity<AccountNoDto> AccountCheck(@RequestBody AuthCheckDto authCheckDto) {
-
+        log.info("계좌 인증 확인 요청");
         try {
             AccountAuthCheckResponseDto accountAuthCheckResponse = accountService.accountAuthCheck(authCheckDto.getAccountNo(), authCheckDto.getAuthCode());
 

@@ -24,6 +24,7 @@ public class ExchangeApiController {
     @AccountBalanceDocs
     @GetMapping("/account-balance")
     public ResponseEntity<AccountBalanceResponseDto> getAccountBalance(@AuthUser UserDetails userDetails) {
+        log.info("계좌 잔액 조회 요청: {}", userDetails.getUsername());
         return ResponseEntity.ok(
                 exchangeService.getAccountBalance(userDetails.getUsername())
         );
@@ -32,6 +33,7 @@ public class ExchangeApiController {
     @ForeignAccountBalanceDocs
     @GetMapping("/foreign/account-balance")
     public ResponseEntity<AccountBalanceResponseDto> getForeignAccountBalance(@AuthUser UserDetails userDetails) {
+        log.info("외화 계좌 잔액 조회 요청: {}", userDetails.getUsername());
         return ResponseEntity.ok(
                 exchangeService.getForeignAccountBalance(userDetails.getUsername())
         );
@@ -40,6 +42,7 @@ public class ExchangeApiController {
     @AIPredictionDocs
     @GetMapping("/ai-prediction")
     public ResponseEntity<AIPredictionResponseDto> getAIPrediction() {
+        log.info("AI 환율 예측 조회 요청");
         return ResponseEntity.ok(
                 exchangeService.getExchangeRateAIPrediction()
         );
@@ -49,6 +52,7 @@ public class ExchangeApiController {
     @HistoricalAnalysisDocs
     @GetMapping("/historical-analysis")
     public ResponseEntity<HistoricalAnalysisResponseDto> getHistoricalAnalysis() {
+        log.info("환율 기록 분석 조회 요청");
         return ResponseEntity.ok(
                 exchangeService.getHistoricalAnalysis()
         );
@@ -57,6 +61,7 @@ public class ExchangeApiController {
     @RateAnalysisDocs
     @GetMapping("/analysis")
     public ResponseEntity<RateAnalysisResponseDto> getRateAnalysis() {
+        log.info("환율 분석 조회 요청");
         return ResponseEntity.ok(
                 exchangeService.getRateAnalysis()
         );
@@ -65,6 +70,7 @@ public class ExchangeApiController {
     @ExchangePageDocs
     @GetMapping("/page")
     public ResponseEntity<ExchangePageResponseDto> getExchangePage(@AuthUser UserDetails userDetails) {
+        log.info("환전 화면 조회 요청 : {}", userDetails.getUsername());
         return ResponseEntity.ok(
                 exchangeService.getExchangePage(userDetails.getUsername())
         );
@@ -73,7 +79,7 @@ public class ExchangeApiController {
     @ExchangeDocs
     @PostMapping
     public ResponseEntity<ExchangeResponseDto> exchangeToForeign(@AuthUser UserDetails userDetails, @RequestBody ExchangeRequestDto exchangeRequestDto) {
-
+        log.info("원화 -> 외화 환전 요청 : {}", userDetails.getUsername());
         try{
             ExchangeResponseDto response = exchangeService.exchangeToForeign(userDetails.getUsername(), exchangeRequestDto);
             return ResponseEntity.ok(response);
@@ -95,6 +101,7 @@ public class ExchangeApiController {
     @ExchangeForeignDocs
     @PostMapping("/foreign")
     public ResponseEntity<ExchangeResponseDto> exchangeFromForeign(@AuthUser UserDetails userDetails, @RequestBody ExchangeRequestDto exchangeRequestDto) {
+        log.info("외화 -> 원화 환전 요청 : {}", userDetails.getUsername());
         try{
             ExchangeResponseDto response = exchangeService.exchangeFromForeign(userDetails.getUsername(), exchangeRequestDto);
             return ResponseEntity.ok(response);

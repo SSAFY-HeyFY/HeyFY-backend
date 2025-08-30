@@ -11,6 +11,7 @@ import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireDe
 import com.ssafy.ssashinsa.heyfy.shinhanApi.dto.account.inquire.ShinhanInquireSingleDepositResponseDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Tag(name = "계좌&거래내역 조회", description = "신한은행 계좌 정보 조회 관련 API")
 @RestController
 @RequestMapping("/inquire")
@@ -28,7 +30,7 @@ public class InquireController {
     @InquireDepositListDocs
     @PostMapping("/depositlist")
     public ResponseEntity<List<ShinhanInquireDepositResponseRecDto>> inquireDepositList() {
-
+        log.info("계좌 목록 조회 요청");
         ShinhanInquireDepositResponseDto response = inquireService.inquireDepositList();
 
         List<ShinhanInquireDepositResponseRecDto> depositList = response.getREC();
@@ -39,7 +41,7 @@ public class InquireController {
     @InquireSingleDepositDocs
     @PostMapping("/singledeposit")
     public ResponseEntity<SingleDepositResponseDto> inquireSingleDeposit(@RequestBody AccountNoDto accountNo) {
-
+        log.info("단일 계좌 조회 요청: {}", accountNo.getAccountNo());
         ShinhanInquireSingleDepositResponseDto response = inquireService.inquireSingleDeposit(accountNo.getAccountNo());
         ShinhanInquireDepositResponseRecDto rec = response.getREC();
         String accountBalanceString = String.valueOf((int) rec.getAccountBalance());
@@ -58,7 +60,7 @@ public class InquireController {
     @InquireSingleForeignDepositDocs
     @PostMapping("/singleforeigndeposit")
     public ResponseEntity<ForeignSingleDepositResponseDto> inquireForeignSingleDeposit(@RequestBody AccountNoDto accountNo) {
-
+        log.info("외화 단일 계좌 조회 요청: {}", accountNo.getAccountNo());
         ShinhanInquireSingleDepositResponseDto response = inquireService.inquireSingleForeignDeposit(accountNo.getAccountNo());
         ShinhanInquireDepositResponseRecDto rec = response.getREC();
         DecimalFormat df = new DecimalFormat("0.00");
@@ -81,7 +83,7 @@ public class InquireController {
     @GetTransactionHistoryDocs
     @PostMapping("/transactionhistory")
     public ResponseEntity<TransactionHistoryResponseRecDto> getTransactionHistoryTest(@RequestBody AccountNoDto accountNo) {
-
+        log.info("거래 내역 조회 요청: {}", accountNo.getAccountNo());
         InquireTransactionHistoryResponseDto originalResponseDto = inquireService.getTransactionHistory(accountNo.getAccountNo());
         InquireTransactionHistoryResponseRecDto originalRec = originalResponseDto.getREC();
 
@@ -111,7 +113,7 @@ public class InquireController {
     @GetForeignTransactionHistoryDocs
     @PostMapping("/foreigntransactionhistory")
     public ResponseEntity<TransactionHistoryResponseRecDto> getForeignTransactionHistoryTest(@RequestBody AccountNoDto accountNo) {
-
+        log.info("외화 거래 내역 조회 요청: {}", accountNo.getAccountNo());
         InquireTransactionHistoryResponseDto originalResponseDto = inquireService.getForeignTransactionHistory(accountNo.getAccountNo());
         InquireTransactionHistoryResponseRecDto originalRec = originalResponseDto.getREC();
 
@@ -142,7 +144,7 @@ public class InquireController {
     @GetExchangeHistoryDocs
     @PostMapping("/exchangehistory")
     public ResponseEntity<ExchangeHistorysDto> getExchangeHistory() {
-
+        log.info("환전 내역 조회 요청");
         List<ExchangeHistorySimplifiedDto> simplifiedList = inquireService.getSimplifiedExchangeHistory();
         ExchangeHistorysDto responseDto = new ExchangeHistorysDto(simplifiedList);
         return ResponseEntity.ok(responseDto);
